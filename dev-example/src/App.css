@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#App {
+    text-align: center;
+    padding: 0;
+}
+
+.my-terminal {
+    height: 75vh;
+    margin: 0 auto;
+    width: 80%;
+    resize: both;
+    overflow-y: hidden;
+}
