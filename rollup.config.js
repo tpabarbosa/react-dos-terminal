@@ -5,6 +5,8 @@ import del from 'rollup-plugin-delete';
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import url from 'rollup-plugin-url';
+import banner2 from 'rollup-plugin-banner2';
 
 const packageJson = require("./package.json");
 
@@ -33,6 +35,11 @@ export default [{
             commonjs(),
             typescript({ tsconfig: "./tsconfig.json" }),
             terser(),
+            banner2(() => '/* eslint-disable */'),
+            url({
+                include: ['**/*.woff', '**/*.woff2'],
+                limit: Infinity,
+            }),
         ],
         external: Object.keys(packageJson.peerDependencies || {}),
     },

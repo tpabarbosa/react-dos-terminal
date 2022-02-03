@@ -8,7 +8,7 @@ body {
     padding: 0;
 }
 
-.my-terminal {
+#My-Terminal {
     height: 75vh;
     margin: 0 auto;
     width: 80%;

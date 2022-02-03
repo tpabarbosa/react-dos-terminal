@@ -1,30 +1,87 @@
-import React from "react"
+import React, { useEffect } from "react";
+import { defaults, TerminalDefaults,  } from "../config";
+import ls, { Value } from "../helpers/localStorage";
+import { useLoadingScreen } from "../hooks/useLoadingScreen";
+import GlobalStyles from "../styles/GlobalStyles";
 import { Main } from "./Main";
+import Output from "./Output";
+import { TerminalScreen } from "./TerminalScreen";
 
-const allowedColors = ['#000000', '#0000aa', '#00aa00', '#00aaaa', '#aa0000', '#aa00aa', '#aa5500', '#aaaaaa', '#555555', '#5555ff', '#55ff55', '#55ffff', '#ff5555', '#ff55ff', '#ffff55', '#ffffff'] as const
+import { UserDefinedComponent } from "./UserDefinedComponent";
 
-type AllowedColors = typeof allowedColors[number]
+const allowedColors = [
+    '#000000', 
+    '#0000aa', 
+    '#00aa00', 
+    '#00aaaa', 
+    '#aa0000', 
+    '#aa00aa', 
+    '#aa5500', 
+    '#aaaaaa', 
+    '#555555', 
+    '#5555ff', 
+    '#55ff55', 
+    '#55ffff', 
+    '#ff5555', 
+    '#ff55ff', 
+    '#ffff55', 
+    '#ffffff'
+] as const
 
-interface TerminalColors {
+type AllowedColors = typeof allowedColors[number];
+
+export interface TerminalColors {
     background: AllowedColors;
     color: AllowedColors;
 }
 
-interface TerminalConfig {
-    colors?: TerminalColors,
-}
-
 interface TerminalProps {
-    config?: TerminalConfig,
+    config: Partial<TerminalDefaults>;
 }
 
 const Terminal = ({config}: TerminalProps) => {
-    console.log(config);
+
+    const loadingScreen = useLoadingScreen(config?.loadingScreen);
+    
+    const isInstalled = ls.get('i');
+    const shouldPersisteData = config?.shouldPersisteData !== undefined ? config.shouldPersisteData : defaults.shouldPersisteData
+
+    useEffect(() => {
+        if ((isInstalled === null || isInstalled === '0') || !shouldPersisteData) {
+            const colors: unknown = config?.colors ? config.colors : defaults.colors
+            const toLS = colors as Value;
+            const stripes = (config?.screenStripes !== undefined ? config?.screenStripes : defaults.screenStripes)
+            ls.set('stripes', stripes ? '1' : '0');
+            ls.set('colors', toLS);
+            ls.set('i', '1');
+        }
+    },[])
+
+
     return (
         <React.StrictMode>
-            <Main />
+            <GlobalStyles />
+            
+            {!loadingScreen.isLoading &&
+                // <TerminalContextProvider>
+                    <Main />
+                // </TerminalContextProvider>
+            }
+            
+            {loadingScreen.isLoading && !React.isValidElement(loadingScreen.content) &&
+                <TerminalScreen >
+                    <Output>
+                        <Output.Print typewriter={true} flashing={true} output={loadingScreen.content as string | string[]} />
+                    </Output>
+                </TerminalScreen>
+            }
+            {loadingScreen.isLoading && React.isValidElement(loadingScreen.content)&&
+                <UserDefinedComponent component={loadingScreen.content}/>
+            }
+
         </React.StrictMode>
     )
 }
+
 
 export default Terminal;

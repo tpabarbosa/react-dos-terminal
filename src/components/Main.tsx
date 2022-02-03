@@ -1,9 +1,15 @@
-import React from "react";
-import styled from 'styled-components';
-
-const Test = styled.div``;
+import Input from './Input';
+import Output from './Output';
+import { TerminalScreen } from './TerminalScreen';
 
 export const Main = () => {
 
-    return (<Test>TESTE!!</Test>)
+    return (
+        <TerminalScreen >
+            <Output>
+                <Output.Print typewriter={true} flashing={true} output={['Welcome to IOS react-dos-terminal', '', '']} />
+            </Output>
+            <Input id='main-input' prompt='C:\>'/>
+        </TerminalScreen>
+    )
 }
