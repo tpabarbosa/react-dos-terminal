@@ -22,7 +22,7 @@ export const defaults:TerminalDefaults = {
     },
     screenStripes: true,
     loadingScreen: {
-        shouldShow: 'always',
+        shouldShow: 'first-time',
         messageOrElement: ['Installing IOS react-dos-terminal','', 'Please wait...', '',],
         loadingTime: 10000,
     },

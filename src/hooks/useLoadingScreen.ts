@@ -27,7 +27,7 @@ export const useLoadingScreen = (config: TerminalLoadingScreen | undefined) => {
         const finishLoading = () => {
             setIsLoading(false)
         }
-        
+
         if (!isLoading && shouldShowLoading(loadingScreen, isInstalled)) {
             setIsLoading(true);
             setTimeout(finishLoading, loadingScreen.loadingTime)

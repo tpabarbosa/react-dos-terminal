@@ -1,6 +1,6 @@
-import { FormEvent, KeyboardEvent } from "react";
+import { FormEvent, KeyboardEvent, MouseEvent } from "react";
 declare type InputProps = {
-    onClick?: () => void;
+    onClick?: (e: MouseEvent<HTMLDivElement>) => void;
     onInput?: (e: FormEvent<HTMLDivElement>) => void;
     onKeyUp?: (e: KeyboardEvent<HTMLDivElement>) => void;
     onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;

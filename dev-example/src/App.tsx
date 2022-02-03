@@ -11,7 +11,7 @@ export const App = () => {
         // },
         screenStripes: false,
         loadingScreen: {
-            shouldShow: 'always',
+            // shouldShow: 'always',
             messageOrElement: ['Installing my custom terminal','', 'Please wait...', '',],
             loadingTime: 3000,
         },

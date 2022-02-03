@@ -178,6 +178,7 @@ export const InputCaret = styled.span<InputCaretProps>`
     top: -3px;
     display: inline-block;
     line-height: 16px;
+    left: ${(props) => props.positionCorrection}ch;
 
     ${(props) => componentsColors(props)}
 `;
