@@ -1,6 +1,6 @@
 import React from "react";
 import { defaults, TerminalDefaults } from "../config";
-import { MainOutputContextProvider } from "../contexts/MainOutputContext";
+import { TerminalOutputContextProvider } from "../contexts/TerminalOutputContext";
 import { TerminalContextProvider } from "../contexts/TerminalContext";
 import { AllowedColors } from "../helpers/colors";
 import { useInitializer } from "../hooks/useInitializer";
@@ -40,9 +40,9 @@ const Terminal = ({config}: TerminalProps) => {
             <GlobalStyles />
             <TerminalContextProvider config={initializer.terminal}>
                 {!loadingScreen.isLoading &&
-                <MainOutputContextProvider config={mainOutput} >
+                <TerminalOutputContextProvider config={mainOutput} >
                     <Main />
-                </ MainOutputContextProvider>
+                </ TerminalOutputContextProvider>
                 }
                 {loadingScreen.isLoading &&
                     <LoadingScreen content={loadingScreen.content}/>

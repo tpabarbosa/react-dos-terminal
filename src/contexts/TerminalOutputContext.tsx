@@ -1,8 +1,8 @@
 import { createContext, useContext, useMemo, useReducer } from "react"
-import { MainOutputConfig } from "../config"
+import { TerminalOutputConfig } from "../config"
 
-export interface MainOutputContextAPI {
-    state: MainOutputState,
+export interface TerminalOutputContextAPI {
+    state: TerminalOutputState,
     action: {
         addLines: (output: string | string[]) => void,
         delLastLines: (number: number) => void,
@@ -10,18 +10,18 @@ export interface MainOutputContextAPI {
     }
 }
 
-export interface MainOutputState {
+export interface TerminalOutputState {
     data: string[];
 }
 
-export type MainOutputProviderProps = {
+export type TerminalOutputProviderProps = {
     children: React.ReactNode,
-    config: MainOutputConfig,
+    config: TerminalOutputConfig,
 }
 
-const MainOutputContext = createContext<MainOutputContextAPI | undefined>(undefined)
+const TerminalOutputContext = createContext<TerminalOutputContextAPI | undefined>(undefined)
 
-export const MainOutputContextProvider = ({children, config}: MainOutputProviderProps) => {
+export const TerminalOutputContextProvider = ({children, config}: TerminalOutputProviderProps) => {
     
     const action = useMemo(() => {return {
         addLines: (output: string | string[]) => {
@@ -35,11 +35,11 @@ export const MainOutputContextProvider = ({children, config}: MainOutputProvider
         },
     }}, [])
     
-    const outputInitialState: MainOutputState = {
+    const outputInitialState: TerminalOutputState = {
         data: typeof config.initialMessage === 'string' ? [config.initialMessage] : config.initialMessage,
     }
     
-    const reducer = (state: MainOutputState, action: {type: string, value: any}) => {
+    const reducer = (state: TerminalOutputState, action: {type: string, value: any}) => {
         switch (action.type) {
             case 'output': {
                 if (action.value === null) {
@@ -65,17 +65,17 @@ export const MainOutputContextProvider = ({children, config}: MainOutputProvider
     const [state, dispatch] = useReducer(reducer, outputInitialState)
 
     return (
-        <MainOutputContext.Provider value={{state, action}}>
+        <TerminalOutputContext.Provider value={{state, action}}>
             {children}
-        </MainOutputContext.Provider>
+        </TerminalOutputContext.Provider>
     )
 }
 
-export const useMainOutput = () => {
-    const ctx = useContext(MainOutputContext);
+export const useTerminalOutput = () => {
+    const ctx = useContext(TerminalOutputContext);
 
     if (ctx === undefined) {
-        throw new Error(`useOutput must be used within a OutputContextProvider.`)
+        throw new Error(`useTerminalOutput must be used within a TerminalOutputContextProvider.`)
     }
 
     return ctx

@@ -14,11 +14,11 @@ export interface TerminalConfig {
     autoFocus: boolean;
 }
 
-export interface MainOutputConfig {
+export interface TerminalOutputConfig {
     initialMessage: string | string[]
 }
 
-export interface TerminalDefaults extends MainOutputConfig {
+export interface TerminalDefaults extends TerminalOutputConfig {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;

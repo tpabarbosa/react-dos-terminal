@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { TerminalDefaults } from "../config";
 import { AllowedColors } from "../helpers/colors";
 declare type Colors<T extends string> = {

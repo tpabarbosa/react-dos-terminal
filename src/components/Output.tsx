@@ -40,7 +40,6 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
         
         return await new Promise((resolve) => {
             
-            
             const word = text ? text.split('') : [];
             const type = () => {
                 

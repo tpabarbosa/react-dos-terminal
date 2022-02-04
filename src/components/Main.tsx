@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useMainOutput } from '../contexts/MainOutputContext';
+import { useTerminalOutput } from '../contexts/TerminalOutputContext';
 import { useTerminal } from '../contexts/TerminalContext';
 import { useCommandsHistory } from '../hooks/useCommandsHistory';
 import { useInput } from '../hooks/useInput';
@@ -11,7 +11,7 @@ import { TerminalScreen } from './TerminalScreen';
 export const Main = () => {
 
     const terminal = useTerminal();
-    const mainOutput = useMainOutput();
+    const terminalOutput = useTerminalOutput();
 
     const input = useInput();
     const commandsHistory = useCommandsHistory({input: input.ref});
@@ -43,8 +43,7 @@ export const Main = () => {
     }
 
     useEffect(()=> {
-        const message = mainOutput.state.data;
-        output.typewriter.startTypewriting(message);
+        output.typewriter.startTypewriting(terminalOutput.state.data);
     },[])
     
     return (
