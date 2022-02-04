@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useTerminal } from "../contexts/TerminalContext";
 
 
 export type UseCaretHandler = {
@@ -14,8 +15,8 @@ export const useCaretHandler = (): UseCaretHandler => {
     const [caretCorrection, setCaretCorrection] = useState(0);
     const [actualInput, setActualInput] = useState<HTMLDivElement | null>(null)
 
-    // const terminal = useTerminal();
-    // const { isInitialized, config } = terminal.state;
+    const terminal = useTerminal();
+    const { isActive, autoFocus } = terminal.state;
 
     const setInputRef = (input: HTMLDivElement | null) => {
         setActualInput(input);
@@ -34,11 +35,11 @@ export const useCaretHandler = (): UseCaretHandler => {
         setCaretCorrection(pos-tex.length);
     }
 
-    // useEffect( () => {
-    //     isInitialized && actualInput && actualInput.focus();
-    //     !isInitialized && config.autoFocus && actualInput && actualInput.focus()
+    useEffect( () => {
+        isActive && actualInput && actualInput.focus();
+        !isActive && autoFocus && actualInput && actualInput.focus()
 
-    // }, [actualInput, isInitialized, config.autoFocus])
+    }, [actualInput, isActive, autoFocus])
 
     const getCaretPosition = (editableDiv: HTMLDivElement) => {
         let caretPos = 0;
