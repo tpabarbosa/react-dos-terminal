@@ -6,10 +6,14 @@ export interface TerminalLoadingScreen {
     messageOrElement: string | string[] | JSX.Element;
     loadingTime: number;
 }
-export interface TerminalDefaults {
+export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
-    loadingScreen: TerminalLoadingScreen;
+    autoFocus: boolean;
+}
+export interface TerminalDefaults {
     shouldPersisteData: boolean;
+    loadingScreen: TerminalLoadingScreen;
+    terminal: TerminalConfig;
 }
 export declare const defaults: TerminalDefaults;

@@ -1,10 +1,8 @@
 /// <reference types="react" />
+import { TerminalColors } from "./Terminal";
 interface OutputProps {
     children: React.ReactNode;
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>;
 }
 declare const Output: {
     ({ children, colors, ...rest }: OutputProps & React.HTMLAttributes<HTMLDivElement>): JSX.Element;
@@ -17,9 +15,6 @@ interface PrintProps {
     typeInterval?: number;
     toggleTypewriting?: (value: boolean) => void;
     isTypewriting?: boolean;
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>;
 }
 export default Output;

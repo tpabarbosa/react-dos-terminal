@@ -5,11 +5,15 @@ import { Terminal } from './component-lib'
 export const App = () => {
 
     const config = {
-        // colors:  {
-        // background: '#0000aa',
-        // color: '#ffffff',
-        // },
-        //screenStripes: true,
+        terminal: {
+            colors:  {
+                background: '#0000aa',
+                color: '#ffffff',
+            },
+            screenStripes: true,
+            // autoFocus: false,
+        },
+        
         loadingScreen: {
             //shouldShow: 'always',
             messageOrElement: ['Installing my custom terminal','', 'Please wait...', ''],

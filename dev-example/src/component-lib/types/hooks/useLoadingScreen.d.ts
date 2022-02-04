@@ -1,6 +1,7 @@
 /// <reference types="react" />
 import { TerminalLoadingScreen } from "../config";
-export declare const useLoadingScreen: (config: TerminalLoadingScreen | undefined) => {
+export interface UseLoadingScreen {
     isLoading: boolean;
-    content: string | JSX.Element | string[];
-};
+    content: string | string[] | JSX.Element;
+}
+export declare const useLoadingScreen: (config: TerminalLoadingScreen | undefined) => UseLoadingScreen;

@@ -1,11 +1,10 @@
 /// <reference types="react" />
 import { TerminalDefaults } from "../config";
-declare const allowedColors: readonly ["#000000", "#0000aa", "#00aa00", "#00aaaa", "#aa0000", "#aa00aa", "#aa5500", "#aaaaaa", "#555555", "#5555ff", "#55ff55", "#55ffff", "#ff5555", "#ff55ff", "#ffff55", "#ffffff"];
-declare type AllowedColors = typeof allowedColors[number];
-export interface TerminalColors {
-    background: AllowedColors;
-    color: AllowedColors;
-}
+import { AllowedColors } from "../helpers/colors";
+declare type Colors<T extends string> = {
+    [field in T]: AllowedColors;
+};
+export declare type TerminalColors = Colors<'background' | 'color'>;
 interface TerminalProps {
     config: Partial<TerminalDefaults>;
 }

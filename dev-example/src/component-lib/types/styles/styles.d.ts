@@ -1,36 +1,35 @@
 /// <reference types="react" />
 interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    stripes?: boolean;
-    colors?: {
+    stripes: boolean;
+    colors: {
         color: string;
-        background?: string;
+        background: string;
     };
 }
 interface OutputContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     };
 }
 interface PrintContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    stripes?: boolean;
     flashing: boolean;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     };
 }
 interface InputContainerProps extends React.HTMLAttributes<HTMLSpanElement> {
     stripes?: boolean;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     };
 }
 interface InputCaretProps {
     positionCorrection: number;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     };
 }
