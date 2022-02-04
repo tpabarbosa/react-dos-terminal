@@ -39,8 +39,8 @@ export const Main = () => {
             </Output>
 
             <Input onKeyUp={handleKeyUp}
-                    id="terminal_input" 
-                    ref={input.ref} prompt='C:\>'
+                id="terminal_input" 
+                ref={input.ref} prompt='C:\>'
             />
         </TerminalScreen>
     )
