@@ -9,10 +9,10 @@ export const App = () => {
         // background: '#0000aa',
         // color: '#ffffff',
         // },
-        screenStripes: false,
+        //screenStripes: true,
         loadingScreen: {
-            // shouldShow: 'always',
-            messageOrElement: ['Installing my custom terminal','', 'Please wait...', '',],
+            //shouldShow: 'always',
+            messageOrElement: ['Installing my custom terminal','', 'Please wait...', ''],
             loadingTime: 3000,
         },
         shouldPersisteData: false,
