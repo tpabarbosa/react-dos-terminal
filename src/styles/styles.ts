@@ -1,28 +1,25 @@
 import styled, { css, keyframes }  from "styled-components";
-import { TerminalColors } from "../components/Terminal";
-import { defaults, } from "../config";
 import ls from "../helpers/localStorage";
 
 interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    stripes?: boolean;
-    colors?: {
+    stripes: boolean;
+    colors: {
         color: string;
-        background?: string;
+        background: string;
     }
 }
 
 interface OutputContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     }
 }
 
 interface PrintContainerProps extends React.HTMLAttributes<HTMLDivElement>{
-    stripes?: boolean;
     flashing: boolean;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     }
 }
@@ -30,7 +27,7 @@ interface PrintContainerProps extends React.HTMLAttributes<HTMLDivElement>{
 interface InputContainerProps extends React.HTMLAttributes<HTMLSpanElement>{
     stripes?: boolean;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     }
 }
@@ -38,38 +35,29 @@ interface InputContainerProps extends React.HTMLAttributes<HTMLSpanElement>{
 interface InputCaretProps {
     positionCorrection: number;
     colors?: {
-        color: string;
+        color?: string;
         background?: string;
     }
 }
 
-const getColor = (value: string | undefined) => {
-    const lscolors = ls.get('colors') as unknown;
-    const colors = lscolors as TerminalColors ?? null ;
-    const color = colors ? colors.color : null;
-    return value ?? color ?? defaults.colors.color
-}
-/* const getBackgroundColor = (value: string | undefined) => {
-    return value ?? colors.background
-} */
-const getBackground = (striped: boolean | undefined, background: string | undefined) => {
-    const lscolors = ls.get('colors') as unknown;
-    const colors = lscolors as TerminalColors ?? null;
-    const back = colors ? colors.background : null;
-
-    const b = background ?? back ?? defaults.colors.background;
-
+const getStriped = () => {
     const lsStripes = ls.get('stripes');
-    const stripes = striped !== undefined ? striped : lsStripes === '1' ? true : false;
-    return stripes ? `repeating-linear-gradient(6deg, ${b}e0 1px, ${b} 6px)` : `${b}`
+    return lsStripes === '1' ? true : false;
 }
 
-const componentsColors = (props: any) => css`
-    ${props?.colors ? `
-        color: ${getColor(props?.colors?.color)};
-        background: ${getBackground(props?.stripes, props?.colors?.background)};` : ''
-}`;
-        
+const getBackground = (striped: boolean, background: string) => {
+    return striped ? `repeating-linear-gradient(6deg, ${background}e0 1px, ${background} 6px)` : `${background}`
+}
+
+const getColorsCSS = (colors?: {color?: string, background?: string}) => {
+    if (colors) {
+        return css`
+            ${colors.color !== undefined ? `color: ${colors.color};` : ';'} 
+            ${colors.background !== undefined ? `background: ${getBackground(getStriped(), colors.background)};` : ';'}
+        `;
+    }
+    return
+}
 
 const preStyles = css`
     font-family: 'IBM VGA 9x16', monospace !important;
@@ -102,8 +90,9 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     text-align: left;
     padding-bottom: 1px;
     text-shadow: 7px 0px 20px #808080a8;
-    color: ${props => getColor(props?.colors?.color)};
-    background: ${props => getBackground(props?.stripes, props?.colors?.background)};
+    color:  ${props => props.colors.color};
+    background: ${props => getBackground(props.stripes, props.colors.background)};
+    /*  */
 `
 
 export const ScreenContent = styled.div`
@@ -120,8 +109,7 @@ export const ScreenContent = styled.div`
 export const OutputContainer = styled.div<OutputContainerProps>`
     outline: none;
     margin: 0;
-    ${(props) => componentsColors(props)}
-
+    ${props => getColorsCSS(props.colors)}
 `;
 
 export const OutputContent  = styled.div`
@@ -129,12 +117,12 @@ export const OutputContent  = styled.div`
 `;
 
 export const PrintContainer = styled.div<PrintContainerProps>`
-    ${(props) => componentsColors(props)}
 
     ${props => props.flashing ? css`
         animation: ${flash} 1.5s infinite; 
         opacity: 0;` : ``
     }
+    ${props => getColorsCSS(props.colors)}
 `;
 
 export const PrintContent  = styled.div`
@@ -148,7 +136,7 @@ export const InputContainer = styled.span<InputContainerProps>`
     padding-left: 8px;
     outline: none;
     margin: 0;
-    ${(props) => componentsColors(props)}
+    ${props => getColorsCSS(props.colors)}
 
     pre {
         display: inline;
@@ -179,6 +167,6 @@ export const InputCaret = styled.span<InputCaretProps>`
     display: inline-block;
     line-height: 16px;
     left: ${(props) => props.positionCorrection}ch;
+    ${props => getColorsCSS(props.colors)}
 
-    ${(props) => componentsColors(props)}
 `;

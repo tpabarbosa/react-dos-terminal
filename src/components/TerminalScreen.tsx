@@ -1,18 +1,16 @@
 import React, { useEffect, useRef } from "react";
+import { useTerminal } from "../contexts/TerminalContext";
 import { ScreenContainer, ScreenContent } from "../styles/styles";
 import { TerminalColors } from "./Terminal";
 
 interface ScreenProps {
     children: React.ReactNode;
-    colorsName?: TerminalColors,
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: TerminalColors;
     stripes?: boolean;
 }
 
 export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
+    const terminal = useTerminal();
 
     const endRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +22,7 @@ export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenPr
 
 
     return (
-        <ScreenContainer {...rest} colors={colors} stripes={stripes}>
+        <ScreenContainer {...rest} colors={colors ?? terminal.state.colors} stripes={stripes ?? terminal.state.screenStripes}>
             <ScreenContent >
                 {children}
                 <div ref={endRef} /> 

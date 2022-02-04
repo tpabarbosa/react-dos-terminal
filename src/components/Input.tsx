@@ -1,6 +1,7 @@
 import { FormEvent, ForwardedRef, forwardRef, KeyboardEvent, MouseEvent, useEffect, useState } from "react";
 import { useCaretHandler } from "../hooks/useCaretHandler";
 import { InputCaret, InputContainer, InputContent } from "../styles/styles";
+import { TerminalColors } from "./Terminal";
 
 type InputProps = {
     onClick?: (e: MouseEvent<HTMLDivElement>) => void,
@@ -10,14 +11,8 @@ type InputProps = {
     onKeyPress?: (e: KeyboardEvent<HTMLDivElement>) => void,
     id: string, 
     prompt?: string,
-    colors?: {
-        color: string;
-        background: string;
-    };
-    caretColors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>;
+    caretColors?: Partial<TerminalColors>;
 }
 
 const Input = forwardRef(({onClick, onInput, onKeyDown, onKeyPress, onKeyUp, id, prompt='', colors, caretColors,...rest}: InputProps & React.HTMLAttributes<HTMLDivElement>, ref: ForwardedRef<HTMLDivElement>) => {
@@ -83,10 +78,7 @@ const Input = forwardRef(({onClick, onInput, onKeyDown, onKeyPress, onKeyUp, id,
 
 interface CaretProps {
     correction: number;
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>
 }
 
 const Caret = ({correction, colors}: CaretProps) => {

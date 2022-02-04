@@ -1,13 +1,11 @@
 import _ from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { OutputContainer, OutputContent, PrintContainer, PrintContent, PrintLine } from "../styles/styles";
+import { TerminalColors } from "./Terminal";
 
 interface OutputProps {
     children: React.ReactNode;
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>;
 }
 
 const Output = ({children, colors, ...rest}: OutputProps & React.HTMLAttributes<HTMLDivElement>) => {
@@ -28,10 +26,7 @@ interface PrintProps {
     typeInterval?: number;
     toggleTypewriting?: (value: boolean) => void;
     isTypewriting?: boolean;
-    colors?: {
-        color: string;
-        background: string;
-    };
+    colors?: Partial<TerminalColors>
 }
 
 const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, typeInterval=40, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
