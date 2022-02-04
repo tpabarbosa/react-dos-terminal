@@ -8,24 +8,33 @@ export interface TerminalLoadingScreen {
     loadingTime: number;
 }
 
-export interface TerminalDefaults {
+export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
-    loadingScreen: TerminalLoadingScreen;
+    autoFocus: boolean;
+}
+
+export interface TerminalDefaults {
     shouldPersisteData: boolean;
+    loadingScreen: TerminalLoadingScreen;
+    terminal: TerminalConfig;
 }
 
 export const defaults:TerminalDefaults = {
-    colors:  {
-        background: '#000000',
-        color: '#aaaaaa',
-    },
-    screenStripes: true,
+    shouldPersisteData: true,
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: ['Installing IOS react-dos-terminal','', 'Please wait...', '',],
-        loadingTime: 10000,
+        loadingTime: 5000,
     },
-    shouldPersisteData: true,
+    terminal: {
+        colors:  {
+            background: '#000000',
+            color: '#aaaaaa',
+        },
+        autoFocus: true,
+        screenStripes: true,
+    },
+    
 }
 

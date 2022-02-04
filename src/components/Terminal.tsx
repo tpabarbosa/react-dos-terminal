@@ -1,39 +1,20 @@
-import React, { useEffect } from "react";
-import { defaults, TerminalDefaults,  } from "../config";
-import ls, { Value } from "../helpers/localStorage";
+import React from "react";
+import { TerminalDefaults } from "../config";
+import { TerminalContextProvider } from "../contexts/TerminalContext";
+import { AllowedColors } from "../helpers/colors";
+import { useInitializer } from "../hooks/useInitializer";
 import { useLoadingScreen } from "../hooks/useLoadingScreen";
 import GlobalStyles from "../styles/GlobalStyles";
 import { Main } from "./Main";
 import Output from "./Output";
 import { TerminalScreen } from "./TerminalScreen";
 
-import { UserDefinedComponent } from "./UserDefinedComponent";
+import { UserDefinedElement } from "./UserDefinedElement";
 
-const allowedColors = [
-    '#000000', 
-    '#0000aa', 
-    '#00aa00', 
-    '#00aaaa', 
-    '#aa0000', 
-    '#aa00aa', 
-    '#aa5500', 
-    '#aaaaaa', 
-    '#555555', 
-    '#5555ff', 
-    '#55ff55', 
-    '#55ffff', 
-    '#ff5555', 
-    '#ff55ff', 
-    '#ffff55', 
-    '#ffffff'
-] as const
+//type Data<T extends string> = { [field in T]: string | {} | null | object };
 
-type AllowedColors = typeof allowedColors[number];
-
-export interface TerminalColors {
-    background: AllowedColors;
-    color: AllowedColors;
-}
+type Colors<T extends string> = { [field in T]: AllowedColors };
+export type TerminalColors = Colors<'background' | 'color'> 
 
 interface TerminalProps {
     config: Partial<TerminalDefaults>;
@@ -41,47 +22,46 @@ interface TerminalProps {
 
 const Terminal = ({config}: TerminalProps) => {
 
+    const initializer = useInitializer(config?.shouldPersisteData, config?.terminal);
     const loadingScreen = useLoadingScreen(config?.loadingScreen);
     
-    const isInstalled = ls.get('i');
-    const shouldPersisteData = config?.shouldPersisteData !== undefined ? config.shouldPersisteData : defaults.shouldPersisteData
-
-    useEffect(() => {
-        if ((isInstalled === null || isInstalled === '0') || !shouldPersisteData) {
-            const colors: unknown = config?.colors ? config.colors : defaults.colors
-            const toLS = colors as Value;
-            const stripes = (config?.screenStripes !== undefined ? config?.screenStripes : defaults.screenStripes)
-            ls.set('stripes', stripes ? '1' : '0');
-            ls.set('colors', toLS);
-            ls.set('i', '1');
-        }
-    },[])
-
-
     return (
         <React.StrictMode>
+            {initializer.isInitialized &&
+            <>
             <GlobalStyles />
-            
-            {!loadingScreen.isLoading &&
-                // <TerminalContextProvider>
+            <TerminalContextProvider config={initializer.terminal}>
+                {!loadingScreen.isLoading &&
                     <Main />
-                // </TerminalContextProvider>
+                }
+                {loadingScreen.isLoading &&
+                    <LoadingScreen content={loadingScreen.content}/>
+                }
+            </TerminalContextProvider>
+            </> 
             }
-            
-            {loadingScreen.isLoading && !React.isValidElement(loadingScreen.content) &&
-                <TerminalScreen >
-                    <Output>
-                        <Output.Print typewriter={true} flashing={true} output={loadingScreen.content as string | string[]} />
-                    </Output>
-                </TerminalScreen>
-            }
-            {loadingScreen.isLoading && React.isValidElement(loadingScreen.content)&&
-                <UserDefinedComponent component={loadingScreen.content}/>
-            }
-
         </React.StrictMode>
     )
 }
 
+const LoadingScreen = ({content}: {content: string | string[] | JSX.Element}) => {
+    return (
+        <>
+        {!React.isValidElement(content) &&
+            <TerminalScreen>
+                <Output >
+                    <Output.Print 
+                        typewriter={true} 
+                        flashing={true} 
+                        output={content as string | string[]} />
+                </Output>
+            </TerminalScreen>
+        }
+        {React.isValidElement(content)&&
+            <UserDefinedElement element={content}/>
+        }
+        </>
+    )
+}
 
 export default Terminal;

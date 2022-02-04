@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { defaults, TerminalLoadingScreen } from "../config";
 import ls from "../helpers/localStorage";
 
-export const useLoadingScreen = (config: TerminalLoadingScreen | undefined) => {
+export interface UseLoadingScreen {
+    isLoading: boolean;
+    content: string | string[] | JSX.Element;
+}
+
+export const useLoadingScreen = (config: TerminalLoadingScreen | undefined): UseLoadingScreen => {
 
         const shouldShowLoading = (loadingScreen: TerminalLoadingScreen, isInstalled: string | null) => {
         switch (loadingScreen.shouldShow) {
@@ -16,7 +21,6 @@ export const useLoadingScreen = (config: TerminalLoadingScreen | undefined) => {
     }
 
     const isInstalled = ls.get('i') as string;
-
 
     const loadingScreen: TerminalLoadingScreen = {...defaults.loadingScreen, ...config}
 
