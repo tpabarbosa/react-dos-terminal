@@ -12,7 +12,7 @@ interface ScreenProps {
     stripes?: boolean;
 }
 
-export const TerminalScreen = ( { children, colors, stripes=true, ...rest }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
+export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
 
     const endRef = useRef<HTMLDivElement>(null);
 

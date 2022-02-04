@@ -60,7 +60,7 @@ const getBackground = (striped: boolean | undefined, background: string | undefi
     const b = background ?? back ?? defaults.colors.background;
 
     const lsStripes = ls.get('stripes');
-    const stripes = striped !== undefined ? striped : lsStripes ? true : false;
+    const stripes = striped !== undefined ? striped : lsStripes === '1' ? true : false;
     return stripes ? `repeating-linear-gradient(6deg, ${b}e0 1px, ${b} 6px)` : `${b}`
 }
 
