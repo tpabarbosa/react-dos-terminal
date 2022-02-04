@@ -12,10 +12,13 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
-    initialMessage: string | string[];
 }
 
-export interface TerminalDefaults {
+export interface MainOutputConfig {
+    initialMessage: string | string[]
+}
+
+export interface TerminalDefaults extends MainOutputConfig {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;
@@ -34,9 +37,8 @@ export const defaults:TerminalDefaults = {
             color: '#aaaaaa',
         },
         autoFocus: true,
-        initialMessage: ['Welcome to IOS react-dos-terminal', '', ''],
         screenStripes: true,
     },
-    
+    initialMessage: ['Welcome to IOS react-dos-terminal', '', ''],
 }
 

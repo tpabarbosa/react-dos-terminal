@@ -13,7 +13,6 @@ export interface TerminalState {
     screenStripes: boolean;
     autoFocus: boolean;
     isActive: boolean;
-    initialMessage: string | string[];
 }
 export declare type TerminalProviderProps = {
     children: React.ReactNode;

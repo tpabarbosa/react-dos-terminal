@@ -1,5 +1,6 @@
 import React from "react";
-import { TerminalDefaults } from "../config";
+import { defaults, TerminalDefaults } from "../config";
+import { MainOutputContextProvider } from "../contexts/MainOutputContext";
 import { TerminalContextProvider } from "../contexts/TerminalContext";
 import { AllowedColors } from "../helpers/colors";
 import { useInitializer } from "../hooks/useInitializer";
@@ -26,6 +27,12 @@ const Terminal = ({config}: TerminalProps) => {
     const initializer = useInitializer(config?.shouldPersisteData, config?.terminal);
     const loadingScreen = useLoadingScreen(config?.loadingScreen);
     
+    const mainOutput = {
+        initialMessage: config?.initialMessage !== undefined  ? 
+            config.initialMessage : 
+            defaults.initialMessage
+        }
+
     return (
         <React.StrictMode>
             {initializer.isInitialized &&
@@ -33,7 +40,9 @@ const Terminal = ({config}: TerminalProps) => {
             <GlobalStyles />
             <TerminalContextProvider config={initializer.terminal}>
                 {!loadingScreen.isLoading &&
+                <MainOutputContextProvider config={mainOutput} >
                     <Main />
+                </ MainOutputContextProvider>
                 }
                 {loadingScreen.isLoading &&
                     <LoadingScreen content={loadingScreen.content}/>

@@ -10,9 +10,11 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
+}
+export interface MainOutputConfig {
     initialMessage: string | string[];
 }
-export interface TerminalDefaults {
+export interface TerminalDefaults extends MainOutputConfig {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;

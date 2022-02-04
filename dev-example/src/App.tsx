@@ -11,16 +11,15 @@ export const App = () => {
                 color: '#ffffff',
             },
             screenStripes: true,
-            // autoFocus: false,
-            //initialMessage: ['This is my custom terminal', '']
+            //autoFocus: false,
         },
-        
         loadingScreen: {
             //shouldShow: 'always',
             messageOrElement: ['Installing my custom terminal','', 'Please wait...', ''],
             loadingTime: 3000,
         },
         shouldPersisteData: false,
+        initialMessage: ['This is my custom terminal', '']
     }
 
     return (

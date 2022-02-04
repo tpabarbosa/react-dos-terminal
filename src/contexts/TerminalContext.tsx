@@ -16,7 +16,6 @@ export interface TerminalState {
     screenStripes: boolean,
     autoFocus: boolean,
     isActive: boolean,
-    initialMessage: string | string[],
 }
 
 export type TerminalProviderProps = {
@@ -42,7 +41,6 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
         screenStripes: config.screenStripes,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
-        initialMessage: config.initialMessage,
     }
     
     const reducer = (state: TerminalState, action: {type: string, value: any}) => {

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useMainOutput } from '../contexts/MainOutputContext';
 import { useTerminal } from '../contexts/TerminalContext';
 import { useCommandsHistory } from '../hooks/useCommandsHistory';
 import { useInput } from '../hooks/useInput';
@@ -10,11 +11,16 @@ import { TerminalScreen } from './TerminalScreen';
 export const Main = () => {
 
     const terminal = useTerminal();
+    const mainOutput = useMainOutput();
+
     const input = useInput();
     const commandsHistory = useCommandsHistory({input: input.ref});
     const output = useOutput();
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!terminal.state.isActive) {
+            terminal.action.userHasInteracted();
+        }
         switch (e.key) {
             case 'ArrowUp': 
                 e.preventDefault();
@@ -32,13 +38,12 @@ export const Main = () => {
                 input.setText('');
                 commandsHistory.add(cmd);
                 return;
-            
             default: return;
         }
     }
 
     useEffect(()=> {
-        const message = typeof terminal.state.initialMessage === 'string' ? [terminal.state.initialMessage] : terminal.state.initialMessage;
+        const message = mainOutput.state.data;
         output.typewriter.startTypewriting(message);
     },[])
     
