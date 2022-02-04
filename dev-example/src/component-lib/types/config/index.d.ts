@@ -10,6 +10,7 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
+    initialMessage: string | string[];
 }
 export interface TerminalDefaults {
     shouldPersisteData: boolean;

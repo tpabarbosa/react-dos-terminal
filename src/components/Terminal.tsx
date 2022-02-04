@@ -4,6 +4,7 @@ import { TerminalContextProvider } from "../contexts/TerminalContext";
 import { AllowedColors } from "../helpers/colors";
 import { useInitializer } from "../hooks/useInitializer";
 import { useLoadingScreen } from "../hooks/useLoadingScreen";
+import { useOutput } from "../hooks/useOutput";
 import GlobalStyles from "../styles/GlobalStyles";
 import { Main } from "./Main";
 import Output from "./Output";
@@ -45,13 +46,16 @@ const Terminal = ({config}: TerminalProps) => {
 }
 
 const LoadingScreen = ({content}: {content: string | string[] | JSX.Element}) => {
+
+    const output = useOutput();
+
     return (
         <>
         {!React.isValidElement(content) &&
             <TerminalScreen>
                 <Output >
                     <Output.Print 
-                        typewriter={true} 
+                        typewriter={output.typewriter} 
                         flashing={true} 
                         output={content as string | string[]} />
                 </Output>

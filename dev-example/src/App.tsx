@@ -12,6 +12,7 @@ export const App = () => {
             },
             screenStripes: true,
             // autoFocus: false,
+            //initialMessage: ['This is my custom terminal', '']
         },
         
         loadingScreen: {

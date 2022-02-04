@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { OutputTypewriter, UseOutput } from "../hooks/useOutput";
 import { OutputContainer, OutputContent, PrintContainer, PrintContent, PrintLine } from "../styles/styles";
 import { TerminalColors } from "./Terminal";
 
@@ -22,14 +23,15 @@ const Output = ({children, colors, ...rest}: OutputProps & React.HTMLAttributes<
 interface PrintProps {
     output: string | string[];
     flashing?: boolean;
-    typewriter?: boolean;
-    typeInterval?: number;
-    toggleTypewriting?: (value: boolean) => void;
-    isTypewriting?: boolean;
+    typewriter?: OutputTypewriter;
+    //typeInterval?: number;
+    //toggleTypewriting?: (value: boolean) => void;
+    //isTypewriting?: boolean;
     colors?: Partial<TerminalColors>
 }
 
-const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, typeInterval=40, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
+//toggleTypewriting, isTypewriting, typeInterval=40, 
+const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
 
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string|string[]>([]);
@@ -54,13 +56,13 @@ const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, ty
                     resolve(true);
                 }
             }
-            const id = setInterval (type, typeInterval);
+            const id = setInterval (type, typewriter?.typeInterval);
             if(!text) {
                 clearInterval(id);
                 resolve(true);
             }
         })
-    }, [typeInterval])
+    }, [typewriter?.typeInterval])
 
     useEffect( () => {
         const typewrite = async (children:HTMLCollection, actual: string | string[]) => {
@@ -72,8 +74,8 @@ const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, ty
             for (let j = 0; j < children.length; j++) {
                 const el = children[j].children[0];
                 await handleTypewrite(text[j], el).then();
-                if (j === children.length -1 && _.isEqual(output, actual) && isTypewriting) {
-                    toggleTypewriting && toggleTypewriting(false);
+                if (j === children.length -1 && _.isEqual(output, actual) && typewriter?.isTypewriting) {
+                    typewriter && typewriter.endTypewriting();
                     setLastOutput([]);
                 }
             }
@@ -83,7 +85,7 @@ const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, ty
             const children = divRef.current.children;
             typewrite(children, output)
         }
-    },[lastOutput, handleTypewrite, isTypewriting, output, toggleTypewriting, typewriter]);
+    },[lastOutput, handleTypewrite, typewriter, output]);
 
     useEffect(() => {
         if (!_.isEqual(output, lastOutput) && output.length > 0) {
@@ -111,6 +113,34 @@ const Print = ( { output, typewriter=false, toggleTypewriting, isTypewriting, ty
     )
 }
 
+interface TypewriterProps {
+    output: UseOutput,
+    flashing?: boolean;
+    colors?: Partial<TerminalColors>
+}
+
+const Typewriter = ({output, flashing=false, colors, ...rest}: TypewriterProps) => {
+
+    return (
+        <>
+        <Output.Print 
+            output={output.outputHistory} 
+            {...rest} 
+            colors={colors} 
+            flashing={flashing}
+        />
+        <Output.Print 
+            typewriter={output.typewriter} 
+            output={output.lastOutput}
+            {...rest} 
+            colors={colors} 
+            flashing={flashing} 
+        />
+        </>
+    )
+}
+
+Output.Typewriter = Typewriter;
 Output.Print = Print;
 
 export default Output;

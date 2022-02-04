@@ -5,6 +5,7 @@ export declare const useInitializer: (shouldPersisteData: boolean | undefined, c
         colors: TerminalColors;
         screenStripes: boolean;
         autoFocus: boolean;
+        initialMessage: string | string[];
     };
     isInitialized: boolean;
 };

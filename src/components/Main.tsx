@@ -1,13 +1,18 @@
+import { useEffect } from 'react';
+import { useTerminal } from '../contexts/TerminalContext';
 import { useCommandsHistory } from '../hooks/useCommandsHistory';
 import { useInput } from '../hooks/useInput';
+import { useOutput } from '../hooks/useOutput';
 import Input from './Input';
 import Output from './Output';
 import { TerminalScreen } from './TerminalScreen';
 
 export const Main = () => {
 
+    const terminal = useTerminal();
     const input = useInput();
     const commandsHistory = useCommandsHistory({input: input.ref});
+    const output = useOutput();
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         switch (e.key) {
@@ -32,16 +37,23 @@ export const Main = () => {
         }
     }
 
+    useEffect(()=> {
+        const message = typeof terminal.state.initialMessage === 'string' ? [terminal.state.initialMessage] : terminal.state.initialMessage;
+        output.typewriter.startTypewriting(message);
+    },[])
+    
     return (
         <TerminalScreen >
             <Output>
-                <Output.Print typewriter={true} output={['Welcome to IOS react-dos-terminal', '', '']} />
+                <Output.Typewriter output={output} />
             </Output>
 
+            {!output.typewriter.isTypewriting && 
             <Input onKeyUp={handleKeyUp}
                 id="terminal_input" 
                 ref={input.ref} prompt='C:\>'
             />
+            }
         </TerminalScreen>
     )
 }

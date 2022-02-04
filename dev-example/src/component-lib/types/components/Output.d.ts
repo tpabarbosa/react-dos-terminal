@@ -1,4 +1,5 @@
 /// <reference types="react" />
+import { OutputTypewriter, UseOutput } from "../hooks/useOutput";
 import { TerminalColors } from "./Terminal";
 interface OutputProps {
     children: React.ReactNode;
@@ -6,15 +7,18 @@ interface OutputProps {
 }
 declare const Output: {
     ({ children, colors, ...rest }: OutputProps & React.HTMLAttributes<HTMLDivElement>): JSX.Element;
-    Print: ({ output, typewriter, toggleTypewriting, isTypewriting, typeInterval, flashing, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => JSX.Element;
+    Typewriter: ({ output, flashing, colors, ...rest }: TypewriterProps) => JSX.Element;
+    Print: ({ output, typewriter, flashing, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => JSX.Element;
 };
 interface PrintProps {
     output: string | string[];
     flashing?: boolean;
-    typewriter?: boolean;
-    typeInterval?: number;
-    toggleTypewriting?: (value: boolean) => void;
-    isTypewriting?: boolean;
+    typewriter?: OutputTypewriter;
+    colors?: Partial<TerminalColors>;
+}
+interface TypewriterProps {
+    output: UseOutput;
+    flashing?: boolean;
     colors?: Partial<TerminalColors>;
 }
 export default Output;
