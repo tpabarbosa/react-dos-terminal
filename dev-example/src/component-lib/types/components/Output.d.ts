@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { OutputTypewriter, UseOutput } from "../hooks/useOutput";
+import { OutputTypewriter, UseOutputHandler } from "../hooks/useOutputHandler";
 import { TerminalColors } from "./Terminal";
 interface OutputProps {
     children: React.ReactNode;
@@ -17,7 +17,7 @@ interface PrintProps {
     colors?: Partial<TerminalColors>;
 }
 interface TypewriterProps {
-    output: UseOutput;
+    output: UseOutputHandler;
     flashing?: boolean;
     colors?: Partial<TerminalColors>;
 }

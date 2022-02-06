@@ -1,10 +1,13 @@
 /// <reference types="react" />
 import { TerminalColors } from "../components/Terminal";
-import { TerminalConfig } from "../config";
+import { TerminalConfig, TerminalMessages } from "../config";
 export interface TerminalContextAPI {
     state: TerminalState;
     action: {
-        setColors: (colors: TerminalColors) => void;
+        setConfig: ({ config, value }: {
+            config: string;
+            value: any;
+        }) => void;
         userHasInteracted: () => void;
     };
 }
@@ -13,10 +16,11 @@ export interface TerminalState {
     screenStripes: boolean;
     autoFocus: boolean;
     isActive: boolean;
+    messages: TerminalMessages;
 }
-export declare type TerminalProviderProps = {
+export interface TerminalProviderProps {
     children: React.ReactNode;
     config: TerminalConfig;
-};
+}
 export declare const TerminalContextProvider: ({ children, config }: TerminalProviderProps) => JSX.Element;
 export declare const useTerminal: () => TerminalContextAPI;

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { OutputTypewriter, UseOutput } from "../hooks/useOutput";
+import { OutputTypewriter, UseOutputHandler } from "../hooks/useOutputHandler";
 import { OutputContainer, OutputContent, PrintContainer, PrintContent, PrintLine } from "../styles/styles";
 import { TerminalColors } from "./Terminal";
 
@@ -24,13 +24,9 @@ interface PrintProps {
     output: string | string[];
     flashing?: boolean;
     typewriter?: OutputTypewriter;
-    //typeInterval?: number;
-    //toggleTypewriting?: (value: boolean) => void;
-    //isTypewriting?: boolean;
     colors?: Partial<TerminalColors>
 }
 
-//toggleTypewriting, isTypewriting, typeInterval=40, 
 const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
 
     const divRef = useRef<HTMLDivElement | null>(null)
@@ -75,7 +71,7 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
                 await handleTypewrite(text[j], el).then();
                 if (j === children.length -1 && _.isEqual(output, actual) && typewriter?.isTypewriting) {
                     typewriter && typewriter.endTypewriting();
-                    setLastOutput([]);
+                    //setLastOutput([]);
                 }
             }
         }
@@ -113,7 +109,7 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
 }
 
 interface TypewriterProps {
-    output: UseOutput,
+    output: UseOutputHandler,
     flashing?: boolean;
     colors?: Partial<TerminalColors>
 }

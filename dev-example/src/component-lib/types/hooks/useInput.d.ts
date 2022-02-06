@@ -1,3 +1,4 @@
+/// <reference types="react" />
 export declare const useInput: () => {
     ref: import("react").RefObject<HTMLDivElement>;
     getText: () => string;

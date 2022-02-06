@@ -6,9 +6,21 @@ interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     colors: {
         color: string;
         background: string;
-    }
+    },
 }
 
+interface ScreenContentProps extends React.HTMLAttributes<HTMLDivElement>{
+    // fullscreen: boolean;
+}
+
+interface CommandScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+    stripes: boolean;
+    colors: {
+        color: string;
+        background: string;
+    },
+    fullscreen: boolean
+}
 interface OutputContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     colors?: {
         color?: string;
@@ -92,12 +104,11 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     text-shadow: 7px 0px 20px #808080a8;
     color:  ${props => props.colors.color};
     background: ${props => getBackground(props.stripes, props.colors.background)};
-    /*  */
 `
 
-export const ScreenContent = styled.div`
+export const ScreenContent = styled.div<ScreenContentProps>`
     width: 134%;
-    min-height: 100%;
+    height: 100%;
     word-break: break-all;
     font-family: 'IBM VGA 9x16', monospace !important;
     font-size: 18px !important;
@@ -105,7 +116,35 @@ export const ScreenContent = styled.div`
     transform: scaleX(0.75);
     position: relative;
     left: -16.7%;
+    
 `
+export const CommandScreenContainer = styled.div<CommandScreenContainerProps>`
+    height: ${props => props.fullscreen ? '100%' : 'auto'};
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align: left;
+    padding-bottom: 1px;
+    text-shadow: 7px 0px 20px #808080a8;
+    color:  ${props => props.colors.color};
+    background: ${props => getBackground(props.stripes, props.colors.background)};
+`
+
+export const CommandScreenContent = styled.div<ScreenContentProps>`
+    width: 134%;
+    height: 100%;
+    word-break: break-all;
+    font-family: 'IBM VGA 9x16', monospace !important;
+    font-size: 18px !important;
+    line-height: 18px !important;
+    transform: scaleX(0.75);
+    position: relative;
+    left: -16.7%;
+    
+`
+
 export const OutputContainer = styled.div<OutputContainerProps>`
     outline: none;
     margin: 0;
@@ -136,6 +175,8 @@ export const InputContainer = styled.span<InputContainerProps>`
     padding-left: 8px;
     outline: none;
     margin: 0;
+    display: inline-block;
+
     ${props => getColorsCSS(props.colors)}
 
     pre {

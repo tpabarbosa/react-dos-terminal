@@ -1,17 +1,19 @@
 import React from "react";
-import { defaults, TerminalDefaults } from "../config";
-import { TerminalOutputContextProvider } from "../contexts/TerminalOutputContext";
+import { TerminalDefaults } from "../config";
 import { TerminalContextProvider } from "../contexts/TerminalContext";
 import { AllowedColors } from "../helpers/colors";
 import { useInitializer } from "../hooks/useInitializer";
 import { useLoadingScreen } from "../hooks/useLoadingScreen";
-import { useOutput } from "../hooks/useOutput";
+import { useOutputHandler } from "../hooks/useOutputHandler";
 import GlobalStyles from "../styles/GlobalStyles";
 import { Main } from "./Main";
 import Output from "./Output";
 import { TerminalScreen } from "./TerminalScreen";
 
 import { UserDefinedElement } from "./UserDefinedElement";
+import { TerminalCommandContextProvider } from "../contexts/CommandContext";
+
+import {commands} from "../config/commands"
 
 //type Data<T extends string> = { [field in T]: string | {} | null | object };
 
@@ -27,12 +29,6 @@ const Terminal = ({config}: TerminalProps) => {
     const initializer = useInitializer(config?.shouldPersisteData, config?.terminal);
     const loadingScreen = useLoadingScreen(config?.loadingScreen);
     
-    const mainOutput = {
-        initialMessage: config?.initialMessage !== undefined  ? 
-            config.initialMessage : 
-            defaults.initialMessage
-        }
-
     return (
         <React.StrictMode>
             {initializer.isInitialized &&
@@ -40,9 +36,9 @@ const Terminal = ({config}: TerminalProps) => {
             <GlobalStyles />
             <TerminalContextProvider config={initializer.terminal}>
                 {!loadingScreen.isLoading &&
-                <TerminalOutputContextProvider config={mainOutput} >
-                    <Main />
-                </ TerminalOutputContextProvider>
+                    <TerminalCommandContextProvider config={{commands}}>
+                        <Main />
+                    </TerminalCommandContextProvider>
                 }
                 {loadingScreen.isLoading &&
                     <LoadingScreen content={loadingScreen.content}/>
@@ -56,7 +52,7 @@ const Terminal = ({config}: TerminalProps) => {
 
 const LoadingScreen = ({content}: {content: string | string[] | JSX.Element}) => {
 
-    const output = useOutput();
+    const output = useOutputHandler([]);
 
     return (
         <>
@@ -71,7 +67,7 @@ const LoadingScreen = ({content}: {content: string | string[] | JSX.Element}) =>
             </TerminalScreen>
         }
         {React.isValidElement(content)&&
-            <UserDefinedElement element={content}/>
+            <UserDefinedElement element={content} outputHandler={output}/>
         }
         </>
     )

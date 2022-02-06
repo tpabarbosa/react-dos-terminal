@@ -1,21 +1,30 @@
-import { useEffect } from 'react';
-import { useTerminalOutput } from '../contexts/TerminalOutputContext';
+import { useEffect, useState } from 'react';
 import { useTerminal } from '../contexts/TerminalContext';
 import { useCommandsHistory } from '../hooks/useCommandsHistory';
 import { useInput } from '../hooks/useInput';
-import { useOutput } from '../hooks/useOutput';
+import { useOutputHandler } from '../hooks/useOutputHandler';
 import Input from './Input';
 import Output from './Output';
 import { TerminalScreen } from './TerminalScreen';
+import { useCommandsHandler } from '../hooks/useCommandHandler';
+import { useMainMachine } from '../hooks/machines/useMainMachine';
+import { UserDefinedElement } from './UserDefinedElement';
+import { useTerminalCommand } from '../contexts/CommandContext';
 
 export const Main = () => {
-
+    const [hideOutput, setHideOutput] = useState(false);
     const terminal = useTerminal();
-    const terminalOutput = useTerminalOutput();
+
+    const command = useTerminalCommand();
+    const dynamic = command.state?.actualCmd?.dynamic;
 
     const input = useInput();
     const commandsHistory = useCommandsHistory({input: input.ref});
-    const output = useOutput();
+    const outputHandler = useOutputHandler(terminal.state.messages.initialOutput);
+
+    const {state, action} = useMainMachine({outputHandler})
+
+    const commandsHandler = useCommandsHandler({state, action, outputHandler});
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (!terminal.state.isActive) {
@@ -33,8 +42,7 @@ export const Main = () => {
             case 'Enter': 
                 e.preventDefault();
                 const cmd = input.getText();
-                console.log(cmd)
-                // commandsHandler.run(cmd);
+                commandsHandler.run(cmd);
                 input.setText('');
                 commandsHistory.add(cmd);
                 return;
@@ -42,17 +50,28 @@ export const Main = () => {
         }
     }
 
-    useEffect(()=> {
-        output.typewriter.startTypewriting(terminalOutput.state.data);
-    },[])
+    useEffect(() => {
+        if (state==='RUNNING_COMMAND' && dynamic?.options?.shouldHideTerminalOutput) {
+            setHideOutput(true);
+        } 
+        if (state!=='RUNNING_COMMAND') {
+            setHideOutput(false);
+        }
+    }, [state, dynamic])
     
     return (
         <TerminalScreen >
+            { !hideOutput &&
             <Output>
-                <Output.Typewriter output={output} />
+                <Output.Typewriter output={outputHandler} />
             </Output>
+            }
+            
+            { state==='RUNNING_COMMAND' && dynamic && 
+                <UserDefinedElement element={dynamic?.element} outputHandler={outputHandler}/> 
+            }
 
-            {!output.typewriter.isTypewriting && 
+            {(state!=='RUNNING_COMMAND' && !outputHandler.typewriter.isTypewriting) && 
             <Input onKeyUp={handleKeyUp}
                 id="terminal_input" 
                 ref={input.ref} prompt='C:\>'

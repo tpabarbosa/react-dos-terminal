@@ -17,6 +17,10 @@ export const useInitializer = (shouldPersisteData: boolean | undefined, config: 
 
     const finalAutofocus = config?.autoFocus !== undefined ? config.autoFocus : defaults.terminal.autoFocus;
 
+    const finalMessages = {...defaults.terminal.messages, ...config?.messages}
+    // const initialMessage = config?.initialMessage !== undefined  ? 
+    //         config.initialMessage : defaults.terminal.initialMessage;
+
     useEffect(() => {
         let col: TerminalColors;
         let strip: boolean;
@@ -42,6 +46,7 @@ export const useInitializer = (shouldPersisteData: boolean | undefined, config: 
             colors: finalColors,
             screenStripes: finalStripes,
             autoFocus: finalAutofocus,
+            messages: finalMessages,
         },
         isInitialized
     }

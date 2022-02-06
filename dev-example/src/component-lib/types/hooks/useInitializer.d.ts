@@ -5,6 +5,12 @@ export declare const useInitializer: (shouldPersisteData: boolean | undefined, c
         colors: TerminalColors;
         screenStripes: boolean;
         autoFocus: boolean;
+        messages: {
+            toBeImplemented: string[];
+            notFound: string[];
+            cantBeExecuted: string[];
+            initialOutput: string[];
+        };
     };
     isInitialized: boolean;
 };

@@ -6,6 +6,16 @@ interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
         background: string;
     };
 }
+interface ScreenContentProps extends React.HTMLAttributes<HTMLDivElement> {
+}
+interface CommandScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+    stripes: boolean;
+    colors: {
+        color: string;
+        background: string;
+    };
+    fullscreen: boolean;
+}
 interface OutputContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     colors?: {
         color?: string;
@@ -34,7 +44,9 @@ interface InputCaretProps {
     };
 }
 export declare const ScreenContainer: import("styled-components").StyledComponent<"div", any, ScreenContainerProps, never>;
-export declare const ScreenContent: import("styled-components").StyledComponent<"div", any, {}, never>;
+export declare const ScreenContent: import("styled-components").StyledComponent<"div", any, ScreenContentProps, never>;
+export declare const CommandScreenContainer: import("styled-components").StyledComponent<"div", any, CommandScreenContainerProps, never>;
+export declare const CommandScreenContent: import("styled-components").StyledComponent<"div", any, ScreenContentProps, never>;
 export declare const OutputContainer: import("styled-components").StyledComponent<"div", any, OutputContainerProps, never>;
 export declare const OutputContent: import("styled-components").StyledComponent<"div", any, {}, never>;
 export declare const PrintContainer: import("styled-components").StyledComponent<"div", any, PrintContainerProps, never>;

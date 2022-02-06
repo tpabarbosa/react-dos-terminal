@@ -1,12 +1,12 @@
 import { createContext, useContext, useMemo, useReducer } from "react"
 import { TerminalColors } from "../components/Terminal"
-import { TerminalConfig } from "../config"
+import { TerminalConfig, TerminalMessages } from "../config"
 import ls from "../helpers/localStorage"
 
 export interface TerminalContextAPI {
     state: TerminalState,
     action: {
-        setColors: (colors: TerminalColors) => void,
+        setConfig: ({config, value}: {config: string, value: any}) => void
         userHasInteracted: () => void;
     }
 }
@@ -16,9 +16,10 @@ export interface TerminalState {
     screenStripes: boolean,
     autoFocus: boolean,
     isActive: boolean,
+    messages: TerminalMessages,
 }
 
-export type TerminalProviderProps = {
+export interface TerminalProviderProps {
     children: React.ReactNode,
     config: TerminalConfig,
 }
@@ -31,9 +32,12 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
         userHasInteracted: () => {
             dispatch({type: 'isActive', value: true})
         },
-        setColors: (colors: TerminalColors) => {
-            dispatch({type: 'setColors', value: colors})
-        },
+        setConfig: ({config, value}: {config: string, value: any}) => {
+            if (config==='colors') {
+                dispatch({type: 'setColors', value})
+            }
+        }
+
     }}, [])
     
     const terminalInitialState: TerminalState = {
@@ -41,6 +45,7 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
         screenStripes: config.screenStripes,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
+        messages: config.messages,
     }
     
     const reducer = (state: TerminalState, action: {type: string, value: any}) => {

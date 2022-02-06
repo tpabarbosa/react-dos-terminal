@@ -1,15 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import { useTerminal } from "../contexts/TerminalContext";
-import { ScreenContainer, ScreenContent } from "../styles/styles";
+import { CommandScreenContainer, CommandScreenContent } from "../styles/styles";
 import { TerminalColors } from "./Terminal";
 
 interface ScreenProps {
     children: React.ReactNode;
     colors?: TerminalColors;
     stripes?: boolean;
+    fullscreen?: boolean;
 }
 
-export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
+export const CommandScreen = ( { children, colors, stripes, fullscreen=false, ...rest }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
     const terminal = useTerminal();
 
     const endRef = useRef<HTMLDivElement>(null);
@@ -22,11 +23,11 @@ export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenPr
 
 
     return (
-        <ScreenContainer  colors={colors ?? terminal.state.colors} stripes={stripes ?? terminal.state.screenStripes} >
-            <ScreenContent {...rest}>
+        <CommandScreenContainer {...rest} colors={colors ?? terminal.state.colors} stripes={stripes ?? terminal.state.screenStripes} fullscreen={fullscreen}>
+            <CommandScreenContent >
                 {children}
                 <div ref={endRef} /> 
-            </ScreenContent>
-        </ScreenContainer>
+            </CommandScreenContent>
+        </CommandScreenContainer>
     )
 }

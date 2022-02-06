@@ -1,4 +1,5 @@
 import { TerminalColors } from "../components/Terminal"
+import { FakeCommand, Help } from "../contexts/CommandContext";
 
 export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time';
 
@@ -12,13 +13,21 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
+    messages: TerminalMessages,
 }
 
-export interface TerminalOutputConfig {
-    initialMessage: string | string[]
+export interface TerminalMessages {
+    toBeImplemented: string[],
+    notFound: string[],
+    cantBeExecuted: string[],
+    initialOutput: string[];
+}
+export interface TerminalCommandConfig {
+    commands: FakeCommand[],
+    helps?: Help[],
 }
 
-export interface TerminalDefaults extends TerminalOutputConfig {
+export interface TerminalDefaults {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;
@@ -38,7 +47,13 @@ export const defaults:TerminalDefaults = {
         },
         autoFocus: true,
         screenStripes: true,
+        messages: {
+            initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
+            toBeImplemented: [`Error: "%n" command hasn't been implemented.`, ''],
+            notFound: [`Error: "%n" is not a valid command.`, ''],
+            cantBeExecuted: [`Error: "%n" can't be executed.`, '']
+        }
     },
-    initialMessage: ['Welcome to IOS react-dos-terminal', '', ''],
+    
 }
 
