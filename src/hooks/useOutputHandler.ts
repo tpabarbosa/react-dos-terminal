@@ -31,7 +31,7 @@ export const useOutputHandler = (initial: string[]): UseOutputHandler => {
     const [outputHistory, setOutputHistory] = useState<string[]>([]);
     const [lastOutput, setLastOutput] = useState<string[]>([]);
     const [isTypewriting, setIsTypewriting] = useState(false);
-    const [typeInterval, setTypeInterval] = useState(40)
+    const [typeInterval, setTypeInterval] = useState(10)
 
     // const changeOutputHistory = (value: string[]) => {
     //     setOutputHistory(value)
@@ -87,6 +87,7 @@ export const useOutputHandler = (initial: string[]): UseOutputHandler => {
                     } else {
                         changeLastOutput(outputQueue[0].value);
                     }
+                    
                     break;
                 case 'remove': 
                     removeFromHistory(outputQueue[0].value);

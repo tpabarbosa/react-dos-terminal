@@ -1,19 +1,20 @@
 /// <reference types="react" />
 import { TerminalColors } from "../components/Terminal";
-import { TerminalCommandConfig } from "../config";
+import { TerminalCommandsConfig, TerminalCommandsMessages } from "../config";
 export interface FakeCommand {
     name: string;
-    alias?: string | string[];
+    alias?: string[];
     action: (props: CommandProps) => Command | Promise<Command>;
     async?: {
         waitingMessage?: string[];
     };
+    help?: (() => string | string[]) | string | string[];
 }
 export interface CommandProps {
     name: string;
     args: string;
-    help?: string[];
     allCommands: FakeCommand[];
+    messages: TerminalCommandsMessages;
 }
 export declare type CommandToOutput = {
     action: 'clear';
@@ -60,13 +61,14 @@ export interface Help {
 }
 export interface TerminalCommandState {
     allCommands: FakeCommand[];
-    allHelps?: Help[];
+    shouldAllowHelp: boolean;
     actualCmd?: TerminalCommand | null;
     isRunningCommand: boolean;
+    messages: TerminalCommandsMessages;
 }
 export interface TerminalCommandProviderProps {
     children: React.ReactNode;
-    config: TerminalCommandConfig;
+    config: TerminalCommandsConfig;
 }
 export declare const TerminalCommandContextProvider: ({ children, config }: TerminalCommandProviderProps) => JSX.Element;
 export declare const useTerminalCommand: () => TerminalCommandContextAPI;

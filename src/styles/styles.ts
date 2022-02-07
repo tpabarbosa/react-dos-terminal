@@ -1,4 +1,5 @@
 import styled, { css, keyframes }  from "styled-components";
+import { TerminalColors } from "../components/Terminal";
 import ls from "../helpers/localStorage";
 
 interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -57,6 +58,14 @@ const getStriped = () => {
     return lsStripes === '1' ? true : false;
 }
 
+const getLinkColors = () => {
+    const colors = ls.get('colors') as TerminalColors;
+    return css`
+        color: ${colors.background};
+        background: ${colors.color};
+    `
+}
+
 const getBackground = (striped: boolean, background: string) => {
     return striped ? `repeating-linear-gradient(6deg, ${background}e0 1px, ${background} 6px)` : `${background}`
 }
@@ -104,6 +113,9 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     text-shadow: 7px 0px 20px #808080a8;
     color:  ${props => props.colors.color};
     background: ${props => getBackground(props.stripes, props.colors.background)};
+    a { 
+        ${getLinkColors()}
+    }
 `
 
 export const ScreenContent = styled.div<ScreenContentProps>`
@@ -169,6 +181,7 @@ export const PrintContent  = styled.div`
 
 export const PrintLine  = styled.pre`
     ${preStyles}
+    
 `;
 
 export const InputContainer = styled.span<InputContainerProps>`

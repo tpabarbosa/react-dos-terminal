@@ -1,1 +1,4 @@
-export declare const Main: () => JSX.Element;
+/// <reference types="react" />
+export declare const Main: ({ initialOutput }: {
+    initialOutput: string[];
+}) => JSX.Element;

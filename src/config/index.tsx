@@ -13,28 +13,32 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
-    messages: TerminalMessages,
 }
 
-export interface TerminalMessages {
-    toBeImplemented: string[],
-    notFound: string[],
-    cantBeExecuted: string[],
-    initialOutput: string[];
+export interface TerminalCommandsMessages {
+    toBeImplemented: string,
+    notFound: string,
+    cantBeExecuted: string,
+    helpNotAvailable: string,
 }
-export interface TerminalCommandConfig {
+export interface TerminalCommandsConfig {
     commands: FakeCommand[],
-    helps?: Help[],
+    excludeCommands: string[] | 'all',
+    shouldAllowHelp: boolean,
+    messages: TerminalCommandsMessages,
 }
 
 export interface TerminalDefaults {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;
+    commands: TerminalCommandsConfig;
+    initialOutput: string[];
 }
 
 export const defaults:TerminalDefaults = {
     shouldPersisteData: true,
+    initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: ['Installing IOS react-dos-terminal','', 'Please wait...', '',],
@@ -47,13 +51,17 @@ export const defaults:TerminalDefaults = {
         },
         autoFocus: true,
         screenStripes: true,
-        messages: {
-            initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
-            toBeImplemented: [`Error: "%n" command hasn't been implemented.`, ''],
-            notFound: [`Error: "%n" is not a valid command.`, ''],
-            cantBeExecuted: [`Error: "%n" can't be executed.`, '']
-        }
     },
-    
+    commands: {
+        commands: [],
+        excludeCommands: [],
+        shouldAllowHelp: true,
+        messages: {
+            toBeImplemented: `Error: "%n" command hasn't been implemented.`,
+            notFound: `Error: "%n" is not a valid command.`,
+            cantBeExecuted: `Error: "%n" can't be executed.`,
+            helpNotAvailable: `Error: "%n" doesn't have any help available.`
+        }
+    }
 }
 

@@ -1,5 +1,5 @@
 import { Command } from "../contexts/CommandContext";
-export declare const cls: {
+export declare const reactDosTerminal: {
     run: () => Command;
     help: string[];
 };

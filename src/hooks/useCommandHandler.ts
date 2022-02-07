@@ -1,7 +1,9 @@
 
 
+import { help } from "../commands/help";
 import { Command, FakeCommand, useTerminalCommand } from "../contexts/CommandContext";
 import { useTerminal } from "../contexts/TerminalContext";
+import commands from "../helpers/commands";
 import { MainAction, MainState } from "./machines/useMainMachine";
 import { UseOutputHandler } from "./useOutputHandler";
 
@@ -14,31 +16,23 @@ type UseCommandsHandlerProps = {
 export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerProps) => {
     
     const terminal = useTerminal();
-    const {messages} = terminal.state;
+    
     const command = useTerminalCommand();
-
+    const {messages, shouldAllowHelp} = command.state;
     //const { actualDir, files } = terminal.state;
     
     const { allCommands } = command.state;
 
     const run = async (cmd: string) => {
 
-        const { name, args } = getNameAndArgs(cmd);
+        const { name, args, isHelp } = getNameAndArgs(cmd);
 
-        outputHandler.addToHistory(`C:\\> ${name} ${args}`)
+        outputHandler.addToHistory(`C:\\> ${cmd}`)
 
         if (name === '') {
             command.action.setActualCmd(null);
             return;
         };
-
-        
-        // if (commandHasHelp(name)) {
-        //     command.action.setActualCmd(null);
-        //     output.action.addLines(helpText(name));
-        //     return;
-        // }
-        // //check if name has /h and print help
 
         const props = {name, args, allCommands, messages};
 
@@ -69,11 +63,19 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
             dispatch(response, waitingMessage);
         }
 
+        const runHelp = (command: FakeCommand) => {
+            if (command.help) {
+                dispatch(help({...props, name:'help', args:name}))
+            }
+            else {
+                dispatch(commands.helpNotAvailable(props))
+            }
+        }
+
         const terminalCommand: FakeCommand[] = allCommands.filter(c => c.name === name || (c.alias?.includes(name)));
 
         if (terminalCommand[0]){ //try internal commands
-            runAction(terminalCommand[0]);
-
+            isHelp ? runHelp(terminalCommand[0]) : runAction(terminalCommand[0]);
         } 
         // else {//try exec-files
         //     const executableCommand = executable(props);
@@ -85,7 +87,7 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
         //     }
         // }
         else {
-            dispatch({output:[{action: 'add', value:[`Error`, '']}]});
+            dispatch(commands.commandNotFound(props));
         }
         
     }
@@ -94,13 +96,27 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
         const index = cmd.indexOf(" "); 
         let name = '';
         let args = '';
+        let isHelp = false;
+
         if (index !== -1) {
-        name = cmd.substring(0, index).trim(); 
-        args = cmd.substring(index + 1).trim();
+            name = cmd.substring(0, index).trim(); 
+            args = cmd.substring(index + 1).trim();
         } else {
-        name = cmd.trim();
+            name = cmd.trim();
         }
-        return {name, args}
+        
+        if (shouldAllowHelp) {
+            const reg = /\/\?/;
+            if (reg.test(name) && name!=='/?') {
+                isHelp = true;
+                name = name.substring(0, name.length-2);
+            } else if (args === '/?'){
+                isHelp = true;
+            } else if (!reg.test(name) && name ==='/?') {
+                isHelp = true;
+            }
+        }
+        return {name, args, isHelp}
     }
     
 

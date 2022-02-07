@@ -23,11 +23,41 @@ const Output = ({children, colors, ...rest}: OutputProps & React.HTMLAttributes<
 interface PrintProps {
     output: string | string[];
     flashing?: boolean;
-    typewriter?: OutputTypewriter;
     colors?: Partial<TerminalColors>
 }
 
-const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
+const Print = ( { output, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
+
+    const divRef = useRef<HTMLDivElement | null>(null)
+    
+    return (
+        <PrintContainer {...rest} colors={colors} flashing={flashing} ref={divRef}>
+        { typeof output === 'object' && output.length > 0 && 
+            output.map((line, index) => {
+                return (
+                <PrintContent key={`${index}|${line}`} >
+                    { line !== '' ? <PrintLine dangerouslySetInnerHTML={{__html: line}}></PrintLine> : <br />}
+                </PrintContent>
+                )
+            })
+        }
+        { typeof output === 'string' && output.length > 0 && 
+                <PrintContent >
+                    { output !== '' ? <PrintLine dangerouslySetInnerHTML={{__html: output}}></PrintLine> : <br />}
+                </PrintContent>
+        }
+        </PrintContainer>
+    )
+}
+
+interface PrintWithTypewriterProps {
+    output: string | string[];
+    flashing?: boolean;
+    typewriter: OutputTypewriter;
+    colors?: Partial<TerminalColors>
+}
+
+const PrintWithTypewriter = ( { output, typewriter, flashing=false, colors, ...rest }: PrintWithTypewriterProps & React.HTMLAttributes<HTMLDivElement>) => {
 
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string|string[]>([]);
@@ -37,8 +67,8 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
         return await new Promise((resolve) => {
             
             const word = text ? text.split('') : [];
+            
             const type = () => {
-                
                 if (word.length > 0) {
                     if (el.textContent) {
                         el.textContent += word.shift() ?? '';
@@ -51,16 +81,17 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
                     resolve(true);
                 }
             }
-            const id = setInterval (type, typewriter?.typeInterval);
+
+            const id = setInterval (type, typewriter.typeInterval);
             if(!text) {
                 clearInterval(id);
                 resolve(true);
             }
         })
-    }, [typewriter?.typeInterval])
+    }, [typewriter])
 
     useEffect( () => {
-        const typewrite = async (children:HTMLCollection, actual: string | string[]) => {
+        const typewrite = async (children:HTMLCollection) => {
             const text: string[] = [];
             for (let i = 0; i < children.length; i++) {
                 text.push(children[i].children[0].textContent ?? '');
@@ -69,24 +100,24 @@ const Print = ( { output, typewriter, flashing=false, colors, ...rest }: PrintPr
             for (let j = 0; j < children.length; j++) {
                 const el = children[j].children[0];
                 await handleTypewrite(text[j], el).then();
-                if (j === children.length -1 && _.isEqual(output, actual) && typewriter?.isTypewriting) {
-                    typewriter && typewriter.endTypewriting();
-                    //setLastOutput([]);
+                if ((j === children.length -1) && typewriter.isTypewriting) {
+                    typewriter.endTypewriting();
                 }
             }
         }
 
-        if (divRef.current && _.isEqual(output, lastOutput) && output.length > 0 && typewriter) {
+        if (divRef.current && typewriter.isTypewriting && !_.isEqual(output, lastOutput) && output.length > 0 ) {
             const children = divRef.current.children;
-            typewrite(children, output)
-        }
-    },[lastOutput, handleTypewrite, typewriter, output]);
-
-    useEffect(() => {
-        if (!_.isEqual(output, lastOutput) && output.length > 0) {
+            typewrite(children)
             setLastOutput(output)
         }
-    }, [output, lastOutput])
+
+        if (!typewriter.isTypewriting && lastOutput.length !== 0) {
+            setLastOutput([])
+        }
+        
+    },[lastOutput, handleTypewrite, typewriter.isTypewriting, output, divRef]);
+
 
     return (
         <PrintContainer {...rest} colors={colors} flashing={flashing} ref={divRef}>
@@ -124,7 +155,7 @@ const Typewriter = ({output, flashing=false, colors, ...rest}: TypewriterProps) 
             colors={colors} 
             flashing={flashing}
         />
-        <Output.Print 
+        <PrintWithTypewriter 
             typewriter={output.typewriter} 
             output={output.lastOutput}
             {...rest} 

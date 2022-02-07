@@ -1,10 +1,13 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TerminalColors } from "../components/Terminal";
-import { defaults, TerminalConfig } from "../config";
+import { defaults, TerminalCommandsConfig, TerminalConfig } from "../config";
 import ls from "../helpers/localStorage";
+import {commandsList, immutableCommands} from "../config/commands";
+import { FakeCommand } from "../contexts/CommandContext";
+import initializer from "../helpers/initializer";
 
-export const useInitializer = (shouldPersisteData: boolean | undefined, config: TerminalConfig | undefined) => {
+export const useInitializer = (shouldPersisteData: boolean | undefined, terminal: TerminalConfig | undefined, commands: TerminalCommandsConfig | undefined) => {
 
     const isInstalled = ls.get('i');
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -15,18 +18,43 @@ export const useInitializer = (shouldPersisteData: boolean | undefined, config: 
     
     const [finalStripes, setFinalStripes] = useState<boolean>(defaults.terminal.screenStripes);
 
-    const finalAutofocus = config?.autoFocus !== undefined ? config.autoFocus : defaults.terminal.autoFocus;
+    const finalAutofocus = terminal?.autoFocus !== undefined ? terminal.autoFocus : defaults.terminal.autoFocus;
 
-    const finalMessages = {...defaults.terminal.messages, ...config?.messages}
-    // const initialMessage = config?.initialMessage !== undefined  ? 
-    //         config.initialMessage : defaults.terminal.initialMessage;
+    const finalMessages = {...defaults.commands.messages, ...commands?.messages}
+    
+    const finalExcludeCommands = commands?.excludeCommands !== undefined ? commands.excludeCommands : defaults.commands.excludeCommands;
+
+    const finalAllowHelp = commands?.shouldAllowHelp !== undefined ? commands.shouldAllowHelp : defaults.commands.shouldAllowHelp;
+
+    const finalCommands = useMemo(() => {
+        let cmd: FakeCommand[];
+        // if (config?.fakeFileSystem !== false) {
+        //     const fc = commands.concat(fileSystemCommands);
+        //     cmd = initializer.createCommands(fc, config?.commands);
+        // }
+        // else {
+        //     const fc = commands.concat(fileSystemSubstituteCommands);
+        //     cmd = initializer.createCommands(fc, config?.commands);
+        // }
+        cmd = initializer.excludeCommands(commandsList, commands?.excludeCommands)
+        if (!finalAllowHelp) {
+            cmd = initializer.excludeCommands(cmd, ['help']);
+        }
+        cmd = initializer.createCommands(cmd, commands?.commands)
+        //console.log(t)
+        
+        //return t
+        return initializer.createCommands(cmd, immutableCommands);
+
+    }, [commands]);
+
 
     useEffect(() => {
         let col: TerminalColors;
         let strip: boolean;
         if ((isInstalled === null || isInstalled === '0') || !persisteData) {
-            col = config?.colors ? config?.colors : defaults.terminal.colors
-            strip = (config?.screenStripes !== undefined ? config?.screenStripes : defaults.terminal.screenStripes);
+            col = terminal?.colors ? terminal?.colors : defaults.terminal.colors
+            strip = (terminal?.screenStripes !== undefined ? terminal?.screenStripes : defaults.terminal.screenStripes);
             ls.set('stripes', strip ? '1' : '0');
             ls.set('colors', col);
             ls.set('i', '1');
@@ -46,8 +74,13 @@ export const useInitializer = (shouldPersisteData: boolean | undefined, config: 
             colors: finalColors,
             screenStripes: finalStripes,
             autoFocus: finalAutofocus,
+        },
+        commands: { 
+            commands: finalCommands,
+            shouldAllowHelp:finalAllowHelp,
+            excludeCommands: finalExcludeCommands,
             messages: finalMessages,
         },
-        isInitialized
+        isInitialized,
     }
 }

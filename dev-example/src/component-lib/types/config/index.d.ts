@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { TerminalColors } from "../components/Terminal";
-import { FakeCommand, Help } from "../contexts/CommandContext";
+import { FakeCommand } from "../contexts/CommandContext";
 export declare type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time';
 export interface TerminalLoadingScreen {
     shouldShow: TerminalLoadingScreenOptions;
@@ -11,21 +11,24 @@ export interface TerminalConfig {
     colors: TerminalColors;
     screenStripes: boolean;
     autoFocus: boolean;
-    messages: TerminalMessages;
 }
-export interface TerminalMessages {
-    toBeImplemented: string[];
-    notFound: string[];
-    cantBeExecuted: string[];
-    initialOutput: string[];
+export interface TerminalCommandsMessages {
+    toBeImplemented: string;
+    notFound: string;
+    cantBeExecuted: string;
+    helpNotAvailable: string;
 }
-export interface TerminalCommandConfig {
+export interface TerminalCommandsConfig {
     commands: FakeCommand[];
-    helps?: Help[];
+    excludeCommands: string[] | 'all';
+    shouldAllowHelp: boolean;
+    messages: TerminalCommandsMessages;
 }
 export interface TerminalDefaults {
     shouldPersisteData: boolean;
     loadingScreen: TerminalLoadingScreen;
     terminal: TerminalConfig;
+    commands: TerminalCommandsConfig;
+    initialOutput: string[];
 }
 export declare const defaults: TerminalDefaults;

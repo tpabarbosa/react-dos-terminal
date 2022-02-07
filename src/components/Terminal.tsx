@@ -1,5 +1,5 @@
 import React from "react";
-import { TerminalDefaults } from "../config";
+import { defaults, TerminalDefaults } from "../config";
 import { TerminalContextProvider } from "../contexts/TerminalContext";
 import { AllowedColors } from "../helpers/colors";
 import { useInitializer } from "../hooks/useInitializer";
@@ -13,8 +13,6 @@ import { TerminalScreen } from "./TerminalScreen";
 import { UserDefinedElement } from "./UserDefinedElement";
 import { TerminalCommandContextProvider } from "../contexts/CommandContext";
 
-import {commands} from "../config/commands"
-
 //type Data<T extends string> = { [field in T]: string | {} | null | object };
 
 type Colors<T extends string> = { [field in T]: AllowedColors };
@@ -26,9 +24,12 @@ interface TerminalProps {
 
 const Terminal = ({config}: TerminalProps) => {
 
-    const initializer = useInitializer(config?.shouldPersisteData, config?.terminal);
+    const initializer = useInitializer(config?.shouldPersisteData, config?.terminal, config?.commands);
     const loadingScreen = useLoadingScreen(config?.loadingScreen);
     
+    const initialOutput = config?.initialOutput !== undefined  ? 
+            config.initialOutput : defaults.initialOutput;
+
     return (
         <React.StrictMode>
             {initializer.isInitialized &&
@@ -36,8 +37,8 @@ const Terminal = ({config}: TerminalProps) => {
             <GlobalStyles />
             <TerminalContextProvider config={initializer.terminal}>
                 {!loadingScreen.isLoading &&
-                    <TerminalCommandContextProvider config={{commands}}>
-                        <Main />
+                    <TerminalCommandContextProvider config={initializer.commands}>
+                        <Main initialOutput={initialOutput}/>
                     </TerminalCommandContextProvider>
                 }
                 {loadingScreen.isLoading &&
@@ -52,17 +53,29 @@ const Terminal = ({config}: TerminalProps) => {
 
 const LoadingScreen = ({content}: {content: string | string[] | JSX.Element}) => {
 
-    const output = useOutputHandler([]);
+    const getContent = (): string[] => {
+        if (!React.isValidElement(content)) {
+            if (typeof content === 'string') {
+                return [content]
+            } else {
+                return content as string[]
+            }
+        }
+        return [] as string[]
+    }
+
+    const output = useOutputHandler(getContent());
 
     return (
         <>
         {!React.isValidElement(content) &&
             <TerminalScreen>
                 <Output >
-                    <Output.Print 
-                        typewriter={output.typewriter} 
+                    <Output.Typewriter 
+                        output={output}
                         flashing={true} 
-                        output={content as string | string[]} />
+                    />
+                    
                 </Output>
             </TerminalScreen>
         }

@@ -11,7 +11,7 @@ import { useMainMachine } from '../hooks/machines/useMainMachine';
 import { UserDefinedElement } from './UserDefinedElement';
 import { useTerminalCommand } from '../contexts/CommandContext';
 
-export const Main = () => {
+export const Main = ({initialOutput}: {initialOutput: string[]}) => {
     const [hideOutput, setHideOutput] = useState(false);
     const terminal = useTerminal();
 
@@ -20,7 +20,7 @@ export const Main = () => {
 
     const input = useInput();
     const commandsHistory = useCommandsHistory({input: input.ref});
-    const outputHandler = useOutputHandler(terminal.state.messages.initialOutput);
+    const outputHandler = useOutputHandler(initialOutput);
 
     const {state, action} = useMainMachine({outputHandler})
 
@@ -60,7 +60,7 @@ export const Main = () => {
     }, [state, dynamic])
     
     return (
-        <TerminalScreen >
+        <TerminalScreen onClick={() => input && input.setFocus()}>
             { !hideOutput &&
             <Output>
                 <Output.Typewriter output={outputHandler} />

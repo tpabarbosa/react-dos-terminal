@@ -4,6 +4,18 @@ import { Terminal } from './component-lib'
 
 export const App = () => {
 
+    const commandsList = [
+        {
+            name: 'cls',
+            // action: () => {return {output: [{action:'add', value:'Subscrevendo um comando'}]}}
+            help: 'Sobrescrevendo apenas a ajuda'
+        },
+        {
+            name: 'tati',
+            action: () => {return {output: [{action:'add', value:'Olá, meu nome é Tatiana'}]}},
+        }
+    ]
+
     const config = {
         terminal: {
             colors:  {
@@ -22,7 +34,12 @@ export const App = () => {
             loadingTime: 3000,
         },
         shouldPersisteData: false,
-        
+        commands: {
+            commands: commandsList,
+            //excludeCommands: ['test-static'],
+            //excludeCommands: 'all'
+            //shouldAllowHelp: false
+        }
     }
 
     return (

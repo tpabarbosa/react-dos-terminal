@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { TerminalColors } from "../components/Terminal";
-import { TerminalConfig, TerminalMessages } from "../config";
+import { TerminalConfig } from "../config";
 export interface TerminalContextAPI {
     state: TerminalState;
     action: {
@@ -16,7 +16,6 @@ export interface TerminalState {
     screenStripes: boolean;
     autoFocus: boolean;
     isActive: boolean;
-    messages: TerminalMessages;
 }
 export interface TerminalProviderProps {
     children: React.ReactNode;

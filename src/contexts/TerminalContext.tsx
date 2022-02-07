@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useReducer } from "react"
 import { TerminalColors } from "../components/Terminal"
-import { TerminalConfig, TerminalMessages } from "../config"
+import { TerminalConfig } from "../config"
 import ls from "../helpers/localStorage"
 
 export interface TerminalContextAPI {
@@ -16,7 +16,6 @@ export interface TerminalState {
     screenStripes: boolean,
     autoFocus: boolean,
     isActive: boolean,
-    messages: TerminalMessages,
 }
 
 export interface TerminalProviderProps {
@@ -45,7 +44,6 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
         screenStripes: config.screenStripes,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
-        messages: config.messages,
     }
     
     const reducer = (state: TerminalState, action: {type: string, value: any}) => {

@@ -1,21 +1,22 @@
 import { createContext, useContext, useMemo, useReducer } from "react"
 import { TerminalColors } from "../components/Terminal"
-import { TerminalCommandConfig } from "../config"
+import { TerminalCommandsConfig, TerminalCommandsMessages } from "../config"
 
 export interface FakeCommand {
     name: string,
-    alias?: string | string[],
+    alias?: string[],
     action: (props: CommandProps) => Command | Promise<Command>,
     async?: {
         waitingMessage?: string[],
-    }
+    },
+    help?: (() => string | string[]) | string | string[],
 }
 
 export interface CommandProps {
     name: string, 
     args: string,
-    help?: string[],
     allCommands: FakeCommand[],
+    messages: TerminalCommandsMessages
 }
 
 export type CommandToOutput = {action: 'clear'} | 
@@ -58,14 +59,15 @@ export interface Help{
 
 export interface TerminalCommandState {
     allCommands: FakeCommand[],
-    allHelps?: Help[],
+    shouldAllowHelp: boolean,
     actualCmd?: TerminalCommand | null,
     isRunningCommand: boolean,
+    messages: TerminalCommandsMessages,
 }
 
 export interface TerminalCommandProviderProps {
     children: React.ReactNode,
-    config: TerminalCommandConfig,
+    config: TerminalCommandsConfig,
 }
 
 const TerminalCommandContext = createContext<TerminalCommandContextAPI | undefined>(undefined)
@@ -86,9 +88,10 @@ export const TerminalCommandContextProvider = ({children, config}: TerminalComma
 
     const terminalCommandInitialState: TerminalCommandState = {
         allCommands: config.commands,
-        allHelps: config.helps,
+        shouldAllowHelp: config.shouldAllowHelp,
         actualCmd: null,
         isRunningCommand: false,
+        messages: config.messages
     }
     
     const reducer = (state: TerminalCommandState, action: {type: string, value: any}) => {
