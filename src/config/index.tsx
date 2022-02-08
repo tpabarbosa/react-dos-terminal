@@ -1,10 +1,11 @@
 import { TerminalColors } from "../components/Terminal"
-import { FakeCommand, Help } from "../contexts/CommandContext";
+import { FakeCommand } from "../contexts/CommandContext";
+import { FakeFile } from "../contexts/FileSystemContext";
 
 export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time';
 
 export interface TerminalLoadingScreen {
-    shouldShow: TerminalLoadingScreenOptions;
+    shouldShow: string;//TerminalLoadingScreenOptions;
     messageOrElement: string | string[] | JSX.Element;
     loadingTime: number;
 }
@@ -28,12 +29,20 @@ export interface TerminalCommandsConfig {
     messages: TerminalCommandsMessages,
 }
 
+export interface TerminalFileSystemConfig {
+    files: FakeFile[],
+    actualDir: string,
+    useFakeFileSystem: boolean,
+    useInternalFiles: boolean,
+}
+
 export interface TerminalDefaults {
     shouldPersisteData: boolean;
-    loadingScreen: TerminalLoadingScreen;
-    terminal: TerminalConfig;
-    commands: TerminalCommandsConfig;
+    loadingScreen: Partial<TerminalLoadingScreen>;
+    terminal: Partial<TerminalConfig>;
+    commands: Partial<TerminalCommandsConfig>;
     initialOutput: string[];
+    fileSystem: Partial<TerminalFileSystemConfig>;
 }
 
 export const defaults:TerminalDefaults = {
@@ -62,6 +71,12 @@ export const defaults:TerminalDefaults = {
             cantBeExecuted: `Error: "%n" can't be executed.`,
             helpNotAvailable: `Error: "%n" doesn't have any help available.`
         }
+    },
+    fileSystem: {
+        files: [],
+        actualDir: '',
+        useFakeFileSystem: true,
+        useInternalFiles: true,
     }
 }
 

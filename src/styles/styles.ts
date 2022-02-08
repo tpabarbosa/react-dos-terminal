@@ -1,5 +1,4 @@
-import styled, { css, keyframes }  from "styled-components";
-import { TerminalColors } from "../components/Terminal";
+import styled, { css, keyframes } from "styled-components";
 import ls from "../helpers/localStorage";
 
 interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -58,14 +57,6 @@ const getStriped = () => {
     return lsStripes === '1' ? true : false;
 }
 
-const getLinkColors = () => {
-    const colors = ls.get('colors') as TerminalColors;
-    return css`
-        color: ${colors.background};
-        background: ${colors.color};
-    `
-}
-
 const getBackground = (striped: boolean, background: string) => {
     return striped ? `repeating-linear-gradient(6deg, ${background}e0 1px, ${background} 6px)` : `${background}`
 }
@@ -114,7 +105,8 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     color:  ${props => props.colors.color};
     background: ${props => getBackground(props.stripes, props.colors.background)};
     a { 
-        ${getLinkColors()}
+        color: ${props => props.colors.background};
+        background-color: ${props => props.colors.color};
     }
 `
 
@@ -145,7 +137,7 @@ export const CommandScreenContainer = styled.div<CommandScreenContainerProps>`
 `
 
 export const CommandScreenContent = styled.div<ScreenContentProps>`
-    width: 134%;
+    /* width: 134%;
     height: 100%;
     word-break: break-all;
     font-family: 'IBM VGA 9x16', monospace !important;
@@ -153,7 +145,7 @@ export const CommandScreenContent = styled.div<ScreenContentProps>`
     line-height: 18px !important;
     transform: scaleX(0.75);
     position: relative;
-    left: -16.7%;
+    left: -16.7%; */
     
 `
 

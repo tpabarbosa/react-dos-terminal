@@ -32,6 +32,7 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
             dispatch({type: 'isActive', value: true})
         },
         setConfig: ({config, value}: {config: string, value: any}) => {
+            
             if (config==='colors') {
                 dispatch({type: 'setColors', value})
             }
@@ -52,7 +53,7 @@ export const TerminalContextProvider = ({children, config}: TerminalProviderProp
                 return {...state, isActive: action.value};
             case 'setColors': 
                 ls.set('colors', action.value)
-                return {...state, config: action.value};
+                return {...state, colors: action.value};
             default:
                 return state;
         }

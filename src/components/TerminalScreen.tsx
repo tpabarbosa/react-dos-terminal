@@ -16,17 +16,17 @@ export const TerminalScreen = ( { children, colors, stripes, ...rest }: ScreenPr
 
     useEffect(() => {
         if (endRef.current) {
-            endRef.current.scrollIntoView({block: "end"});
+            endRef.current.scrollIntoView({block: 'end'});
         }
     });
-
 
     return (
         <ScreenContainer  colors={colors ?? terminal.state.colors} stripes={stripes ?? terminal.state.screenStripes} >
             <ScreenContent {...rest}>
                 {children}
-                <div ref={endRef} /> 
+                <div ref={endRef} />
             </ScreenContent>
         </ScreenContainer>
+        
     )
 }

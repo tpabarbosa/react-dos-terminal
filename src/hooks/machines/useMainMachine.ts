@@ -17,13 +17,14 @@ export const useMainMachine = ({outputHandler}: UseMachineProps) => {
     const { isRunningCommand } = command.state;
     const { outputQueue } = outputHandler;
     const { isTypewriting } = outputHandler.typewriter;
-    const { endRunningCommand, setActualCmd, startRunningCommand } = command.action;
+    const { endRunningCommand, setActualCmd } = command.action;
 
     const [type, setType] = useState('');
 
     const onFinishCommand = () => {
         endRunningCommand();
         setActualCmd(null);
+        setType('')
         action('FINISH_CMD');
     }
 
@@ -36,7 +37,6 @@ export const useMainMachine = ({outputHandler}: UseMachineProps) => {
                     NEW_CMD: {
                         newState: 'RUNNING_COMMAND',
                         onTransition: (type: 'async'|'static'|'dynamic') => {
-                            type !== 'async' && startRunningCommand();
                             setType(type)
                         },
                     },
@@ -44,11 +44,11 @@ export const useMainMachine = ({outputHandler}: UseMachineProps) => {
             },
             RUNNING_COMMAND: { 
                 effect: () => {
-                    if (!isRunningCommand && outputQueue.length === 0 && !isTypewriting && type==='dynamic') {
+                    if (!isRunningCommand && type==='dynamic') {
                         onFinishCommand();
                         return
                     }
-                    if (isRunningCommand && outputQueue.length === 0 && !isTypewriting && type!=='dynamic') {
+                    if (isRunningCommand && outputQueue.length === 0 && !isTypewriting && type!=='dynamic' && type !== '') {
                         onFinishCommand();
                     }
                 },

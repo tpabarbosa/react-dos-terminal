@@ -28,7 +28,7 @@ export const help = (props: CommandProps): Command => {
                 '',
                 'Help is available for those commands:',
                 '',
-                ...output,
+                ...output.sort(),
                 ''
                 ]}
             ]

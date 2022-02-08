@@ -40,7 +40,6 @@ const link = (href: string, text: string) => {
     return `<a href="${href}" target="_blank" >${text}</a>`
 }
 
-
 const commandsHelper = {commandNotFound, toBeImplemented, cantBeExecuted, helpNotAvailable, link }
 
 export default commandsHelper

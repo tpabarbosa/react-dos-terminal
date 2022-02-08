@@ -29,8 +29,15 @@ interface PrintProps {
 const Print = ( { output, flashing=false, colors, ...rest }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
 
     const divRef = useRef<HTMLDivElement | null>(null)
-    
+    const endRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (endRef.current) {
+            endRef.current.scrollIntoView({block: 'end'});
+        }
+    });
     return (
+        <>
         <PrintContainer {...rest} colors={colors} flashing={flashing} ref={divRef}>
         { typeof output === 'object' && output.length > 0 && 
             output.map((line, index) => {
@@ -47,6 +54,8 @@ const Print = ( { output, flashing=false, colors, ...rest }: PrintProps & React.
                 </PrintContent>
         }
         </PrintContainer>
+        <div ref={endRef}/>
+        </>
     )
 }
 
@@ -61,6 +70,8 @@ const PrintWithTypewriter = ( { output, typewriter, flashing=false, colors, ...r
 
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string|string[]>([]);
+
+    const endRef = useRef<HTMLDivElement>(null);
 
     const handleTypewrite = useCallback(async ( text: string, el: any) => {
         
@@ -100,6 +111,7 @@ const PrintWithTypewriter = ( { output, typewriter, flashing=false, colors, ...r
             for (let j = 0; j < children.length; j++) {
                 const el = children[j].children[0];
                 await handleTypewrite(text[j], el).then();
+                endRef.current && endRef.current.scrollIntoView({block:'end'})
                 if ((j === children.length -1) && typewriter.isTypewriting) {
                     typewriter.endTypewriting();
                 }
@@ -118,8 +130,10 @@ const PrintWithTypewriter = ( { output, typewriter, flashing=false, colors, ...r
         
     },[lastOutput, handleTypewrite, typewriter.isTypewriting, output, divRef]);
 
+    
 
     return (
+        <>
         <PrintContainer {...rest} colors={colors} flashing={flashing} ref={divRef}>
         { typeof output === 'object' && output.length > 0 && 
             output.map((line, index) => {
@@ -135,7 +149,10 @@ const PrintWithTypewriter = ( { output, typewriter, flashing=false, colors, ...r
                     { output !== '' ? <PrintLine dangerouslySetInnerHTML={{__html: output}}></PrintLine> : <br />}
                 </PrintContent>
         }
+        
         </PrintContainer>
+        <div ref={endRef}/>
+        </>
     )
 }
 

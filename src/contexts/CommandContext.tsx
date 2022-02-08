@@ -1,11 +1,12 @@
 import { createContext, useContext, useMemo, useReducer } from "react"
 import { TerminalColors } from "../components/Terminal"
 import { TerminalCommandsConfig, TerminalCommandsMessages } from "../config"
+import { FakeFileSystem } from "./FileSystemContext"
 
 export interface FakeCommand {
     name: string,
     alias?: string[],
-    action: (props: CommandProps) => Command | Promise<Command>,
+    action?: (props: CommandProps) => Command | Promise<Command>,
     async?: {
         waitingMessage?: string[],
     },
@@ -15,6 +16,8 @@ export interface FakeCommand {
 export interface CommandProps {
     name: string, 
     args: string,
+    actualDir: string, 
+    files: FakeFileSystem,
     allCommands: FakeCommand[],
     messages: TerminalCommandsMessages
 }
@@ -50,11 +53,6 @@ export interface TerminalCommandContextAPI {
         endRunningCommand: () => void,
         setActualCmd: (cmd: TerminalCommand | null) => void,
     }
-}
-
-export interface Help{
-    command: string,
-    text: string[],
 }
 
 export interface TerminalCommandState {

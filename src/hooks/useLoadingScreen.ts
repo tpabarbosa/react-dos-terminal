@@ -7,22 +7,24 @@ export interface UseLoadingScreen {
     content: string | string[] | JSX.Element;
 }
 
-export const useLoadingScreen = (config: TerminalLoadingScreen | undefined): UseLoadingScreen => {
+export const useLoadingScreen = (config: Partial<TerminalLoadingScreen> | undefined): UseLoadingScreen => {
 
-        const shouldShowLoading = (loadingScreen: TerminalLoadingScreen, isInstalled: string | null) => {
-        switch (loadingScreen.shouldShow) {
+        const shouldShowLoading = (loadingScreen: Partial<TerminalLoadingScreen>, isInstalled: string | null) => {
+        const ss = loadingScreen.shouldShow ?? 'first-time';
+        switch (ss) {
             case 'always':
                 return true;
             case 'never': 
                 return false;
             case 'first-time': 
                 return isInstalled !== '1'
+            default: return isInstalled !== '1'
         }
     }
 
     const isInstalled = ls.get('i') as string;
 
-    const loadingScreen: TerminalLoadingScreen = {...defaults.loadingScreen, ...config}
+    const loadingScreen: TerminalLoadingScreen = {...defaults.loadingScreen, ...config} as TerminalLoadingScreen
 
     const [isLoading, setIsLoading] = useState(false)
 

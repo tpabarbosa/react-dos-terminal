@@ -10,10 +10,16 @@ import { useCommandsHandler } from '../hooks/useCommandHandler';
 import { useMainMachine } from '../hooks/machines/useMainMachine';
 import { UserDefinedElement } from './UserDefinedElement';
 import { useTerminalCommand } from '../contexts/CommandContext';
+import fileSystemHelper from '../helpers/filesystem';
+import { useFileSystem } from '../contexts/FileSystemContext';
+
 
 export const Main = ({initialOutput}: {initialOutput: string[]}) => {
     const [hideOutput, setHideOutput] = useState(false);
     const terminal = useTerminal();
+
+    const filesystem = useFileSystem();
+    const { actualDir } = filesystem.state;
 
     const command = useTerminalCommand();
     const dynamic = command.state?.actualCmd?.dynamic;
@@ -57,8 +63,9 @@ export const Main = ({initialOutput}: {initialOutput: string[]}) => {
         if (state!=='RUNNING_COMMAND') {
             setHideOutput(false);
         }
+        
     }, [state, dynamic])
-    
+
     return (
         <TerminalScreen onClick={() => input && input.setFocus()}>
             { !hideOutput &&
@@ -74,7 +81,8 @@ export const Main = ({initialOutput}: {initialOutput: string[]}) => {
             {(state!=='RUNNING_COMMAND' && !outputHandler.typewriter.isTypewriting) && 
             <Input onKeyUp={handleKeyUp}
                 id="terminal_input" 
-                ref={input.ref} prompt='C:\>'
+                ref={input.ref} 
+                prompt={fileSystemHelper.formatPrompt(actualDir)}
             />
             }
         </TerminalScreen>

@@ -12,6 +12,7 @@ import { TerminalScreen } from "./TerminalScreen";
 
 import { UserDefinedElement } from "./UserDefinedElement";
 import { TerminalCommandContextProvider } from "../contexts/CommandContext";
+import { FileSystemContextProvider } from "../contexts/FileSystemContext";
 
 //type Data<T extends string> = { [field in T]: string | {} | null | object };
 
@@ -24,12 +25,13 @@ interface TerminalProps {
 
 const Terminal = ({config}: TerminalProps) => {
 
-    const initializer = useInitializer(config?.shouldPersisteData, config?.terminal, config?.commands);
+    const initializer = useInitializer(config);
     const loadingScreen = useLoadingScreen(config?.loadingScreen);
     
     const initialOutput = config?.initialOutput !== undefined  ? 
             config.initialOutput : defaults.initialOutput;
 
+    
     return (
         <React.StrictMode>
             {initializer.isInitialized &&
@@ -37,9 +39,11 @@ const Terminal = ({config}: TerminalProps) => {
             <GlobalStyles />
             <TerminalContextProvider config={initializer.terminal}>
                 {!loadingScreen.isLoading &&
-                    <TerminalCommandContextProvider config={initializer.commands}>
-                        <Main initialOutput={initialOutput}/>
-                    </TerminalCommandContextProvider>
+                    <FileSystemContextProvider config={initializer.fileSystem}>
+                        <TerminalCommandContextProvider config={initializer.commands}>
+                            <Main initialOutput={initialOutput}/>
+                        </TerminalCommandContextProvider>
+                    </FileSystemContextProvider>
                 }
                 {loadingScreen.isLoading &&
                     <LoadingScreen content={loadingScreen.content}/>

@@ -1,5 +1,7 @@
 import { createGlobalStyle } from "styled-components";
-import VGA from '../fonts/WebPlus_IBM_VGA_9x16.woff';
+//import VGA from '../fonts/WebPlus_IBM_VGA_9x16.woff';
+
+const VGA = require('../assets/WebPlus_IBM_VGA_9x16.woff')
 
 const GlobalStyles =  createGlobalStyle`
     @font-face {

@@ -5,21 +5,34 @@ import del from 'rollup-plugin-delete';
 import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import url from 'rollup-plugin-url';
 import banner2 from 'rollup-plugin-banner2';
+import copy from 'rollup-plugin-copy';
+import versionInjector from 'rollup-plugin-version-injector';
+import json from "@rollup/plugin-json";
 
 const packageJson = require("./package.json");
+
+const plugins = [
+    peerDepsExternal(),
+    resolve(),
+    commonjs(),
+    terser(),
+    banner2(() => '/* eslint-disable */'),
+    versionInjector(),
+    json()
+];
 
 export default [{
         input: "src/index.tsx",
         output: [{
-                file: 'dev-example/src/component-lib/index.js',
-                format: 'esm',
-                banner: '/* eslint-disable */',
-            },
-            {
                 file: packageJson.main,
                 format: "cjs",
+                sourcemap: true,
+            },
+            {
+                file: 'dev-example/src/component-lib/esm/index.js',
+                format: 'esm',
+                banner: '/* eslint-disable */',
                 sourcemap: true,
             },
             {
@@ -29,23 +42,29 @@ export default [{
             },
         ],
         plugins: [
-            peerDepsExternal(),
-            del({ targets: ['dist/*', 'dev-example/src/component-lib'] }),
-            resolve(),
-            commonjs(),
+            ...plugins,
             typescript({ tsconfig: "./tsconfig.json" }),
-            terser(),
-            banner2(() => '/* eslint-disable */'),
-            url({
-                include: ['**/*.woff', '**/*.woff2'],
-                limit: Infinity,
+            del({ targets: ['dist/*', 'dev-example/src/component-lib/*'] }),
+            copy({
+                targets: [
+                    { src: ['src/assets/**/*'], dest: ['dist/assets', 'dev-example/src/component-lib/assets'] },
+                ]
             }),
         ],
         external: Object.keys(packageJson.peerDependencies || {}),
     },
     {
         input: "dist/esm/types/index.d.ts",
-        output: [{ file: "dist/index.d.ts", format: "esm" }],
-        plugins: [dts()],
+        output: [
+            { file: "dist/index.d.ts", format: "esm" },
+            { file: "dev-example/src/component-lib/esm/index.d.ts", format: "esm" }
+        ],
+        plugins: [
+            dts(),
+            del({
+                hook: "buildEnd",
+                targets: ["dist/esm/types", "dist/cjs/types", "dev-example/src/component-lib/esm/types"]
+            }),
+        ],
     },
 ];

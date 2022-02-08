@@ -1,9 +1,13 @@
 
 
+import _ from "lodash";
 import { help } from "../commands/help";
-import { Command, FakeCommand, useTerminalCommand } from "../contexts/CommandContext";
+import { Command, CommandProps, FakeCommand, useTerminalCommand } from "../contexts/CommandContext";
+import { useFileSystem } from "../contexts/FileSystemContext";
 import { useTerminal } from "../contexts/TerminalContext";
+import commandsHelper from "../helpers/commands";
 import commands from "../helpers/commands";
+import fileSystemHelper from "../helpers/filesystem";
 import { MainAction, MainState } from "./machines/useMainMachine";
 import { UseOutputHandler } from "./useOutputHandler";
 
@@ -16,10 +20,10 @@ type UseCommandsHandlerProps = {
 export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerProps) => {
     
     const terminal = useTerminal();
-    
+    const filesystem = useFileSystem();
     const command = useTerminalCommand();
     const {messages, shouldAllowHelp} = command.state;
-    //const { actualDir, files } = terminal.state;
+    const { actualDir, allFiles:files } = filesystem.state;
     
     const { allCommands } = command.state;
 
@@ -27,14 +31,14 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
 
         const { name, args, isHelp } = getNameAndArgs(cmd);
 
-        outputHandler.addToHistory(`C:\\> ${cmd}`)
+        outputHandler.addToHistory(`${fileSystemHelper.formatPrompt(actualDir)} ${cmd}`)
 
         if (name === '') {
             command.action.setActualCmd(null);
             return;
         };
 
-        const props = {name, args, allCommands, messages};
+        const props = {name, args, allCommands, messages, actualDir, files};
 
         const dispatch = (response: Command, waitingMessage?: string[]) => {
 
@@ -42,12 +46,16 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
 
             if (response.configTerminal !== undefined) {
                 terminal.action.setConfig(response.configTerminal);
+                if (response.configTerminal.config==='actualDir') {
+                    filesystem.action.setActualDir(response.configTerminal.value)
+                }
             }
             
             if (response.output) {
                 outputHandler.addToQueue(response.output);
             }
-            
+
+            !waitingMessage && command.action.startRunningCommand();
             response.dynamic ? action('NEW_CMD', 'dynamic') : action('NEW_CMD', 'static');
         }
 
@@ -58,9 +66,13 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
                 action('NEW_CMD', 'async');
             }
 
-            const response = await command.action(props);
+            if (command.action) {
+                const response = await command.action(props);
+                dispatch(response, waitingMessage);
+                return
+            }
             
-            dispatch(response, waitingMessage);
+            dispatch(commandsHelper.commandNotFound(props));
         }
 
         const runHelp = (command: FakeCommand) => {
@@ -72,24 +84,20 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
             }
         }
 
-        const terminalCommand: FakeCommand[] = allCommands.filter(c => c.name === name || (c.alias?.includes(name)));
+        const terminalCommand: FakeCommand[] = allCommands.filter(c => c.name.toLowerCase() === name.toLowerCase() || (c.alias?.find(a => a.toLowerCase().includes(name.toLowerCase()))));
 
         if (terminalCommand[0]){ //try internal commands
             isHelp ? runHelp(terminalCommand[0]) : runAction(terminalCommand[0]);
         } 
-        // else {//try exec-files
-        //     const executableCommand = executable(props);
-        //     if (executableCommand) {
-        //         runAction(executableCommand);
-        //     }
-        //     else { // is not a valid command
-        //         dispatch(commandsHelper.commandNotFound(props));
-        //     }
-        // }
-        else {
-            dispatch(commands.commandNotFound(props));
+        else {//try exec-files
+            const executableCommand = executable(props);
+            if (executableCommand) {
+                isHelp ? runHelp(terminalCommand[0]) : runAction(executableCommand);
+            }
+            else { // is not a valid command
+                dispatch(commandsHelper.commandNotFound(props));
+            }
         }
-        
     }
 
     const getNameAndArgs = (cmd:string) => {
@@ -120,36 +128,39 @@ export const useCommandsHandler =  ({action, outputHandler}: UseCommandsHandlerP
     }
     
 
-    // const executable = ({name, files, actualDir}: CommandProps & FileSystemProps) => {
-    //     if (_.isEmpty(files)) {
-    //         return 
-    //     }
+    const executable = ({name, files, actualDir}: CommandProps) => {
+        if (_.isEmpty(files)) {
+            return 
+        }
 
-    //     const pathsToSearch = [actualDir, '', '\\system'];
+        const pathsToSearch = [actualDir, '', '\\system'];
 
-    //     const cmd = pathsToSearch.reduce((acc, path) => {
-    //         if (_.isEmpty(acc)) {
-    //             const dirContent = fakeFileSystemHelper.getDir(files, path);
+        const cmd = pathsToSearch.reduce((acc, path) => {
+            if (_.isEmpty(acc)) {
+                const dirContent = fileSystemHelper.getDir(files, path);
 
-    //             if (dirContent && dirContent.files) {
-    //                 if (dirContent.files[name] && (dirContent.files[name].t==='e' || dirContent.files[name].t==='s')) {
-    //                     return dirContent.files[name].c as Command;
-    //                 }
-    //                 else if (dirContent.files[name+'.com'] && (dirContent.files[name+'.com'].t==='e' || dirContent.files[name+'.com'].t==='s')) {
-    //                     return dirContent.files[name+'.com'].c as Command;
-    //                 }
-    //                 else if (dirContent.files[name+'.exe'] && (dirContent.files[name+'.exe'].t==='e' || dirContent.files[name+'.exe'].t==='s')) {
-    //                     return dirContent.files[name+'.exe'].c as Command;
-    //                 }
-    //             }
-    //         } 
-    //         return acc
-    //     }, {} as Command)
+                if (dirContent && dirContent.files) {
+                    if (dirContent.files[name] && (dirContent.files[name].t==='e' || dirContent.files[name].t==='s')) {
+                        return dirContent.files[name].c as FakeCommand;
+                    }
+                    else if (dirContent.files[name+'.com'] && (dirContent.files[name+'.com'].t==='e' || dirContent.files[name+'.com'].t==='s')) {
+                        return dirContent.files[name+'.com'].c as FakeCommand;
+                    }
+                    else if (dirContent.files[name+'.exe'] && (dirContent.files[name+'.exe'].t==='e' || dirContent.files[name+'.exe'].t==='s')) {
+                        return dirContent.files[name+'.exe'].c as FakeCommand;
+                    }
+                }
+            } 
+            return acc
+        }, {} as FakeCommand)
 
-    //     if (!_.isEmpty(cmd)) {
-    //         return cmd
-    //     }
-    // }
+        if (!_.isEmpty(cmd)) {
+            
+            return cmd
+        }
+
+        return
+    }
 
     return { 
         run,
