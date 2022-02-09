@@ -32,9 +32,10 @@ export const useInitializer = (config: Partial<TerminalDefaults>) => {
         defaults.terminal.colors
     )
 
-    const [finalStripes, setFinalStripes] = useState<boolean | undefined>(
-        defaults.terminal.screenStripes
-    )
+    const finalStripes =
+        config?.terminal?.screenStripes !== undefined
+            ? config?.terminal?.screenStripes
+            : defaults.terminal.screenStripes
 
     const [finalActualDir, setFinalActualDir] = useState<string | undefined>(
         defaults.fileSystem.actualDir
@@ -111,31 +112,25 @@ export const useInitializer = (config: Partial<TerminalDefaults>) => {
 
     useEffect(() => {
         let col: TerminalColors | undefined
-        let strip: boolean | undefined
         let actualD: string | undefined
         if (isInstalled === null || isInstalled === '0' || !persisteData) {
             col = config?.terminal?.colors
                 ? config?.terminal?.colors
                 : defaults.terminal.colors
-            strip =
-                config?.terminal?.screenStripes !== undefined
-                    ? config?.terminal?.screenStripes
-                    : defaults.terminal.screenStripes
             actualD =
                 config?.fileSystem?.actualDir !== undefined
-                    ? config?.fileSystem?.actualDir
-                    : defaults.fileSystem.actualDir
-            ls.set('stripes', strip ? '1' : '0')
+                    ? (config?.fileSystem?.actualDir as string)
+                    : (defaults.fileSystem.actualDir as string)
+
             if (col) ls.set('colors', col)
             ls.set('i', '1')
+            ls.set('actualDir', actualD)
         } else {
             col = ls.get('colors') as TerminalColors
-            strip = ls.get('stripes') === '1'
             actualD = ls.get('actualDir') as string
         }
-
+        ls.set('stripes', finalStripes ? '1' : '0')
         setFinalColors(col)
-        setFinalStripes(strip)
         setFinalActualDir(actualD)
         setIsInitialized(true)
     }, [
@@ -144,6 +139,7 @@ export const useInitializer = (config: Partial<TerminalDefaults>) => {
         config?.terminal?.screenStripes,
         isInstalled,
         persisteData,
+        finalStripes,
     ])
 
     return {

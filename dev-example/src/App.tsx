@@ -63,7 +63,7 @@ export const App = () => {
                 background: '#0000aa',
                 color: '#ffffff',
             } as TerminalColors,
-            screenStripes: true,
+            //screenStripes: false,
             //autoFocus: false,
             messages: {
                 initialOutput: ['This is my custom terminal', ''],
