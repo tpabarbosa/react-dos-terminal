@@ -20,7 +20,7 @@ type Colors<T extends string> = { [field in T]: AllowedColors }
 export type TerminalColors = Colors<'background' | 'color'>
 
 interface TerminalProps {
-    config: Partial<TerminalDefaults>
+    config?: Partial<TerminalDefaults>
 }
 
 const LoadingScreen = ({

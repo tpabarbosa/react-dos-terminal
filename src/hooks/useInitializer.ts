@@ -19,7 +19,7 @@ import initializer from '../helpers/initializer'
 import { files } from '../config/files'
 import { FileSystemState } from '../contexts/FileSystemContext'
 
-export const useInitializer = (config: Partial<TerminalDefaults>) => {
+export const useInitializer = (config?: Partial<TerminalDefaults>) => {
     const isInstalled = ls.get('i')
     const [isInitialized, setIsInitialized] = useState<boolean>(false)
 

@@ -139,7 +139,7 @@ declare type Colors<T extends string> = {
 };
 declare type TerminalColors = Colors<'background' | 'color'>;
 interface TerminalProps {
-    config: Partial<TerminalDefaults>;
+    config?: Partial<TerminalDefaults>;
 }
 declare const Terminal: ({ config }: TerminalProps) => JSX.Element;
 
