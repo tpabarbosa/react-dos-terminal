@@ -1,0 +1,10 @@
+dev-example/node_modules
+dev-example/src/component-lib
+dev-examp/coverage
+
+node_modules
+
+# Ignore artifacts:
+dist
+build
+coverage

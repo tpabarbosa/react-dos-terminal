@@ -1,30 +1,7 @@
-
-import { TerminalColors } from "../components/Terminal";
-import { Command, CommandProps } from "../contexts/CommandContext";
-import colorsHelper from "../helpers/colors";
-
-const run = ({args}: CommandProps): Command => {
-
-
-    const re = /[0-9A-Fa-f]{2}/g;
-
-    if (!args || !re.test(args) || args[0]===args[1]) {
-        return { output: [{action: 'add', value: help}] };
-    }
-
-    const colors: TerminalColors = {
-        background: colorsHelper.getColorByHex(args[0]),
-        color: colorsHelper.getColorByHex(args[1])
-    }
-
-    return {
-        output: [{action: 'add', value: [
-            'Colors changed successfully.',
-            '',
-        ]}],
-        configTerminal: {config: 'colors', value: colors},
-    }
-}
+/* eslint-disable max-len */
+import { TerminalColors } from '../components/Terminal'
+import { Command, CommandProps } from '../contexts/CommandContext'
+import colorsHelper from '../helpers/colors'
 
 const help = [
     'The COLOR command is used to configure the terminal colors.',
@@ -41,7 +18,27 @@ const help = [
     '5 = Purple      D = Light Purple',
     '6 = Yellow      E = Light Yellow',
     `7 = White       F = Bright White`,
-    ''
+    '',
 ]
 
-export const color = {run, help}
+const run = ({ args }: CommandProps): Command => {
+    const re = /[0-9A-Fa-f]{2}/g
+
+    if (!args || !re.test(args) || args[0] === args[1]) {
+        return { output: [{ action: 'add', value: help }] }
+    }
+
+    const colors: TerminalColors = {
+        background: colorsHelper.getColorByHex(args[0]),
+        color: colorsHelper.getColorByHex(args[1]),
+    }
+
+    return {
+        output: [
+            { action: 'add', value: ['Colors changed successfully.', ''] },
+        ],
+        configTerminal: { config: 'setColors', value: colors },
+    }
+}
+
+export const color = { run, help }

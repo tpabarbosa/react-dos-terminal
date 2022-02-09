@@ -1,60 +1,65 @@
-import { TerminalColors } from "../components/Terminal"
-import { FakeCommand } from "../contexts/CommandContext";
-import { FakeFile } from "../contexts/FileSystemContext";
+import { TerminalColors } from '../components/Terminal'
+import { FakeCommand } from '../contexts/CommandContext'
+import { FakeFile } from '../contexts/FileSystemContext'
 
-export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time';
+export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time'
 
 export interface TerminalLoadingScreen {
-    shouldShow: string;//TerminalLoadingScreenOptions;
-    messageOrElement: string | string[] | JSX.Element;
-    loadingTime: number;
+    shouldShow: string // TerminalLoadingScreenOptions;
+    messageOrElement: string | string[] | JSX.Element
+    loadingTime: number
 }
 
 export interface TerminalConfig {
-    colors: TerminalColors;
-    screenStripes: boolean;
-    autoFocus: boolean;
+    colors: TerminalColors
+    screenStripes: boolean
+    autoFocus: boolean
 }
 
-export interface TerminalCommandsMessages {
-    toBeImplemented: string,
-    notFound: string,
-    cantBeExecuted: string,
-    helpNotAvailable: string,
+export interface CommandsMessages {
+    toBeImplemented: string
+    notFound: string
+    cantBeExecuted: string
+    helpNotAvailable: string
 }
-export interface TerminalCommandsConfig {
-    commands: FakeCommand[],
-    excludeCommands: string[] | 'all',
-    shouldAllowHelp: boolean,
-    messages: TerminalCommandsMessages,
+export interface CommandsConfig {
+    commands: FakeCommand[]
+    excludeCommands: string[] | 'all'
+    shouldAllowHelp: boolean
+    messages: Partial<CommandsMessages>
 }
 
 export interface TerminalFileSystemConfig {
-    files: FakeFile[],
-    actualDir: string,
-    useFakeFileSystem: boolean,
-    useInternalFiles: boolean,
+    files: FakeFile[]
+    actualDir: string
+    useFakeFileSystem: boolean
+    useInternalFiles: boolean
 }
 
 export interface TerminalDefaults {
-    shouldPersisteData: boolean;
-    loadingScreen: Partial<TerminalLoadingScreen>;
-    terminal: Partial<TerminalConfig>;
-    commands: Partial<TerminalCommandsConfig>;
-    initialOutput: string[];
-    fileSystem: Partial<TerminalFileSystemConfig>;
+    shouldPersisteData: boolean
+    loadingScreen: Partial<TerminalLoadingScreen>
+    terminal: Partial<TerminalConfig>
+    commands: Partial<CommandsConfig>
+    initialOutput: string[]
+    fileSystem: Partial<TerminalFileSystemConfig>
 }
 
-export const defaults:TerminalDefaults = {
+export const defaults: TerminalDefaults = {
     shouldPersisteData: true,
     initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
     loadingScreen: {
         shouldShow: 'first-time',
-        messageOrElement: ['Installing IOS react-dos-terminal','', 'Please wait...', '',],
+        messageOrElement: [
+            'Installing IOS react-dos-terminal',
+            '',
+            'Please wait...',
+            '',
+        ],
         loadingTime: 5000,
     },
     terminal: {
-        colors:  {
+        colors: {
             background: '#000000',
             color: '#aaaaaa',
         },
@@ -69,14 +74,13 @@ export const defaults:TerminalDefaults = {
             toBeImplemented: `Error: "%n" command hasn't been implemented.`,
             notFound: `Error: "%n" is not a valid command.`,
             cantBeExecuted: `Error: "%n" can't be executed.`,
-            helpNotAvailable: `Error: "%n" doesn't have any help available.`
-        }
+            helpNotAvailable: `Error: "%n" doesn't have any help available.`,
+        },
     },
     fileSystem: {
         files: [],
         actualDir: '',
         useFakeFileSystem: true,
         useInternalFiles: true,
-    }
+    },
 }
-

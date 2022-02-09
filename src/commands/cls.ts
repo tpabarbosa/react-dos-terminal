@@ -1,16 +1,14 @@
-import { Command } from "../contexts/CommandContext";
+import { Command } from '../contexts/CommandContext'
 
-const run = (): Command  => {
-    
+const run = (): Command => {
     return {
-        output: [{action: 'clear'}],
+        output: [{ action: 'clear' }],
     }
 }
-    
-const help = [
-    'Clears the command prompt screen.', 
-]
+
+const help = ['Clears the command prompt screen.']
 
 export const cls = {
-    run, help
+    run,
+    help,
 }

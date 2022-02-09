@@ -1,123 +1,130 @@
-import { createContext, useContext, useMemo, useReducer } from "react"
-import { TerminalColors } from "../components/Terminal"
-import { TerminalCommandsConfig, TerminalCommandsMessages } from "../config"
-import { FakeFileSystem } from "./FileSystemContext"
+import React, { createContext, useContext, useMemo, useReducer } from 'react'
+import { TerminalColors } from '../components/Terminal'
+import { CommandsConfig, CommandsMessages } from '../config'
+import { FakeFileSystem } from './FileSystemContext'
 
 export interface FakeCommand {
-    name: string,
-    alias?: string[],
-    action?: (props: CommandProps) => Command | Promise<Command>,
+    name: string
+    alias?: string[]
+    action?: (props: CommandProps) => Command | Promise<Command>
     async?: {
-        waitingMessage?: string[],
-    },
-    help?: (() => string | string[]) | string | string[],
+        waitingMessage?: string[]
+    }
+    help?: (() => string | string[]) | string | string[]
 }
 
 export interface CommandProps {
-    name: string, 
-    args: string,
-    actualDir: string, 
-    files: FakeFileSystem,
-    allCommands: FakeCommand[],
-    messages: TerminalCommandsMessages
+    name: string
+    args: string
+    actualDir: string
+    files: FakeFileSystem
+    allCommands: FakeCommand[]
+    messages: CommandsMessages
 }
 
-export type CommandToOutput = {action: 'clear'} | 
-    {action: 'add', value: string | string[]} |
-    {action: 'remove', value: number}
+export type CommandToOutput =
+    | { action: 'clear' }
+    | { action: 'add'; value: string | string[] }
+    | { action: 'remove'; value: number }
 
-export type CommandToConfigTerminal = {config: 'colors', value: TerminalColors}|
-    {config: 'actualDir', value: string}
+export type CommandToConfigTerminal =
+    | { config: 'setColors'; value: TerminalColors }
+    | { config: 'setActualDir'; value: string }
 
 export interface Command {
     dynamic?: {
-        element: JSX.Element,
+        element: JSX.Element
         options?: {
-            shouldHideTerminalOutput?: boolean,
-        },
-    },
-    output?: CommandToOutput[],
-    configTerminal?: CommandToConfigTerminal,
+            shouldHideTerminalOutput?: boolean
+        }
+    }
+    output?: CommandToOutput[]
+    configTerminal?: CommandToConfigTerminal
 }
 
 export interface TerminalCommand extends Command {
-    name: string,
-    args: string,
-    waitingMessage?: string[],
+    name: string
+    args: string
+    waitingMessage?: string[]
 }
 
-export interface TerminalCommandContextAPI {
-    state: TerminalCommandState,
-    action: {
-        startRunningCommand: () => void,
-        endRunningCommand: () => void,
-        setActualCmd: (cmd: TerminalCommand | null) => void,
-    }
+export interface CommandContextAPI extends CommandState {
+    startRunningCommand: () => void
+    endRunningCommand: () => void
+    setActualCmd: (cmd: TerminalCommand | null) => void
 }
 
-export interface TerminalCommandState {
-    allCommands: FakeCommand[],
-    shouldAllowHelp: boolean,
-    actualCmd?: TerminalCommand | null,
-    isRunningCommand: boolean,
-    messages: TerminalCommandsMessages,
+export type CommandAction =
+    | { type: 'isRunningCommand'; value: boolean }
+    | { type: 'setActualCmd'; value: TerminalCommand | null }
+
+export interface CommandState {
+    allCommands: FakeCommand[]
+    shouldAllowHelp: boolean
+    actualCmd?: TerminalCommand | null
+    isRunningCommand: boolean
+    messages: CommandsMessages
 }
 
-export interface TerminalCommandProviderProps {
-    children: React.ReactNode,
-    config: TerminalCommandsConfig,
+export interface CommandProviderProps {
+    children: React.ReactNode
+    config: CommandsConfig
 }
 
-const TerminalCommandContext = createContext<TerminalCommandContextAPI | undefined>(undefined)
+const CommandContext = createContext<CommandContextAPI | undefined>(undefined)
 
-export const TerminalCommandContextProvider = ({children, config}: TerminalCommandProviderProps) => {
-    
-    const action = useMemo(() => {return {
-        startRunningCommand: () => {
-            dispatch({type: 'isRunningCommand', value: true})
-        },
-        endRunningCommand: () => {
-            dispatch({type: 'isRunningCommand', value: false})
-        },
-        setActualCmd: (cmd: TerminalCommand | null) => {
-            dispatch({type: 'setActualCmd', value:cmd})
-        }
-    }}, [])
-
-    const terminalCommandInitialState: TerminalCommandState = {
+export const CommandContextProvider = ({
+    children,
+    config,
+}: CommandProviderProps) => {
+    const terminalCommandInitialState: CommandState = {
         allCommands: config.commands,
         shouldAllowHelp: config.shouldAllowHelp,
         actualCmd: null,
         isRunningCommand: false,
-        messages: config.messages
+        messages: config.messages as CommandsMessages,
     }
-    
-    const reducer = (state: TerminalCommandState, action: {type: string, value: any}) => {
+
+    const reducer = (state: CommandState, action: CommandAction) => {
         switch (action.type) {
             case 'isRunningCommand':
-                return {...state, isRunningCommand: action.value};
-            ;
+                return { ...state, isRunningCommand: action.value }
             case 'setActualCmd':
-                return {...state, actualCmd: action.value};
+                return { ...state, actualCmd: action.value }
             default:
-                return state;
+                return state
         }
     }
 
     const [state, dispatch] = useReducer(reducer, terminalCommandInitialState)
 
+    const cm = useMemo(() => {
+        return {
+            ...state,
+            startRunningCommand: () => {
+                dispatch({ type: 'isRunningCommand', value: true })
+            },
+            endRunningCommand: () => {
+                dispatch({ type: 'isRunningCommand', value: false })
+            },
+            setActualCmd: (cmd: TerminalCommand | null) => {
+                dispatch({ type: 'setActualCmd', value: cmd })
+            },
+        }
+    }, [state])
+
     return (
-        <TerminalCommandContext.Provider value={{state, action}}>
-            {children}
-        </TerminalCommandContext.Provider>
+        <CommandContext.Provider value={cm}>{children}</CommandContext.Provider>
     )
 }
 
-export const useTerminalCommand = () => {
-    const ctx = useContext(TerminalCommandContext);
+export const useCommand = () => {
+    const ctx = useContext(CommandContext)
 
     if (ctx === undefined) {
-        throw new Error(`useTerminalCommand must be used within a TerminalCommandContextProvider.`)
+        throw new Error(
+            `useCommand must be used within a CommandContextProvider.`
+        )
     }
 
     return ctx

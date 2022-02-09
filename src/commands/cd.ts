@@ -1,64 +1,79 @@
-import { Command, CommandProps } from "../contexts/CommandContext";
-import fileSystemHelper from "../helpers/filesystem";
+/* eslint-disable max-len */
+import { Command, CommandProps } from '../contexts/CommandContext'
+import fileSystemHelper from '../helpers/filesystem'
 
-const run = ({name, args, files, actualDir}: CommandProps): Command => {
+const run = ({ name, args, files, actualDir }: CommandProps): Command => {
     if (!args && (name === 'cd' || name === 'chdir')) {
-        return { }
+        return {}
     }
 
     if (name === 'cd\\' || name === 'chdir\\') {
-        return { configTerminal: {config: 'actualDir', value:''} }
+        return { configTerminal: { config: 'setActualDir', value: '' } }
     }
 
-    const regexNameReturn = /\.\./;
+    const regexNameReturn = /\.\./
     if (regexNameReturn.test(name) && actualDir === '') {
         return {
             output: [
-                {action: 'add', value:[
-                `Error: You can't move back from root.`,
-                '']}
-        ]
+                {
+                    action: 'add',
+                    value: [`Error: You can't move back from root.`, ''],
+                },
+            ],
         }
     }
     if (regexNameReturn.test(name) && actualDir !== '') {
-        return { configTerminal: {config: 'actualDir', value:''} }
+        return { configTerminal: { config: 'setActualDir', value: '' } }
     }
 
     if (args[0] === '\\' && args.length === 1) {
-        return { configTerminal: {config: 'actualDir', value: ''} }
+        return { configTerminal: { config: 'setActualDir', value: '' } }
     }
 
     if (args[0] === '\\' && args.length > 1) {
-        const dirPath = args.substring(1);
-        const dirContent = fileSystemHelper.getDir(files,dirPath);
-        console.log(dirPath)
-        console.log(dirContent)
+        const dirPath = args.substring(1)
+        const dirContent = fileSystemHelper.getDir(files, dirPath)
         if (dirContent) {
-            return { configTerminal: {config: 'actualDir', value: dirPath} }
+            return {
+                configTerminal: { config: 'setActualDir', value: dirPath },
+            }
         }
 
-        return { 
+        return {
             output: [
-                {action: 'add', value:[ `This directory doesn't exists.`, '' ] }]
-        };
-    }
-    
-    if (args[0]!=='\\') {
-        const dirPath = actualDir +'\\'+ args;
-        const dirContent = fileSystemHelper.getDir(files, dirPath);
-        const newDir = actualDir === '' ? args : `${actualDir}\\${args}`
-        console.log(newDir)
-        if (dirContent) {
-            return { configTerminal: {config: 'actualDir', value: newDir} }
+                {
+                    action: 'add',
+                    value: [`This directory doesn't exists.`, ''],
+                },
+            ],
         }
-        
-        return { 
-            output: [{action: 'add', value:[ `This directory doesn't exists.`, '' ]}] 
-        };
     }
 
-    return { 
-        output: [{action: 'add', value:[`Error: Some strange error has occurred.`, '' ]}] 
+    if (args[0] !== '\\') {
+        const dirPath = `${actualDir}\\${args}`
+        const dirContent = fileSystemHelper.getDir(files, dirPath)
+        const newDir = actualDir === '' ? args : `${actualDir}\\${args}`
+        if (dirContent) {
+            return { configTerminal: { config: 'setActualDir', value: newDir } }
+        }
+
+        return {
+            output: [
+                {
+                    action: 'add',
+                    value: [`This directory doesn't exists.`, ''],
+                },
+            ],
+        }
+    }
+
+    return {
+        output: [
+            {
+                action: 'add',
+                value: [`Error: Some strange error has occurred.`, ''],
+            },
+        ],
     }
 }
 
@@ -74,7 +89,7 @@ const help = [
     `CD \\[path]  If path directory is available, it would first move back to the root of the drive and then go into the path directory.`,
     `CD\\   Goes to the highest level (the root) of the drive.`,
     `CD..  Moves back one directory.`,
-    ''
-];
+    '',
+]
 
-export const cd = {run, help}
+export const cd = { run, help }

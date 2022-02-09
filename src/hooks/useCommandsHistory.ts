@@ -1,56 +1,58 @@
-import { useEffect, useState } from "react"
-import { useCaretHandler } from "./useCaretHandler"
+import { useEffect, useState } from 'react'
+import { useCaretHandler } from './useCaretHandler'
 
 type CommandsHistoryProps = {
     input: React.RefObject<HTMLDivElement>
 }
 
-export const useCommandsHistory = ({input}: CommandsHistoryProps) => {
-    const caretHandler = useCaretHandler();
+export const useCommandsHistory = ({ input }: CommandsHistoryProps) => {
+    const caretHandler = useCaretHandler()
 
     useEffect(() => {
         if (input.current) {
-            caretHandler.setInputRef(input.current);
+            caretHandler.setInputRef(input.current)
         }
-    }, [input, caretHandler]);
-    
+    }, [input, caretHandler])
 
     const [cmdsHistoryList, setCmdHistoryList] = useState<string[]>([])
     const [actualCmd, setActualCmd] = useState(cmdsHistoryList.length)
 
     const add = (cmd: string) => {
-        if (cmd.trim() !== '' && cmd.trim() !== cmdsHistoryList[cmdsHistoryList.length - 1]) {
-            setCmdHistoryList([...cmdsHistoryList, cmd.trim()]);
-            setActualCmd(cmdsHistoryList.length+1);
-        }
-        else { 
-            setActualCmd(cmdsHistoryList.length);
+        if (
+            cmd.trim() !== '' &&
+            cmd.trim() !== cmdsHistoryList[cmdsHistoryList.length - 1]
+        ) {
+            setCmdHistoryList([...cmdsHistoryList, cmd.trim()])
+            setActualCmd(cmdsHistoryList.length + 1)
+        } else {
+            setActualCmd(cmdsHistoryList.length)
         }
     }
 
     const up = () => {
         if (actualCmd === 0) {
-            caretHandler.input.textContent = cmdsHistoryList[0] 
+            // eslint-disable-next-line prefer-destructuring
+            caretHandler.input.textContent = cmdsHistoryList[0]
             caretHandler.setPosition(0)
-            return cmdsHistoryList[0];
+            return cmdsHistoryList[0]
         }
-        const cmd = cmdsHistoryList[actualCmd - 1] ?? '';
-        caretHandler.input.textContent = cmd;
+        const cmd = cmdsHistoryList[actualCmd - 1] ?? ''
+        caretHandler.input.textContent = cmd
         caretHandler.setPosition(cmd.length)
-        setActualCmd(prev => prev-1)
+        setActualCmd((prev) => prev - 1)
         return cmd
     }
 
     const down = () => {
         if (actualCmd === cmdsHistoryList.length) {
-            caretHandler.input.textContent = '' 
+            caretHandler.input.textContent = ''
             caretHandler.setPosition(0)
-            return '';
+            return ''
         }
-        const cmd = cmdsHistoryList[actualCmd+1] ?? '';
-        caretHandler.input.textContent = cmd;
+        const cmd = cmdsHistoryList[actualCmd + 1] ?? ''
+        caretHandler.input.textContent = cmd
         caretHandler.setPosition(cmd.length)
-        setActualCmd(prev => prev+1)
+        setActualCmd((prev) => prev + 1)
         return cmd
     }
 
@@ -58,6 +60,6 @@ export const useCommandsHistory = ({input}: CommandsHistoryProps) => {
         add,
         up,
         down,
-        length: actualCmd
+        length: actualCmd,
     }
 }
