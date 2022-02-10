@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 10, 2022 16:34:09 */
+/* Version: 0.1.4 - February 10, 2022 16:53:22 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -129,7 +129,7 @@ var defaults = {
     },
     fileSystem: {
         files: [],
-        actualDir: '',
+        initialDir: '',
         useFakeFileSystem: true,
         useInternalFiles: true,
     },
@@ -1281,7 +1281,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 10, 2022 16:34:09';
+    var version = '0.1.4 - February 10, 2022 16:53:22';
     return {
         output: [
             {
@@ -2178,17 +2178,17 @@ var files = [
 ];
 
 var useInitializer = function (config) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     var isInstalled = ls.get('i');
-    var _o = useState(false), isInitialized = _o[0], setIsInitialized = _o[1];
+    var _m = useState(false), isInitialized = _m[0], setIsInitialized = _m[1];
     var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteData) !== undefined
         ? config.shouldPersisteData
         : defaults.shouldPersisteData;
-    var _p = useState(defaults.terminal.colors), finalColors = _p[0], setFinalColors = _p[1];
+    var _o = useState(defaults.terminal.colors), finalColors = _o[0], setFinalColors = _o[1];
     var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
         ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
         : defaults.terminal.showOldScreenEffect;
-    var _q = useState(defaults.fileSystem.actualDir), finalActualDir = _q[0], setFinalActualDir = _q[1];
+    var _p = useState(), finalInitialDir = _p[0], setFinalInitialDir = _p[1];
     var finalAutofocus = ((_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.autoFocus) !== undefined
         ? config.terminal.autoFocus
         : defaults.terminal.autoFocus;
@@ -2239,35 +2239,40 @@ var useInitializer = function (config) {
     }, [config]);
     useEffect(function () {
         var _a, _b, _c, _d;
-        var col;
-        var actualD = ls.get('actualDir');
-        if (isInstalled === null || isInstalled === '0' || !persisteData) {
-            col = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.colors)
-                ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.colors
-                : defaults.terminal.colors;
-            actualD =
-                ((_c = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _c === void 0 ? void 0 : _c.actualDir) !== undefined
-                    ? (_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.actualDir
-                    : defaults.fileSystem.actualDir;
-            if (col)
-                ls.set('colors', col);
-            ls.set('i', '1');
-            ls.set('actualDir', actualD);
+        if (!isInitialized) {
+            var col = void 0;
+            var actualD = void 0;
+            if (isInstalled === null || isInstalled === '0' || !persisteData) {
+                col = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.colors)
+                    ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.colors
+                    : defaults.terminal.colors;
+                actualD =
+                    ((_c = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _c === void 0 ? void 0 : _c.initialDir) !== undefined
+                        ? (_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.initialDir
+                        : defaults.fileSystem.initialDir;
+                if (col)
+                    ls.set('colors', col);
+                ls.set('i', '1');
+                ls.set('actualDir', actualD);
+            }
+            else {
+                col = ls.get('colors');
+                var dir = ls.get('actualDir');
+                actualD = typeof dir !== 'string' ? '' : dir;
+            }
+            ls.set('oldEffect', finalOldScreenEffect ? '1' : '0');
+            setFinalColors(col);
+            setFinalInitialDir(actualD);
+            setIsInitialized(true);
         }
-        else {
-            col = ls.get('colors');
-        }
-        ls.set('oldEffect', finalOldScreenEffect ? '1' : '0');
-        setFinalColors(col);
-        setFinalActualDir(typeof actualD !== 'string' ? '' : actualD);
-        setIsInitialized(true);
     }, [
-        (_k = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _k === void 0 ? void 0 : _k.actualDir,
-        (_l = config === null || config === void 0 ? void 0 : config.terminal) === null || _l === void 0 ? void 0 : _l.colors,
-        (_m = config === null || config === void 0 ? void 0 : config.terminal) === null || _m === void 0 ? void 0 : _m.showOldScreenEffect,
+        (_k = config === null || config === void 0 ? void 0 : config.terminal) === null || _k === void 0 ? void 0 : _k.colors,
+        (_l = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _l === void 0 ? void 0 : _l.initialDir,
         isInstalled,
+        isInitialized,
         persisteData,
         finalOldScreenEffect,
+        finalInitialDir,
     ]);
     return {
         terminal: {
@@ -2283,7 +2288,7 @@ var useInitializer = function (config) {
         },
         isInitialized: isInitialized,
         fileSystem: {
-            actualDir: finalActualDir,
+            actualDir: finalInitialDir,
             allFiles: finalFiles,
         },
     };

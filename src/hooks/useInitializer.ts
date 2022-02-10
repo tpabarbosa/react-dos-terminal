@@ -37,9 +37,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             ? config?.terminal?.showOldScreenEffect
             : defaults.terminal.showOldScreenEffect
 
-    const [finalActualDir, setFinalActualDir] = useState<string | undefined>(
-        defaults.fileSystem.actualDir
-    )
+    const [finalInitialDir, setFinalInitialDir] = useState<string | undefined>()
 
     const finalAutofocus =
         config?.terminal?.autoFocus !== undefined
@@ -111,34 +109,38 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
     }, [config])
 
     useEffect(() => {
-        let col: TerminalColors | undefined
-        let actualD = ls.get('actualDir')
-        if (isInstalled === null || isInstalled === '0' || !persisteData) {
-            col = config?.terminal?.colors
-                ? config?.terminal?.colors
-                : defaults.terminal.colors
-            actualD =
-                config?.fileSystem?.actualDir !== undefined
-                    ? (config?.fileSystem?.actualDir as string)
-                    : (defaults.fileSystem.actualDir as string)
-
-            if (col) ls.set('colors', col)
-            ls.set('i', '1')
-            ls.set('actualDir', actualD)
-        } else {
-            col = ls.get('colors') as TerminalColors
+        if (!isInitialized) {
+            let col: TerminalColors | undefined
+            let actualD: string
+            if (isInstalled === null || isInstalled === '0' || !persisteData) {
+                col = config?.terminal?.colors
+                    ? config?.terminal?.colors
+                    : defaults.terminal.colors
+                actualD =
+                    config?.fileSystem?.initialDir !== undefined
+                        ? (config?.fileSystem?.initialDir as string)
+                        : (defaults.fileSystem.initialDir as string)
+                if (col) ls.set('colors', col)
+                ls.set('i', '1')
+                ls.set('actualDir', actualD)
+            } else {
+                col = ls.get('colors') as TerminalColors
+                const dir = ls.get('actualDir')
+                actualD = typeof dir !== 'string' ? '' : dir
+            }
+            ls.set('oldEffect', finalOldScreenEffect ? '1' : '0')
+            setFinalColors(col)
+            setFinalInitialDir(actualD)
+            setIsInitialized(true)
         }
-        ls.set('oldEffect', finalOldScreenEffect ? '1' : '0')
-        setFinalColors(col)
-        setFinalActualDir(typeof actualD !== 'string' ? '' : actualD)
-        setIsInitialized(true)
     }, [
-        config?.fileSystem?.actualDir,
         config?.terminal?.colors,
-        config?.terminal?.showOldScreenEffect,
+        config?.fileSystem?.initialDir,
         isInstalled,
+        isInitialized,
         persisteData,
         finalOldScreenEffect,
+        finalInitialDir,
     ])
 
     return {
@@ -155,7 +157,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         } as CommandsConfig,
         isInitialized,
         fileSystem: {
-            actualDir: finalActualDir,
+            actualDir: finalInitialDir,
             allFiles: finalFiles,
         } as FileSystemState,
     }

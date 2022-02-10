@@ -110,7 +110,7 @@ interface CommandsConfig {
 }
 interface TerminalFileSystemConfig {
     files: FakeFile[];
-    actualDir: string;
+    initialDir: string;
     useFakeFileSystem: boolean;
     useInternalFiles: boolean;
 }

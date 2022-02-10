@@ -88,7 +88,7 @@ export const App = () => {
         },
         //shouldPersisteData: false,
         fileSystem: {
-            //actualDir: 'system',
+            //initialDir: 'system',
             files,
             //useFakeFileSystem: false,
             //useInternalFiles: false,

@@ -31,7 +31,7 @@ export interface CommandsConfig {
 
 export interface TerminalFileSystemConfig {
     files: FakeFile[]
-    actualDir: string
+    initialDir: string
     useFakeFileSystem: boolean
     useInternalFiles: boolean
 }
@@ -79,7 +79,7 @@ export const defaults: TerminalDefaults = {
     },
     fileSystem: {
         files: [],
-        actualDir: '',
+        initialDir: '',
         useFakeFileSystem: true,
         useInternalFiles: true,
     },
