@@ -14,7 +14,7 @@ export interface TerminalContextAPI extends TerminalState {
 
 export interface TerminalState {
     colors: TerminalColors
-    screenStripes: boolean
+    showOldScreenEffect: boolean
     autoFocus: boolean
     isActive: boolean
 }
@@ -32,7 +32,7 @@ export const TerminalContextProvider = ({
 }: TerminalProviderProps) => {
     const terminalInitialState: TerminalState = {
         colors: config.colors,
-        screenStripes: config.screenStripes,
+        showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
     }

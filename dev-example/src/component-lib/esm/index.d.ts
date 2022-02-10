@@ -93,7 +93,7 @@ interface TerminalLoadingScreen {
 }
 interface TerminalConfig {
     colors: TerminalColors;
-    screenStripes: boolean;
+    showOldScreenEffect: boolean;
     autoFocus: boolean;
 }
 interface CommandsMessages {
@@ -154,10 +154,10 @@ declare const fileSystemHelper: {
 interface ScreenProps {
     children: React__default.ReactNode;
     colors?: TerminalColors;
-    stripes?: boolean;
+    oldEffect?: boolean;
     fullscreen?: boolean;
 }
-declare const CommandScreen: ({ children, colors, stripes, fullscreen, ...rest }: ScreenProps & React__default.HTMLAttributes<HTMLDivElement>) => JSX.Element;
+declare const CommandScreen: ({ children, colors, oldEffect, fullscreen, ...rest }: ScreenProps & React__default.HTMLAttributes<HTMLDivElement>) => JSX.Element;
 
 declare type InputProps = {
     onClick?: (e: MouseEvent<HTMLDivElement>) => void;

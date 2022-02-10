@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 10, 2022 14:17:37 */
+/* Version: 0.1.4 - February 10, 2022 16:34:09 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -114,7 +114,7 @@ var defaults = {
             color: '#aaaaaa',
         },
         autoFocus: true,
-        screenStripes: true,
+        showOldScreenEffect: true,
     },
     commands: {
         commands: [],
@@ -177,7 +177,7 @@ var TerminalContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
     var terminalInitialState = {
         colors: config.colors,
-        screenStripes: config.screenStripes,
+        showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
     };
@@ -840,16 +840,12 @@ var useCaretHandler = function () {
     };
 };
 
-var getStriped = function () {
-    var lsStripes = ls.get('stripes');
-    return lsStripes === '1';
-};
 var getBackground = function (striped, background) {
     var text = "repeating-linear-gradient(6deg, ".concat(background, "e0 1px, ").concat(background, " 6px)");
     return striped ? text : "".concat(background);
 };
-var getColorsCSS = function (colors) {
-    var text = "background: ".concat(getBackground(getStriped(), colors === null || colors === void 0 ? void 0 : colors.background), ";");
+var getColorsCSS = function (colors, oldEffect) {
+    var text = "background: ".concat(getBackground(oldEffect, colors === null || colors === void 0 ? void 0 : colors.background), ";");
     if (colors) {
         return css(templateObject_1$1 || (templateObject_1$1 = __makeTemplateObject(["\n            ", "\n            ", "\n        "], ["\n            ", "\n            ", "\n        "])), colors.color !== undefined ? "color: ".concat(colors.color, ";") : ';', colors.background !== undefined ? text : ';');
     }
@@ -858,10 +854,10 @@ var getColorsCSS = function (colors) {
 var preStyles = css(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none;\n    margin: 0;\n    white-space: pre-wrap;\n    word-wrap: break-word;\n"], ["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none;\n    margin: 0;\n    white-space: pre-wrap;\n    word-wrap: break-word;\n"])));
 var flash = keyframes(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n    50% {\n        opacity: 1;\n    }\n"], ["\n    50% {\n        opacity: 1;\n    }\n"])));
 var blink = keyframes(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n    50% {\n    border-color: transparent;\n    }\n"], ["\n    50% {\n    border-color: transparent;\n    }\n"])));
-var ScreenContainer = styled.div(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8;\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"], ["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8;\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"])), function (props) { return getColorsCSS(props.colors); }, function (props) { return props.colors.background; }, function (props) { return props.colors.color; });
+var ScreenContainer = styled.div(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8;\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"], ["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8;\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"])), function (props) { return getColorsCSS(props.colors, props.oldEffect); }, function (props) { return props.colors.background; }, function (props) { return props.colors.color; });
 var ScreenContent = styled.div(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%;\n"], ["\n    width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%;\n"])));
-var CommandScreenContainer = styled.div(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n    height: ", ";\n    /* width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8; */\n    ", "\n"], ["\n    height: ", ";\n    /* width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    text-shadow: 7px 0px 20px #808080a8; */\n    ", "\n"])), function (props) { return (props.fullscreen ? '100%' : 'auto'); }, function (props) { return getColorsCSS(props.colors); });
-var CommandScreenContent = styled.div(templateObject_8 || (templateObject_8 = __makeTemplateObject(["\n    /* width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%; */\n"], ["\n    /* width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%; */\n"])));
+var CommandScreenContainer = styled.div(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n    height: ", ";\n    ", "\n"], ["\n    height: ", ";\n    ", "\n"])), function (props) { return (props.fullscreen ? '100%' : 'auto'); }, function (props) { return getColorsCSS(props.colors, props.oldEffect); });
+var CommandScreenContent = styled.div(templateObject_8 || (templateObject_8 = __makeTemplateObject([""], [""])));
 var OutputContainer = styled.div(templateObject_9 || (templateObject_9 = __makeTemplateObject(["\n    outline: none;\n    margin: 0;\n    ", "\n"], ["\n    outline: none;\n    margin: 0;\n    ", "\n"])), function (props) { return getColorsCSS(props.colors); });
 var OutputContent = styled.div(templateObject_10 || (templateObject_10 = __makeTemplateObject(["\n    padding: 4px 8px 0 8px;\n"], ["\n    padding: 4px 8px 0 8px;\n"])));
 var PrintContainer = styled.div(templateObject_12 || (templateObject_12 = __makeTemplateObject(["\n    ", "\n    ", "\n"], ["\n    ", "\n    ", "\n"])), function (props) {
@@ -1110,7 +1106,7 @@ var useInput = function () {
 };
 
 var CommandScreen = function (_a) {
-    var children = _a.children, colors = _a.colors, stripes = _a.stripes, _b = _a.fullscreen, fullscreen = _b === void 0 ? false : _b, rest = __rest(_a, ["children", "colors", "stripes", "fullscreen"]);
+    var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, _b = _a.fullscreen, fullscreen = _b === void 0 ? false : _b, rest = __rest(_a, ["children", "colors", "oldEffect", "fullscreen"]);
     var terminal = useTerminal();
     var endRef = useRef(null);
     useEffect(function () {
@@ -1118,7 +1114,7 @@ var CommandScreen = function (_a) {
             endRef.current.scrollIntoView({ block: 'end' });
         }
     });
-    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, stripes: stripes !== null && stripes !== void 0 ? stripes : terminal.screenStripes, fullscreen: fullscreen }, { children: jsxs(CommandScreenContent, { children: [children, jsx("div", { ref: endRef }, void 0)] }, void 0) }), void 0));
+    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect, fullscreen: fullscreen }, { children: jsxs(CommandScreenContent, { children: [children, jsx("div", { ref: endRef }, void 0)] }, void 0) }), void 0));
 };
 
 var TestDynamicOutput = function (_a) {
@@ -1285,7 +1281,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 10, 2022 14:17:37';
+    var version = '0.1.4 - February 10, 2022 16:34:09';
     return {
         output: [
             {
@@ -1698,7 +1694,7 @@ var useOutputHandler = function (initial) {
 };
 
 var TerminalScreen = function (_a) {
-    var children = _a.children, colors = _a.colors, stripes = _a.stripes, rest = __rest(_a, ["children", "colors", "stripes"]);
+    var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, rest = __rest(_a, ["children", "colors", "oldEffect"]);
     var terminal = useTerminal();
     var endRef = useRef(null);
     useEffect(function () {
@@ -1706,7 +1702,7 @@ var TerminalScreen = function (_a) {
             endRef.current.scrollIntoView({ block: 'end' });
         }
     });
-    return (jsx(ScreenContainer, __assign({ colors: colors !== null && colors !== void 0 ? colors : terminal.colors, stripes: stripes !== null && stripes !== void 0 ? stripes : terminal.screenStripes }, { children: jsxs(ScreenContent, __assign({}, rest, { children: [children, jsx("div", { ref: endRef }, void 0)] }), void 0) }), void 0));
+    return (jsx(ScreenContainer, __assign({ colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect }, { children: jsxs(ScreenContent, __assign({}, rest, { children: [children, jsx("div", { ref: endRef }, void 0)] }), void 0) }), void 0));
 };
 
 var FileSystemContext = createContext(undefined);
@@ -2189,9 +2185,9 @@ var useInitializer = function (config) {
         ? config.shouldPersisteData
         : defaults.shouldPersisteData;
     var _p = useState(defaults.terminal.colors), finalColors = _p[0], setFinalColors = _p[1];
-    var finalStripes = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.screenStripes) !== undefined
-        ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.screenStripes
-        : defaults.terminal.screenStripes;
+    var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
+        ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
+        : defaults.terminal.showOldScreenEffect;
     var _q = useState(defaults.fileSystem.actualDir), finalActualDir = _q[0], setFinalActualDir = _q[1];
     var finalAutofocus = ((_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.autoFocus) !== undefined
         ? config.terminal.autoFocus
@@ -2261,22 +2257,22 @@ var useInitializer = function (config) {
         else {
             col = ls.get('colors');
         }
-        ls.set('stripes', finalStripes ? '1' : '0');
+        ls.set('oldEffect', finalOldScreenEffect ? '1' : '0');
         setFinalColors(col);
         setFinalActualDir(typeof actualD !== 'string' ? '' : actualD);
         setIsInitialized(true);
     }, [
         (_k = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _k === void 0 ? void 0 : _k.actualDir,
         (_l = config === null || config === void 0 ? void 0 : config.terminal) === null || _l === void 0 ? void 0 : _l.colors,
-        (_m = config === null || config === void 0 ? void 0 : config.terminal) === null || _m === void 0 ? void 0 : _m.screenStripes,
+        (_m = config === null || config === void 0 ? void 0 : config.terminal) === null || _m === void 0 ? void 0 : _m.showOldScreenEffect,
         isInstalled,
         persisteData,
-        finalStripes,
+        finalOldScreenEffect,
     ]);
     return {
         terminal: {
             colors: finalColors,
-            screenStripes: finalStripes,
+            showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
         },
         commands: {

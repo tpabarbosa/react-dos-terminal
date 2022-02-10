@@ -32,10 +32,10 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         defaults.terminal.colors
     )
 
-    const finalStripes =
-        config?.terminal?.screenStripes !== undefined
-            ? config?.terminal?.screenStripes
-            : defaults.terminal.screenStripes
+    const finalOldScreenEffect =
+        config?.terminal?.showOldScreenEffect !== undefined
+            ? config?.terminal?.showOldScreenEffect
+            : defaults.terminal.showOldScreenEffect
 
     const [finalActualDir, setFinalActualDir] = useState<string | undefined>(
         defaults.fileSystem.actualDir
@@ -128,23 +128,23 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         } else {
             col = ls.get('colors') as TerminalColors
         }
-        ls.set('stripes', finalStripes ? '1' : '0')
+        ls.set('oldEffect', finalOldScreenEffect ? '1' : '0')
         setFinalColors(col)
         setFinalActualDir(typeof actualD !== 'string' ? '' : actualD)
         setIsInitialized(true)
     }, [
         config?.fileSystem?.actualDir,
         config?.terminal?.colors,
-        config?.terminal?.screenStripes,
+        config?.terminal?.showOldScreenEffect,
         isInstalled,
         persisteData,
-        finalStripes,
+        finalOldScreenEffect,
     ])
 
     return {
         terminal: {
             colors: finalColors,
-            screenStripes: finalStripes,
+            showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
         } as TerminalConfig,
         commands: {

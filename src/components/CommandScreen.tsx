@@ -6,14 +6,14 @@ import { TerminalColors } from './Terminal'
 interface ScreenProps {
     children: React.ReactNode
     colors?: TerminalColors
-    stripes?: boolean
+    oldEffect?: boolean
     fullscreen?: boolean
 }
 
 export const CommandScreen = ({
     children,
     colors,
-    stripes,
+    oldEffect,
     fullscreen = false,
     ...rest
 }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
@@ -31,7 +31,7 @@ export const CommandScreen = ({
         <CommandScreenContainer
             {...rest}
             colors={colors ?? terminal.colors}
-            stripes={stripes ?? terminal.screenStripes}
+            oldEffect={oldEffect ?? terminal.showOldScreenEffect}
             fullscreen={fullscreen}
         >
             <CommandScreenContent>

@@ -6,13 +6,13 @@ import { TerminalColors } from './Terminal'
 interface ScreenProps {
     children: React.ReactNode
     colors?: TerminalColors
-    stripes?: boolean
+    oldEffect?: boolean
 }
 
 export const TerminalScreen = ({
     children,
     colors,
-    stripes,
+    oldEffect,
     ...rest
 }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
     const terminal = useTerminal()
@@ -28,7 +28,7 @@ export const TerminalScreen = ({
     return (
         <ScreenContainer
             colors={colors ?? terminal.colors}
-            stripes={stripes ?? terminal.screenStripes}
+            oldEffect={oldEffect ?? terminal.showOldScreenEffect}
         >
             <ScreenContent {...rest}>
                 {children}

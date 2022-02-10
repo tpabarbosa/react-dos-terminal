@@ -1,9 +1,8 @@
 import styled, { css, keyframes } from 'styled-components'
 import { TerminalColors } from '../components/Terminal'
-import ls from '../helpers/localStorage'
 
 interface ScreenContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    stripes: boolean
+    oldEffect: boolean
     colors: TerminalColors
 }
 
@@ -11,7 +10,7 @@ type ScreenContentProps = React.HTMLAttributes<HTMLDivElement>
 
 interface CommandScreenContainerProps
     extends React.HTMLAttributes<HTMLDivElement> {
-    stripes: boolean
+    oldEffect: boolean
     colors?: TerminalColors
     fullscreen: boolean
 }
@@ -25,7 +24,6 @@ interface PrintContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 interface InputContainerProps extends React.HTMLAttributes<HTMLSpanElement> {
-    stripes?: boolean
     colors?: Partial<TerminalColors>
 }
 
@@ -34,22 +32,20 @@ interface InputCaretProps {
     colors?: Partial<TerminalColors>
 }
 
-const getStriped = () => {
-    const lsStripes = ls.get('stripes')
-    return lsStripes === '1'
-}
-
-const getBackground = (striped: boolean, background: string | undefined) => {
+const getBackground = (
+    striped: boolean | undefined,
+    background: string | undefined
+) => {
     // eslint-disable-next-line max-len
     const text = `repeating-linear-gradient(6deg, ${background}e0 1px, ${background} 6px)`
     return striped ? text : `${background}`
 }
 
-const getColorsCSS = (colors?: Partial<TerminalColors>) => {
-    const text = `background: ${getBackground(
-        getStriped(),
-        colors?.background
-    )};`
+const getColorsCSS = (
+    colors?: Partial<TerminalColors>,
+    oldEffect?: boolean
+) => {
+    const text = `background: ${getBackground(oldEffect, colors?.background)};`
     if (colors) {
         return css`
             ${colors.color !== undefined ? `color: ${colors.color};` : ';'}
@@ -90,7 +86,7 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     text-align: left;
     padding-bottom: 1px;
     text-shadow: 7px 0px 20px #808080a8;
-    ${(props) => getColorsCSS(props.colors)};
+    ${(props) => getColorsCSS(props.colors, props.oldEffect)};
     a {
         color: ${(props) => props.colors.background};
         background-color: ${(props) => props.colors.color};
@@ -110,28 +106,10 @@ export const ScreenContent = styled.div<ScreenContentProps>`
 `
 export const CommandScreenContainer = styled.div<CommandScreenContainerProps>`
     height: ${(props) => (props.fullscreen ? '100%' : 'auto')};
-    /* width: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    text-align: left;
-    padding-bottom: 1px;
-    text-shadow: 7px 0px 20px #808080a8; */
-    ${(props) => getColorsCSS(props.colors)}
+    ${(props) => getColorsCSS(props.colors, props.oldEffect)}
 `
 
-export const CommandScreenContent = styled.div<ScreenContentProps>`
-    /* width: 134%;
-    height: 100%;
-    word-break: break-all;
-    font-family: 'IBM VGA 9x16', monospace !important;
-    font-size: 18px !important;
-    line-height: 18px !important;
-    transform: scaleX(0.75);
-    position: relative;
-    left: -16.7%; */
-`
+export const CommandScreenContent = styled.div<ScreenContentProps>``
 
 export const OutputContainer = styled.div<OutputContainerProps>`
     outline: none;
@@ -151,7 +129,7 @@ export const PrintContainer = styled.div<PrintContainerProps>`
                   opacity: 0;
               `
             : ``}
-    ${(props) => getColorsCSS(props.colors as TerminalColors)}
+    ${(props) => getColorsCSS(props.colors)}
 `
 
 export const PrintContent = styled.div``

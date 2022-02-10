@@ -12,7 +12,7 @@ export interface TerminalLoadingScreen {
 
 export interface TerminalConfig {
     colors: TerminalColors
-    screenStripes: boolean
+    showOldScreenEffect: boolean
     autoFocus: boolean
 }
 
@@ -64,7 +64,7 @@ export const defaults: TerminalDefaults = {
             color: '#aaaaaa',
         },
         autoFocus: true,
-        screenStripes: true,
+        showOldScreenEffect: true,
     },
     commands: {
         commands: [],

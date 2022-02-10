@@ -63,10 +63,10 @@ export const App = () => {
                 background: '#0000aa',
                 color: '#ffffff',
             } as TerminalColors,
-            screenStripes: false,
+            showOldScreenEffect: false,
             //autoFocus: false,
         },
-        initialOutput: ['This is my custom terminal', ''],
+        initialOutput: ['This is my <span style="color: green">custom</span> terminal', ''],
         loadingScreen: {
             //shouldShow: 'always',
             messageOrElement: [
@@ -96,11 +96,11 @@ export const App = () => {
     }
 
     return (
-        <div id="App">
-            <h1>react-dos-terminal example</h1>
-            <div id="My-Terminal">
+        // <div id="App">
+        //     <h1>react-dos-terminal example</h1>
+            <div id="My-Terminal" style={{marginTop: "30px", width: '600px', height: '400px'}}>
                 <Terminal config={config} />
             </div>
-        </div>
+        // </div>
     )
 }
