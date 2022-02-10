@@ -89,7 +89,10 @@ export const Main = ({ initialOutput }: { initialOutput: string[] }) => {
                         onKeyUp={handleKeyUp}
                         id="terminal_input"
                         ref={input.ref}
-                        prompt={fileSystemHelper.formatPrompt(actualDir)}
+                        prompt={fileSystemHelper.formatPrompt(
+                            terminal.formatPrompt,
+                            actualDir
+                        )}
                     />
                 )}
         </TerminalScreen>

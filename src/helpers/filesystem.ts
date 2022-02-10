@@ -1,8 +1,26 @@
 import { FakeCommand } from '../contexts/CommandContext'
 import { FakeFileSystem } from '../contexts/FileSystemContext'
 
-const formatPrompt = (dir: string) => {
-    return `C:\\${dir}>`
+const replacePromptParams = (prompt: string, dir: string) => {
+    let p = prompt.replace(/\$p/g, `C:\\${dir}`)
+    p = p.replace(/\$g/g, '>')
+    p = p.replace(/\$l/g, '<')
+    p = p.replace(/\$n/g, 'C:')
+    p = p.replace(/\$b/g, '|')
+    p = p.replace(/\$\$/g, '$')
+    p = p.replace(/\$_/g, '\n')
+    p = p.replace(/\$a/g, '&')
+    p = p.replace(/\$c/g, '(')
+    p = p.replace(/\$f/g, ')')
+    p = p.replace(/\$s/g, ' ')
+    p = p.replace(/\$t/g, new Date().toLocaleTimeString())
+    p = p.replace(/\$d/g, new Date().toLocaleDateString())
+    return p
+}
+
+const formatPrompt = (prompt: string, dir: string) => {
+    const final = replacePromptParams(prompt, dir)
+    return final
 }
 
 const fullDirPath = (dir: string) => {

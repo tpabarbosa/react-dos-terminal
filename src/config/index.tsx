@@ -14,6 +14,8 @@ export interface TerminalConfig {
     colors: TerminalColors
     showOldScreenEffect: boolean
     autoFocus: boolean
+    initialOutput: string[]
+    formatPrompt: string
 }
 
 export interface CommandsMessages {
@@ -41,13 +43,11 @@ export interface TerminalDefaults {
     loadingScreen: Partial<TerminalLoadingScreen>
     terminal: Partial<TerminalConfig>
     commands: Partial<CommandsConfig>
-    initialOutput: string[]
     fileSystem: Partial<TerminalFileSystemConfig>
 }
 
 export const defaults: TerminalDefaults = {
     shouldPersisteData: true,
-    initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: [
@@ -65,6 +65,8 @@ export const defaults: TerminalDefaults = {
         },
         autoFocus: true,
         showOldScreenEffect: true,
+        initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
+        formatPrompt: '$p$g',
     },
     commands: {
         commands: [],

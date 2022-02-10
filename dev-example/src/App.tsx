@@ -65,8 +65,10 @@ export const App = () => {
             } as TerminalColors,
             showOldScreenEffect: false,
             //autoFocus: false,
+            initialOutput: ['This is my <span style="color: green">custom</span> terminal', ''],
+            formatPrompt: '$d$s$t$_$p$g'
         },
-        initialOutput: ['This is my <span style="color: green">custom</span> terminal', ''],
+        
         loadingScreen: {
             //shouldShow: 'always',
             messageOrElement: [
@@ -86,7 +88,7 @@ export const App = () => {
                 notFound: 'My custom not Found message'
             },
         },
-        //shouldPersisteData: false,
+        shouldPersisteData: false,
         fileSystem: {
             //initialDir: 'system',
             files,

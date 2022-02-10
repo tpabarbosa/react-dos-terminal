@@ -61,7 +61,10 @@ export const useCommandsHandler = ({
         const { name, args, isHelp } = getNameAndArgs(cmd)
 
         outputHandler.addToHistory(
-            `${fileSystemHelper.formatPrompt(actualDir)} ${cmd}`
+            `${fileSystemHelper.formatPrompt(
+                terminal.formatPrompt,
+                actualDir
+            )} ${cmd}`
         )
 
         if (name === '') {

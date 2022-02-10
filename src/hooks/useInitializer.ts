@@ -37,6 +37,10 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             ? config?.terminal?.showOldScreenEffect
             : defaults.terminal.showOldScreenEffect
 
+    const [finalFormatPrompt, setFinalFormatPrompt] = useState<
+        string | undefined
+    >()
+
     const [finalInitialDir, setFinalInitialDir] = useState<string | undefined>()
 
     const finalAutofocus =
@@ -112,6 +116,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         if (!isInitialized) {
             let col: TerminalColors | undefined
             let actualD: string
+            let prompt: string
             if (isInstalled === null || isInstalled === '0' || !persisteData) {
                 col = config?.terminal?.colors
                     ? config?.terminal?.colors
@@ -120,18 +125,26 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
                     config?.fileSystem?.initialDir !== undefined
                         ? (config?.fileSystem?.initialDir as string)
                         : (defaults.fileSystem.initialDir as string)
+                prompt =
+                    config?.terminal?.formatPrompt !== undefined
+                        ? (config?.terminal?.formatPrompt as string)
+                        : (defaults.terminal.formatPrompt as string)
                 if (col) ls.set('colors', col)
                 ls.set('i', '1')
                 ls.set('actualDir', actualD)
+                ls.set('formatPrompt', finalFormatPrompt as string)
             } else {
                 col = ls.get('colors') as TerminalColors
                 const dir = ls.get('actualDir')
+                const promp = ls.get('formatPrompt')
                 actualD = typeof dir !== 'string' ? '' : dir
+                prompt = typeof promp !== 'string' ? '' : promp
             }
             ls.set('oldEffect', finalOldScreenEffect ? '1' : '0')
             setFinalColors(col)
             setFinalInitialDir(actualD)
             setIsInitialized(true)
+            setFinalFormatPrompt(prompt)
         }
     }, [
         config?.terminal?.colors,
@@ -141,6 +154,8 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         persisteData,
         finalOldScreenEffect,
         finalInitialDir,
+        config?.terminal?.formatPrompt,
+        finalFormatPrompt,
     ])
 
     return {
@@ -148,6 +163,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             colors: finalColors,
             showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
+            formatPrompt: finalFormatPrompt,
         } as TerminalConfig,
         commands: {
             commands: finalCommands,

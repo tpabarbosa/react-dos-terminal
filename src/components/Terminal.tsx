@@ -61,9 +61,9 @@ const Terminal = ({ config }: TerminalProps) => {
     const loadingScreen = useLoadingScreen(config?.loadingScreen)
 
     const initialOutput =
-        config?.initialOutput !== undefined
-            ? config.initialOutput
-            : defaults.initialOutput
+        config?.terminal?.initialOutput !== undefined
+            ? (config?.terminal?.initialOutput as string[])
+            : (defaults?.terminal?.initialOutput as string[])
 
     return (
         <React.StrictMode>

@@ -17,6 +17,7 @@ export interface TerminalState {
     showOldScreenEffect: boolean
     autoFocus: boolean
     isActive: boolean
+    formatPrompt: string
 }
 
 export interface TerminalProviderProps {
@@ -35,6 +36,7 @@ export const TerminalContextProvider = ({
         showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
+        formatPrompt: config.formatPrompt,
     }
 
     const reducer = (state: TerminalState, action: TerminalConfigAction) => {

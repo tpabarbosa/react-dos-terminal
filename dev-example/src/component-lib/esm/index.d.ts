@@ -95,6 +95,8 @@ interface TerminalConfig {
     colors: TerminalColors;
     showOldScreenEffect: boolean;
     autoFocus: boolean;
+    initialOutput: string[];
+    formatPrompt: string;
 }
 interface CommandsMessages {
     toBeImplemented: string;
@@ -119,7 +121,6 @@ interface TerminalDefaults {
     loadingScreen: Partial<TerminalLoadingScreen>;
     terminal: Partial<TerminalConfig>;
     commands: Partial<CommandsConfig>;
-    initialOutput: string[];
     fileSystem: Partial<TerminalFileSystemConfig>;
 }
 
@@ -148,7 +149,7 @@ declare const fileSystemHelper: {
     getDir: (files: FakeFileSystem, dirPath: string) => FakeFileSystem | null;
     getCommandsSize: (commands: FakeCommand[]) => number;
     fullDirPath: (dir: string) => string;
-    formatPrompt: (dir: string) => string;
+    formatPrompt: (prompt: string, dir: string) => string;
 };
 
 interface ScreenProps {

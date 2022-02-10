@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 10, 2022 16:53:22 */
+/* Version: 0.1.4 - February 10, 2022 17:44:06 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -97,7 +97,6 @@ function __makeTemplateObject(cooked, raw) {
 
 var defaults = {
     shouldPersisteData: true,
-    initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: [
@@ -115,6 +114,8 @@ var defaults = {
         },
         autoFocus: true,
         showOldScreenEffect: true,
+        initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
+        formatPrompt: '$p$g',
     },
     commands: {
         commands: [],
@@ -180,6 +181,7 @@ var TerminalContextProvider = function (_a) {
         showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
+        formatPrompt: config.formatPrompt,
     };
     var reducer = function (state, action) {
         switch (action.config) {
@@ -212,8 +214,25 @@ var useTerminal = function () {
     return ctx;
 };
 
-var formatPrompt = function (dir) {
-    return "C:\\".concat(dir, ">");
+var replacePromptParams = function (prompt, dir) {
+    var p = prompt.replace(/\$p/g, "C:\\".concat(dir));
+    p = p.replace(/\$g/g, '>');
+    p = p.replace(/\$l/g, '<');
+    p = p.replace(/\$n/g, 'C:');
+    p = p.replace(/\$b/g, '|');
+    p = p.replace(/\$\$/g, '$');
+    p = p.replace(/\$_/g, '\n');
+    p = p.replace(/\$a/g, '&');
+    p = p.replace(/\$c/g, '(');
+    p = p.replace(/\$f/g, ')');
+    p = p.replace(/\$s/g, ' ');
+    p = p.replace(/\$t/g, new Date().toLocaleTimeString());
+    p = p.replace(/\$d/g, new Date().toLocaleDateString());
+    return p;
+};
+var formatPrompt = function (prompt, dir) {
+    var final = replacePromptParams(prompt, dir);
+    return final;
 };
 var fullDirPath = function (dir) {
     return "C:\\".concat(dir);
@@ -1281,7 +1300,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 10, 2022 16:53:22';
+    var version = '0.1.4 - February 10, 2022 17:44:06';
     return {
         output: [
             {
@@ -1779,7 +1798,7 @@ var useCommandsHandler = function (_a) {
                 return { name: name, args: args, isHelp: isHelp };
             };
             _a = getNameAndArgs(cmd), name = _a.name, args = _a.args, isHelp = _a.isHelp;
-            outputHandler.addToHistory("".concat(fileSystemHelper.formatPrompt(actualDir), " ").concat(cmd));
+            outputHandler.addToHistory("".concat(fileSystemHelper.formatPrompt(terminal.formatPrompt, actualDir), " ").concat(cmd));
             if (name === '') {
                 command.setActualCmd(null);
                 return [2];
@@ -2046,7 +2065,7 @@ var Main = function (_a) {
         }
     }, [state, dynamic]);
     return (jsxs(TerminalScreen, __assign({ onClick: function () { return input && input.setFocus(); } }, { children: [!hideOutput && (jsx(Output, { children: jsx(Output.Typewriter, { output: outputHandler }, void 0) }, void 0)), state === 'RUNNING_COMMAND' && dynamic && (jsx(UserDefinedElement, { element: dynamic === null || dynamic === void 0 ? void 0 : dynamic.element, outputHandler: outputHandler }, void 0)), state !== 'RUNNING_COMMAND' &&
-                !outputHandler.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(actualDir) }, void 0))] }), void 0));
+                !outputHandler.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(terminal.formatPrompt, actualDir) }, void 0))] }), void 0));
 };
 
 var useLoadingScreen = function (config) {
@@ -2178,17 +2197,18 @@ var files = [
 ];
 
 var useInitializer = function (config) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     var isInstalled = ls.get('i');
-    var _m = useState(false), isInitialized = _m[0], setIsInitialized = _m[1];
+    var _o = useState(false), isInitialized = _o[0], setIsInitialized = _o[1];
     var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteData) !== undefined
         ? config.shouldPersisteData
         : defaults.shouldPersisteData;
-    var _o = useState(defaults.terminal.colors), finalColors = _o[0], setFinalColors = _o[1];
+    var _p = useState(defaults.terminal.colors), finalColors = _p[0], setFinalColors = _p[1];
     var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
         ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
         : defaults.terminal.showOldScreenEffect;
-    var _p = useState(), finalInitialDir = _p[0], setFinalInitialDir = _p[1];
+    var _q = useState(), finalFormatPrompt = _q[0], setFinalFormatPrompt = _q[1];
+    var _r = useState(), finalInitialDir = _r[0], setFinalInitialDir = _r[1];
     var finalAutofocus = ((_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.autoFocus) !== undefined
         ? config.terminal.autoFocus
         : defaults.terminal.autoFocus;
@@ -2238,10 +2258,11 @@ var useInitializer = function (config) {
         return initializer.createFakeFileSystem();
     }, [config]);
     useEffect(function () {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         if (!isInitialized) {
             var col = void 0;
             var actualD = void 0;
+            var prompt_1;
             if (isInstalled === null || isInstalled === '0' || !persisteData) {
                 col = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.colors)
                     ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.colors
@@ -2250,20 +2271,28 @@ var useInitializer = function (config) {
                     ((_c = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _c === void 0 ? void 0 : _c.initialDir) !== undefined
                         ? (_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.initialDir
                         : defaults.fileSystem.initialDir;
+                prompt_1 =
+                    ((_e = config === null || config === void 0 ? void 0 : config.terminal) === null || _e === void 0 ? void 0 : _e.formatPrompt) !== undefined
+                        ? (_f = config === null || config === void 0 ? void 0 : config.terminal) === null || _f === void 0 ? void 0 : _f.formatPrompt
+                        : defaults.terminal.formatPrompt;
                 if (col)
                     ls.set('colors', col);
                 ls.set('i', '1');
                 ls.set('actualDir', actualD);
+                ls.set('formatPrompt', finalFormatPrompt);
             }
             else {
                 col = ls.get('colors');
                 var dir = ls.get('actualDir');
+                var promp = ls.get('formatPrompt');
                 actualD = typeof dir !== 'string' ? '' : dir;
+                prompt_1 = typeof promp !== 'string' ? '' : promp;
             }
             ls.set('oldEffect', finalOldScreenEffect ? '1' : '0');
             setFinalColors(col);
             setFinalInitialDir(actualD);
             setIsInitialized(true);
+            setFinalFormatPrompt(prompt_1);
         }
     }, [
         (_k = config === null || config === void 0 ? void 0 : config.terminal) === null || _k === void 0 ? void 0 : _k.colors,
@@ -2273,12 +2302,15 @@ var useInitializer = function (config) {
         persisteData,
         finalOldScreenEffect,
         finalInitialDir,
+        (_m = config === null || config === void 0 ? void 0 : config.terminal) === null || _m === void 0 ? void 0 : _m.formatPrompt,
+        finalFormatPrompt,
     ]);
     return {
         terminal: {
             colors: finalColors,
             showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
+            formatPrompt: finalFormatPrompt,
         },
         commands: {
             commands: finalCommands,
@@ -2313,12 +2345,13 @@ var LoadingScreen = function (_a) {
     return (jsxs(Fragment, { children: [!React.isValidElement(content) && (jsx(TerminalScreen, { children: jsx(Output, { children: jsx(Output.Typewriter, { output: output, flashing: true }, void 0) }, void 0) }, void 0)), React.isValidElement(content) && (jsx(UserDefinedElement, { element: content, outputHandler: output }, void 0))] }, void 0));
 };
 var Terminal = function (_a) {
+    var _b, _c, _d;
     var config = _a.config;
     var initializer = useInitializer(config);
     var loadingScreen = useLoadingScreen(config === null || config === void 0 ? void 0 : config.loadingScreen);
-    var initialOutput = (config === null || config === void 0 ? void 0 : config.initialOutput) !== undefined
-        ? config.initialOutput
-        : defaults.initialOutput;
+    var initialOutput = ((_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.initialOutput) !== undefined
+        ? (_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.initialOutput
+        : (_d = defaults === null || defaults === void 0 ? void 0 : defaults.terminal) === null || _d === void 0 ? void 0 : _d.initialOutput;
     return (jsx(React.StrictMode, { children: initializer.isInitialized && (jsxs(Fragment, { children: [jsx(GlobalStyles, {}, void 0), jsxs(TerminalContextProvider, __assign({ config: initializer.terminal }, { children: [!loadingScreen.isLoading && (jsx(FileSystemContextProvider, __assign({ config: initializer.fileSystem }, { children: jsx(CommandContextProvider, __assign({ config: initializer.commands }, { children: jsx(Main, { initialOutput: initialOutput }, void 0) }), void 0) }), void 0)), loadingScreen.isLoading && (jsx(LoadingScreen, { content: loadingScreen.content }, void 0))] }), void 0)] }, void 0)) }, void 0));
 };
 
