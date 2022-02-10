@@ -63,14 +63,12 @@ export const App = () => {
                 background: '#0000aa',
                 color: '#ffffff',
             } as TerminalColors,
-            //screenStripes: false,
+            screenStripes: false,
             //autoFocus: false,
-            messages: {
-                initialOutput: ['This is my custom terminal', ''],
-            },
         },
+        initialOutput: ['This is my custom terminal', ''],
         loadingScreen: {
-            shouldShow: 'always',
+            //shouldShow: 'always',
             messageOrElement: [
                 'Installing my custom terminal',
                 '',
@@ -83,7 +81,10 @@ export const App = () => {
             commands: commandsList,
             //excludeCommands: ['test-static'],
             //excludeCommands: 'all'
-            //shouldAllowHelp: false
+            //shouldAllowHelp: false,
+            messages: {
+                notFound: 'My custom not Found message'
+            },
         },
         //shouldPersisteData: false,
         fileSystem: {
