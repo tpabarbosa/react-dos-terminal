@@ -1,4 +1,4 @@
-/* Version: 0.1.3 - February 10, 2022 11:37:15 */
+/* Version: 0.1.4 - February 10, 2022 14:17:37 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -1285,7 +1285,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.3 - February 10, 2022 11:37:15';
+    var version = '0.1.4 - February 10, 2022 14:17:37';
     return {
         output: [
             {
@@ -2244,7 +2244,7 @@ var useInitializer = function (config) {
     useEffect(function () {
         var _a, _b, _c, _d;
         var col;
-        var actualD;
+        var actualD = ls.get('actualDir');
         if (isInstalled === null || isInstalled === '0' || !persisteData) {
             col = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.colors)
                 ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.colors
@@ -2260,11 +2260,10 @@ var useInitializer = function (config) {
         }
         else {
             col = ls.get('colors');
-            actualD = ls.get('actualDir');
         }
         ls.set('stripes', finalStripes ? '1' : '0');
         setFinalColors(col);
-        setFinalActualDir(actualD);
+        setFinalActualDir(typeof actualD !== 'string' ? '' : actualD);
         setIsInitialized(true);
     }, [
         (_k = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _k === void 0 ? void 0 : _k.actualDir,

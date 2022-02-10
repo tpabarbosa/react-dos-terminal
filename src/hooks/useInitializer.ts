@@ -112,7 +112,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
 
     useEffect(() => {
         let col: TerminalColors | undefined
-        let actualD: string | undefined
+        let actualD = ls.get('actualDir')
         if (isInstalled === null || isInstalled === '0' || !persisteData) {
             col = config?.terminal?.colors
                 ? config?.terminal?.colors
@@ -127,11 +127,10 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             ls.set('actualDir', actualD)
         } else {
             col = ls.get('colors') as TerminalColors
-            actualD = ls.get('actualDir') as string
         }
         ls.set('stripes', finalStripes ? '1' : '0')
         setFinalColors(col)
-        setFinalActualDir(actualD)
+        setFinalActualDir(typeof actualD !== 'string' ? '' : actualD)
         setIsInitialized(true)
     }, [
         config?.fileSystem?.actualDir,

@@ -34,7 +34,7 @@ const devConfig = [{
         }, ],
         plugins: [
             ...devPlugins,
-            del({ targets: ['dev-example/src/component-lib/*'] }),
+            // del({ targets: ['dev-example/src/component-lib/*'] }),
             copy({
                 targets: [{
                     src: ['src/assets/**/*'],
