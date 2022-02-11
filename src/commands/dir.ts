@@ -83,7 +83,7 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
                     content.files[item].t === 'e' ||
                     content.files[item].t === 's'
                 ) {
-                    filesNumber += filesNumber
+                    filesNumber += 1
                     size += content.files[item].s
                     text = `${item}${space.repeat(
                         28 - item.length
@@ -91,7 +91,7 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
                         minimumFractionDigits: 0,
                     })}`
                 } else {
-                    dirsNumber += dirsNumber
+                    dirsNumber += 1
                     text = `${item}${space.repeat(20 - item.length)}&ltDIR&gt`
                 }
                 acc.push(text)

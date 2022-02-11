@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 11, 2022 05:39:30 */
+/* Version: 0.1.4 - February 11, 2022 05:44:14 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -538,14 +538,14 @@ var run$4 = function (_a) {
                 if (content.files[item].t === 'f' ||
                     content.files[item].t === 'e' ||
                     content.files[item].t === 's') {
-                    filesNumber += filesNumber;
+                    filesNumber += 1;
                     size += content.files[item].s;
                     text = "".concat(item).concat(space.repeat(28 - item.length)).concat(content.files[item].s.toLocaleString('en-US', {
                         minimumFractionDigits: 0,
                     }));
                 }
                 else {
-                    dirsNumber += dirsNumber;
+                    dirsNumber += 1;
                     text = "".concat(item).concat(space.repeat(20 - item.length), "&ltDIR&gt");
                 }
                 acc.push(text);
@@ -1300,7 +1300,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 11, 2022 05:39:30';
+    var version = '0.1.4 - February 11, 2022 05:44:14';
     return {
         output: [
             {
