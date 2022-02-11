@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 10, 2022 17:44:06 */
+/* Version: 0.1.4 - February 11, 2022 05:39:30 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -96,7 +96,7 @@ function __makeTemplateObject(cooked, raw) {
 }
 
 var defaults = {
-    shouldPersisteData: true,
+    shouldPersisteUserData: true,
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: [
@@ -1300,7 +1300,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 10, 2022 17:44:06';
+    var version = '0.1.4 - February 11, 2022 05:39:30';
     return {
         output: [
             {
@@ -2200,9 +2200,9 @@ var useInitializer = function (config) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     var isInstalled = ls.get('i');
     var _o = useState(false), isInitialized = _o[0], setIsInitialized = _o[1];
-    var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteData) !== undefined
-        ? config.shouldPersisteData
-        : defaults.shouldPersisteData;
+    var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteUserData) !== undefined
+        ? config.shouldPersisteUserData
+        : defaults.shouldPersisteUserData;
     var _p = useState(defaults.terminal.colors), finalColors = _p[0], setFinalColors = _p[1];
     var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
         ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
@@ -2279,7 +2279,7 @@ var useInitializer = function (config) {
                     ls.set('colors', col);
                 ls.set('i', '1');
                 ls.set('actualDir', actualD);
-                ls.set('formatPrompt', finalFormatPrompt);
+                ls.set('formatPrompt', prompt_1);
             }
             else {
                 col = ls.get('colors');

@@ -117,7 +117,7 @@ interface TerminalFileSystemConfig {
     useInternalFiles: boolean;
 }
 interface TerminalDefaults {
-    shouldPersisteData: boolean;
+    shouldPersisteUserData: boolean;
     loadingScreen: Partial<TerminalLoadingScreen>;
     terminal: Partial<TerminalConfig>;
     commands: Partial<CommandsConfig>;

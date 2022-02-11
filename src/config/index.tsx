@@ -39,7 +39,7 @@ export interface TerminalFileSystemConfig {
 }
 
 export interface TerminalDefaults {
-    shouldPersisteData: boolean
+    shouldPersisteUserData: boolean
     loadingScreen: Partial<TerminalLoadingScreen>
     terminal: Partial<TerminalConfig>
     commands: Partial<CommandsConfig>
@@ -47,7 +47,7 @@ export interface TerminalDefaults {
 }
 
 export const defaults: TerminalDefaults = {
-    shouldPersisteData: true,
+    shouldPersisteUserData: true,
     loadingScreen: {
         shouldShow: 'first-time',
         messageOrElement: [

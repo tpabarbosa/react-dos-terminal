@@ -24,9 +24,9 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
     const [isInitialized, setIsInitialized] = useState<boolean>(false)
 
     const persisteData =
-        config?.shouldPersisteData !== undefined
-            ? config.shouldPersisteData
-            : defaults.shouldPersisteData
+        config?.shouldPersisteUserData !== undefined
+            ? config.shouldPersisteUserData
+            : defaults.shouldPersisteUserData
 
     const [finalColors, setFinalColors] = useState<TerminalColors | undefined>(
         defaults.terminal.colors
@@ -132,7 +132,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
                 if (col) ls.set('colors', col)
                 ls.set('i', '1')
                 ls.set('actualDir', actualD)
-                ls.set('formatPrompt', finalFormatPrompt as string)
+                ls.set('formatPrompt', prompt as string)
             } else {
                 col = ls.get('colors') as TerminalColors
                 const dir = ls.get('actualDir')
