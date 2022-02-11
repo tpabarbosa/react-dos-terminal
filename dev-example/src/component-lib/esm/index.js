@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 11, 2022 06:05:49 */
+/* Version: 0.1.4 - February 11, 2022 06:12:32 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -98,7 +98,7 @@ function __makeTemplateObject(cooked, raw) {
 var defaults = {
     shouldPersisteUserData: true,
     loadingScreen: {
-        shouldShow: 'first-time',
+        showLoadingScreen: 'first-time',
         messageOrElement: [
             'Installing IOS react-dos-terminal',
             '',
@@ -1300,7 +1300,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 11, 2022 06:05:49';
+    var version = '0.1.4 - February 11, 2022 06:12:32';
     return {
         output: [
             {
@@ -2071,7 +2071,7 @@ var Main = function (_a) {
 var useLoadingScreen = function (config) {
     var shouldShowLoading = function (loadingScreen, isInstalled) {
         var _a;
-        var ss = (_a = loadingScreen.shouldShow) !== null && _a !== void 0 ? _a : 'first-time';
+        var ss = (_a = loadingScreen.showLoadingScreen) !== null && _a !== void 0 ? _a : 'first-time';
         switch (ss) {
             case 'always':
                 return true;
@@ -2197,26 +2197,23 @@ var files = [
 ];
 
 var useInitializer = function (config) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     var isInstalled = ls.get('i');
-    var _o = useState(false), isInitialized = _o[0], setIsInitialized = _o[1];
+    var _m = useState(false), isInitialized = _m[0], setIsInitialized = _m[1];
     var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteUserData) !== undefined
         ? config.shouldPersisteUserData
         : defaults.shouldPersisteUserData;
-    var _p = useState(defaults.terminal.colors), finalColors = _p[0], setFinalColors = _p[1];
+    var _o = useState(defaults.terminal.colors), finalColors = _o[0], setFinalColors = _o[1];
     var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
         ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
         : defaults.terminal.showOldScreenEffect;
-    var _q = useState(), finalFormatPrompt = _q[0], setFinalFormatPrompt = _q[1];
-    var _r = useState(), finalInitialDir = _r[0], setFinalInitialDir = _r[1];
+    var _p = useState(), finalFormatPrompt = _p[0], setFinalFormatPrompt = _p[1];
+    var _q = useState(), finalInitialDir = _q[0], setFinalInitialDir = _q[1];
     var finalAutofocus = ((_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.autoFocus) !== undefined
         ? config.terminal.autoFocus
         : defaults.terminal.autoFocus;
     var finalMessages = __assign(__assign({}, defaults.commands.messages), (_d = config === null || config === void 0 ? void 0 : config.commands) === null || _d === void 0 ? void 0 : _d.messages);
-    ((_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.excludeInternalCommands) !== undefined
-        ? config.commands.excludeInternalCommands
-        : defaults.commands.excludeInternalCommands;
-    var finalAllowHelp = ((_f = config === null || config === void 0 ? void 0 : config.commands) === null || _f === void 0 ? void 0 : _f.shouldAllowHelp) !== undefined
+    var finalAllowHelp = ((_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.shouldAllowHelp) !== undefined
         ? config.commands.shouldAllowHelp
         : defaults.commands.shouldAllowHelp;
     var finalCommands = useMemo(function () {
@@ -2239,9 +2236,9 @@ var useInitializer = function (config) {
         cmd = initializer.createCommands(cmd, (_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.customCommands);
         return initializer.createCommands(cmd, immutableCommands);
     }, [
-        (_g = config === null || config === void 0 ? void 0 : config.commands) === null || _g === void 0 ? void 0 : _g.customCommands,
-        (_h = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _h === void 0 ? void 0 : _h.useFakeFileSystem,
-        (_j = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _j === void 0 ? void 0 : _j.excludeInternalFiles,
+        (_f = config === null || config === void 0 ? void 0 : config.commands) === null || _f === void 0 ? void 0 : _f.customCommands,
+        (_g = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _g === void 0 ? void 0 : _g.useFakeFileSystem,
+        (_h = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _h === void 0 ? void 0 : _h.excludeInternalFiles,
         finalAllowHelp,
     ]);
     var finalFiles = useMemo(function () {
@@ -2295,14 +2292,14 @@ var useInitializer = function (config) {
             setFinalFormatPrompt(prompt_1);
         }
     }, [
-        (_k = config === null || config === void 0 ? void 0 : config.terminal) === null || _k === void 0 ? void 0 : _k.colors,
-        (_l = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _l === void 0 ? void 0 : _l.initialDir,
+        (_j = config === null || config === void 0 ? void 0 : config.terminal) === null || _j === void 0 ? void 0 : _j.colors,
+        (_k = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _k === void 0 ? void 0 : _k.initialDir,
         isInstalled,
         isInitialized,
         persisteData,
         finalOldScreenEffect,
         finalInitialDir,
-        (_m = config === null || config === void 0 ? void 0 : config.terminal) === null || _m === void 0 ? void 0 : _m.formatPrompt,
+        (_l = config === null || config === void 0 ? void 0 : config.terminal) === null || _l === void 0 ? void 0 : _l.formatPrompt,
         finalFormatPrompt,
     ]);
     return {

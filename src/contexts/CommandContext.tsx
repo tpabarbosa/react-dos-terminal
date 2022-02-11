@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
 import { TerminalColors } from '../components/Terminal'
-import { CommandsConfig, CommandsMessages } from '../config'
+import { CommandsMessages } from '../config'
 import { FakeFileSystem } from './FileSystemContext'
 
 export interface FakeCommand {

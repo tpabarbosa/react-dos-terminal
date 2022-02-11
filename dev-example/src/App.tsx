@@ -70,7 +70,7 @@ export const App = () => {
         },
         
         loadingScreen: {
-            //showLoadingScreen: 'always',
+            showLoadingScreen: 'first-time',
             messageOrElement: [
                 'Installing my custom terminal',
                 '',

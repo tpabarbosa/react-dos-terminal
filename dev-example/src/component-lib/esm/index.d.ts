@@ -87,7 +87,7 @@ interface CommandState {
 declare const useCommand: () => CommandContextAPI;
 
 interface TerminalLoadingScreen {
-    shouldShow: string;
+    showLoadingScreen: string;
     messageOrElement: string | string[] | JSX.Element;
     loadingTime: number;
 }

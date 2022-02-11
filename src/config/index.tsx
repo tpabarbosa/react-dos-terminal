@@ -5,7 +5,7 @@ import { FakeFile } from '../contexts/FileSystemContext'
 export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time'
 
 export interface TerminalLoadingScreen {
-    shouldShow: string // TerminalLoadingScreenOptions;
+    showLoadingScreen: string // TerminalLoadingScreenOptions;
     messageOrElement: string | string[] | JSX.Element
     loadingTime: number
 }
@@ -49,7 +49,7 @@ export interface TerminalDefaults {
 export const defaults: TerminalDefaults = {
     shouldPersisteUserData: true,
     loadingScreen: {
-        shouldShow: 'first-time',
+        showLoadingScreen: 'first-time',
         messageOrElement: [
             'Installing IOS react-dos-terminal',
             '',

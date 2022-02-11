@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { TerminalColors } from '../components/Terminal'
 import {
     defaults,
-    CommandsConfig,
     TerminalConfig,
     TerminalDefaults,
     CommandsMessages,
@@ -53,10 +52,10 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         ...config?.commands?.messages,
     }
 
-    const finalExcludeCommands =
-        config?.commands?.excludeInternalCommands !== undefined
-            ? config.commands.excludeInternalCommands
-            : defaults.commands.excludeInternalCommands
+    // const finalExcludeCommands =
+    //     config?.commands?.excludeInternalCommands !== undefined
+    //         ? config.commands.excludeInternalCommands
+    //         : defaults.commands.excludeInternalCommands
 
     const finalAllowHelp =
         config?.commands?.shouldAllowHelp !== undefined
