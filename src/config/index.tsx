@@ -25,17 +25,17 @@ export interface CommandsMessages {
     helpNotAvailable: string
 }
 export interface CommandsConfig {
-    commands: FakeCommand[]
-    excludeCommands: string[] | 'all'
+    customCommands: FakeCommand[]
+    excludeInternalCommands: string[] | 'all'
     shouldAllowHelp: boolean
     messages: Partial<CommandsMessages>
 }
 
 export interface TerminalFileSystemConfig {
-    files: FakeFile[]
+    customFiles: FakeFile[]
     initialDir: string
     useFakeFileSystem: boolean
-    useInternalFiles: boolean
+    excludeInternalFiles: boolean
 }
 
 export interface TerminalDefaults {
@@ -69,8 +69,8 @@ export const defaults: TerminalDefaults = {
         formatPrompt: '$p$g',
     },
     commands: {
-        commands: [],
-        excludeCommands: [],
+        customCommands: [],
+        excludeInternalCommands: [],
         shouldAllowHelp: true,
         messages: {
             toBeImplemented: `Error: "%n" command hasn't been implemented.`,
@@ -80,9 +80,9 @@ export const defaults: TerminalDefaults = {
         },
     },
     fileSystem: {
-        files: [],
+        customFiles: [],
         initialDir: '',
         useFakeFileSystem: true,
-        useInternalFiles: true,
+        excludeInternalFiles: false,
     },
 }

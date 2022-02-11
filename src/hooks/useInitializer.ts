@@ -14,7 +14,7 @@ import {
     fileSystemSubstituteCommands,
     immutableCommands,
 } from '../config/commands'
-import { FakeCommand } from '../contexts/CommandContext'
+import { CommandState, FakeCommand } from '../contexts/CommandContext'
 import initializer from '../helpers/initializer'
 import { files } from '../config/files'
 import { FileSystemState } from '../contexts/FileSystemContext'
@@ -54,9 +54,9 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
     }
 
     const finalExcludeCommands =
-        config?.commands?.excludeCommands !== undefined
-            ? config.commands.excludeCommands
-            : defaults.commands.excludeCommands
+        config?.commands?.excludeInternalCommands !== undefined
+            ? config.commands.excludeInternalCommands
+            : defaults.commands.excludeInternalCommands
 
     const finalAllowHelp =
         config?.commands?.shouldAllowHelp !== undefined
@@ -68,45 +68,53 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
 
         if (config?.fileSystem?.useFakeFileSystem !== false) {
             const fc = commandsList.concat(fileSystemCommands)
-            cmd = initializer.createCommands(fc, config?.commands?.commands)
+            cmd = initializer.createCommands(
+                fc,
+                config?.commands?.customCommands
+            )
         } else {
             const fc = commandsList.concat(fileSystemSubstituteCommands)
-            cmd = initializer.createCommands(fc, config?.commands?.commands)
+            cmd = initializer.createCommands(
+                fc,
+                config?.commands?.customCommands
+            )
         }
-        if (config?.fileSystem?.useInternalFiles === false) {
+        if (config?.fileSystem?.excludeInternalFiles === true) {
             cmd = initializer.createCommands(cmd, fileSystemSubstituteCommands)
         }
 
         if (!finalAllowHelp) {
             cmd = initializer.excludeCommands(cmd, ['help'])
         }
-        cmd = initializer.createCommands(cmd, config?.commands?.commands)
+        cmd = initializer.createCommands(cmd, config?.commands?.customCommands)
 
         return initializer.createCommands(cmd, immutableCommands)
     }, [
-        config?.commands?.commands,
+        config?.commands?.customCommands,
         config?.fileSystem?.useFakeFileSystem,
-        config?.fileSystem?.useInternalFiles,
+        config?.fileSystem?.excludeInternalFiles,
         finalAllowHelp,
     ])
 
     const finalFiles = useMemo(() => {
         if (
             config?.fileSystem?.useFakeFileSystem !== false &&
-            config?.fileSystem?.useInternalFiles !== false
+            config?.fileSystem?.excludeInternalFiles !== true
         ) {
             return initializer.createFakeFileSystem(
                 files,
-                config?.fileSystem?.files
+                config?.fileSystem?.customFiles
             )
         }
 
         if (
-            config?.fileSystem.useFakeFileSystem !== false &&
-            config?.fileSystem.useInternalFiles === false &&
-            config.fileSystem.files
+            config?.fileSystem?.useFakeFileSystem !== false &&
+            config?.fileSystem?.excludeInternalFiles === true &&
+            config.fileSystem.customFiles
         ) {
-            return initializer.createFakeFileSystem(config.fileSystem.files)
+            return initializer.createFakeFileSystem(
+                config.fileSystem.customFiles
+            )
         }
 
         return initializer.createFakeFileSystem()
@@ -166,11 +174,10 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             formatPrompt: finalFormatPrompt,
         } as TerminalConfig,
         commands: {
-            commands: finalCommands,
+            allCommands: finalCommands,
             shouldAllowHelp: finalAllowHelp,
-            excludeCommands: finalExcludeCommands,
             messages: finalMessages as CommandsMessages,
-        } as CommandsConfig,
+        } as CommandState,
         isInitialized,
         fileSystem: {
             actualDir: finalInitialDir,

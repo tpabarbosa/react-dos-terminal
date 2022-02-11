@@ -68,7 +68,7 @@ export interface CommandState {
 
 export interface CommandProviderProps {
     children: React.ReactNode
-    config: CommandsConfig
+    config: Partial<CommandState>
 }
 
 const CommandContext = createContext<CommandContextAPI | undefined>(undefined)
@@ -78,8 +78,8 @@ export const CommandContextProvider = ({
     config,
 }: CommandProviderProps) => {
     const terminalCommandInitialState: CommandState = {
-        allCommands: config.commands,
-        shouldAllowHelp: config.shouldAllowHelp,
+        allCommands: config?.allCommands as FakeCommand[],
+        shouldAllowHelp: config?.shouldAllowHelp as boolean,
         actualCmd: null,
         isRunningCommand: false,
         messages: config.messages as CommandsMessages,

@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 11, 2022 05:44:14 */
+/* Version: 0.1.4 - February 11, 2022 06:05:49 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { createContext, useReducer, useMemo, useContext, useState, useEffect, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -118,8 +118,8 @@ var defaults = {
         formatPrompt: '$p$g',
     },
     commands: {
-        commands: [],
-        excludeCommands: [],
+        customCommands: [],
+        excludeInternalCommands: [],
         shouldAllowHelp: true,
         messages: {
             toBeImplemented: "Error: \"%n\" command hasn't been implemented.",
@@ -129,10 +129,10 @@ var defaults = {
         },
     },
     fileSystem: {
-        files: [],
+        customFiles: [],
         initialDir: '',
         useFakeFileSystem: true,
-        useInternalFiles: true,
+        excludeInternalFiles: false,
     },
 };
 
@@ -1061,8 +1061,8 @@ var CommandContext = createContext(undefined);
 var CommandContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
     var terminalCommandInitialState = {
-        allCommands: config.commands,
-        shouldAllowHelp: config.shouldAllowHelp,
+        allCommands: config === null || config === void 0 ? void 0 : config.allCommands,
+        shouldAllowHelp: config === null || config === void 0 ? void 0 : config.shouldAllowHelp,
         actualCmd: null,
         isRunningCommand: false,
         messages: config.messages,
@@ -1300,7 +1300,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 11, 2022 05:44:14';
+    var version = '0.1.4 - February 11, 2022 06:05:49';
     return {
         output: [
             {
@@ -2213,9 +2213,9 @@ var useInitializer = function (config) {
         ? config.terminal.autoFocus
         : defaults.terminal.autoFocus;
     var finalMessages = __assign(__assign({}, defaults.commands.messages), (_d = config === null || config === void 0 ? void 0 : config.commands) === null || _d === void 0 ? void 0 : _d.messages);
-    var finalExcludeCommands = ((_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.excludeCommands) !== undefined
-        ? config.commands.excludeCommands
-        : defaults.commands.excludeCommands;
+    ((_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.excludeInternalCommands) !== undefined
+        ? config.commands.excludeInternalCommands
+        : defaults.commands.excludeInternalCommands;
     var finalAllowHelp = ((_f = config === null || config === void 0 ? void 0 : config.commands) === null || _f === void 0 ? void 0 : _f.shouldAllowHelp) !== undefined
         ? config.commands.shouldAllowHelp
         : defaults.commands.shouldAllowHelp;
@@ -2224,36 +2224,36 @@ var useInitializer = function (config) {
         var cmd;
         if (((_a = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _a === void 0 ? void 0 : _a.useFakeFileSystem) !== false) {
             var fc = commandsList.concat(fileSystemCommands);
-            cmd = initializer.createCommands(fc, (_b = config === null || config === void 0 ? void 0 : config.commands) === null || _b === void 0 ? void 0 : _b.commands);
+            cmd = initializer.createCommands(fc, (_b = config === null || config === void 0 ? void 0 : config.commands) === null || _b === void 0 ? void 0 : _b.customCommands);
         }
         else {
             var fc = commandsList.concat(fileSystemSubstituteCommands);
-            cmd = initializer.createCommands(fc, (_c = config === null || config === void 0 ? void 0 : config.commands) === null || _c === void 0 ? void 0 : _c.commands);
+            cmd = initializer.createCommands(fc, (_c = config === null || config === void 0 ? void 0 : config.commands) === null || _c === void 0 ? void 0 : _c.customCommands);
         }
-        if (((_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.useInternalFiles) === false) {
+        if (((_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.excludeInternalFiles) === true) {
             cmd = initializer.createCommands(cmd, fileSystemSubstituteCommands);
         }
         if (!finalAllowHelp) {
             cmd = initializer.excludeCommands(cmd, ['help']);
         }
-        cmd = initializer.createCommands(cmd, (_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.commands);
+        cmd = initializer.createCommands(cmd, (_e = config === null || config === void 0 ? void 0 : config.commands) === null || _e === void 0 ? void 0 : _e.customCommands);
         return initializer.createCommands(cmd, immutableCommands);
     }, [
-        (_g = config === null || config === void 0 ? void 0 : config.commands) === null || _g === void 0 ? void 0 : _g.commands,
+        (_g = config === null || config === void 0 ? void 0 : config.commands) === null || _g === void 0 ? void 0 : _g.customCommands,
         (_h = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _h === void 0 ? void 0 : _h.useFakeFileSystem,
-        (_j = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _j === void 0 ? void 0 : _j.useInternalFiles,
+        (_j = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _j === void 0 ? void 0 : _j.excludeInternalFiles,
         finalAllowHelp,
     ]);
     var finalFiles = useMemo(function () {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e;
         if (((_a = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _a === void 0 ? void 0 : _a.useFakeFileSystem) !== false &&
-            ((_b = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _b === void 0 ? void 0 : _b.useInternalFiles) !== false) {
-            return initializer.createFakeFileSystem(files, (_c = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _c === void 0 ? void 0 : _c.files);
+            ((_b = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _b === void 0 ? void 0 : _b.excludeInternalFiles) !== true) {
+            return initializer.createFakeFileSystem(files, (_c = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _c === void 0 ? void 0 : _c.customFiles);
         }
-        if ((config === null || config === void 0 ? void 0 : config.fileSystem.useFakeFileSystem) !== false &&
-            (config === null || config === void 0 ? void 0 : config.fileSystem.useInternalFiles) === false &&
-            config.fileSystem.files) {
-            return initializer.createFakeFileSystem(config.fileSystem.files);
+        if (((_d = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _d === void 0 ? void 0 : _d.useFakeFileSystem) !== false &&
+            ((_e = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _e === void 0 ? void 0 : _e.excludeInternalFiles) === true &&
+            config.fileSystem.customFiles) {
+            return initializer.createFakeFileSystem(config.fileSystem.customFiles);
         }
         return initializer.createFakeFileSystem();
     }, [config]);
@@ -2313,9 +2313,8 @@ var useInitializer = function (config) {
             formatPrompt: finalFormatPrompt,
         },
         commands: {
-            commands: finalCommands,
+            allCommands: finalCommands,
             shouldAllowHelp: finalAllowHelp,
-            excludeCommands: finalExcludeCommands,
             messages: finalMessages,
         },
         isInitialized: isInitialized,

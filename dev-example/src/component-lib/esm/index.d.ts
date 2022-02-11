@@ -105,16 +105,16 @@ interface CommandsMessages {
     helpNotAvailable: string;
 }
 interface CommandsConfig {
-    commands: FakeCommand[];
-    excludeCommands: string[] | 'all';
+    customCommands: FakeCommand[];
+    excludeInternalCommands: string[] | 'all';
     shouldAllowHelp: boolean;
     messages: Partial<CommandsMessages>;
 }
 interface TerminalFileSystemConfig {
-    files: FakeFile[];
+    customFiles: FakeFile[];
     initialDir: string;
     useFakeFileSystem: boolean;
-    useInternalFiles: boolean;
+    excludeInternalFiles: boolean;
 }
 interface TerminalDefaults {
     shouldPersisteUserData: boolean;

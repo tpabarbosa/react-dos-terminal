@@ -9,7 +9,7 @@ import {
 import { Hangman, hangman } from './components/Hangman/hangman'
 
 export const App = () => {
-    const commandsList: FakeCommand[] = [
+    const customCommands: FakeCommand[] = [
         {
             name: 'cls',
             // you can change help for a command
@@ -31,7 +31,7 @@ export const App = () => {
         },
     ]
 
-    const files: FakeFile[] = [
+    const customFiles: FakeFile[] = [
         {
             name: 'readme.txt',
             type: 'file',
@@ -70,7 +70,7 @@ export const App = () => {
         },
         
         loadingScreen: {
-            //shouldShow: 'always',
+            //showLoadingScreen: 'always',
             messageOrElement: [
                 'Installing my custom terminal',
                 '',
@@ -80,9 +80,9 @@ export const App = () => {
             loadingTime: 3000,
         },
         commands: {
-            commands: commandsList,
-            //excludeCommands: ['test-static'],
-            //excludeCommands: 'all'
+            customCommands,
+            //excludeInternalCommands: ['test-static'],
+            //excludeInternalCommands: 'all'
             //shouldAllowHelp: false,
             messages: {
                 notFound: 'My custom not Found message'
@@ -91,9 +91,9 @@ export const App = () => {
         shouldPersisteData: false,
         fileSystem: {
             //initialDir: 'system',
-            files,
+            customFiles,
             //useFakeFileSystem: false,
-            //useInternalFiles: false,
+            //excludeInternalFiles: true,
         },
     }
 
