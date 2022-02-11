@@ -14,7 +14,7 @@ export const useLoadingScreen = (
         loadingScreen: Partial<TerminalLoadingScreen>,
         isInstalled: string | null
     ) => {
-        const ss = loadingScreen.shouldShow ?? 'first-time'
+        const ss = loadingScreen.showLoadingScreen ?? 'first-time'
         switch (ss) {
             case 'always':
                 return true
