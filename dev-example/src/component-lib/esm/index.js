@@ -1,4 +1,4 @@
-/* Version: 0.1.4 - February 11, 2022 07:37:51 */
+/* Version: 0.1.4 - February 11, 2022 08:15:01 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useCallback, useEffect, createContext, useReducer, useMemo, useContext, forwardRef, useRef, createRef, createElement } from 'react';
 import _ from 'lodash';
@@ -2721,7 +2721,7 @@ var testDynamic = function (_a) {
         '',
         "Please enter your name:",
     ];
-    if (args !== 'with-output') {
+    if (args !== 'with-output' && args !== '') {
         terminalOutput.push("Error: Unknown argument ".concat(args));
     }
     terminalOutput.push('');
@@ -2837,7 +2837,7 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 11, 2022 07:37:51';
+    var version = '0.1.4 - February 11, 2022 08:15:01';
     return {
         output: [
             {
@@ -3259,8 +3259,8 @@ var useCommandsHandler = function (_a) {
                 return [2];
             }
             props = { name: name, args: args, allCommands: allCommands, messages: messages, actualDir: actualDir, files: files };
-            dispatch = function (response, waitingMessage) {
-                command.setActualCmd(__assign({ name: name, args: args, waitingMessage: waitingMessage }, response));
+            dispatch = function (response) {
+                command.setActualCmd(__assign({ name: name, args: args }, response));
                 if (response.configTerminal !== undefined) {
                     if (response.configTerminal.config === 'setColors')
                         terminal.setConfig(response.configTerminal);
@@ -3271,8 +3271,7 @@ var useCommandsHandler = function (_a) {
                 if (response.output) {
                     terminal.output.addToQueue(response.output);
                 }
-                if (!waitingMessage)
-                    command.startRunningCommand();
+                command.startRunningCommand();
                 if (response.dynamic) {
                     action('NEW_CMD', 'dynamic');
                     return;
@@ -3296,7 +3295,7 @@ var useCommandsHandler = function (_a) {
                             return [4, cm.action(props)];
                         case 1:
                             response = _b.sent();
-                            dispatch(response, waitingMessage);
+                            dispatch(response);
                             return [2];
                         case 2:
                             dispatch(commandsHelper.commandNotFound(props));

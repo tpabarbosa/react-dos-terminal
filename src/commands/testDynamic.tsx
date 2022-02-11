@@ -88,7 +88,7 @@ export const testDynamic = ({ name, args }: CommandProps): Command => {
         `Please enter your name:`,
     ]
 
-    if (args !== 'with-output') {
+    if (args !== 'with-output' && args !== '') {
         terminalOutput.push(`Error: Unknown argument ${args}`)
     }
 

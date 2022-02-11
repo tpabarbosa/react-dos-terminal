@@ -69,11 +69,10 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
         const props = { name, args, allCommands, messages, actualDir, files }
 
-        const dispatch = (response: Command, waitingMessage?: string[]) => {
+        const dispatch = (response: Command) => {
             command.setActualCmd({
                 name,
                 args,
-                waitingMessage,
                 ...response,
             })
 
@@ -89,7 +88,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 terminal.output.addToQueue(response.output)
             }
 
-            if (!waitingMessage) command.startRunningCommand()
+            command.startRunningCommand()
 
             if (response.dynamic) {
                 action('NEW_CMD', 'dynamic')
@@ -109,7 +108,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
             if (cm.action) {
                 const response = await cm.action(props)
-                dispatch(response, waitingMessage)
+                dispatch(response)
                 return
             }
 
