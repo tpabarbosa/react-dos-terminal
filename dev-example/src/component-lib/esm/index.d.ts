@@ -97,6 +97,7 @@ interface TerminalConfig {
     autoFocus: boolean;
     initialOutput: string[];
     formatPrompt: string;
+    shouldTypewrite: boolean;
 }
 interface CommandsMessages {
     toBeImplemented: string;
@@ -181,9 +182,10 @@ interface OutputTypewriter {
     changeTypeInterval: (value: number) => void;
 }
 interface UseOutputHandler {
-    outputHistory: string[];
-    addToHistory: (value: string[] | string) => void;
-    removeFromHistory: (numberOfLines: number) => void;
+    output: string[];
+    addToOutput: (value: string[] | string) => void;
+    removeFromOutput: (numberOfLines: number) => void;
+    clearOutput: () => void;
     outputQueue: CommandToOutput[];
     addToQueue: (actions: CommandToOutput[]) => void;
     lastOutput: string[];

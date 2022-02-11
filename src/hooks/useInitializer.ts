@@ -42,10 +42,20 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
 
     const [finalInitialDir, setFinalInitialDir] = useState<string | undefined>()
 
+    const initialOutput =
+        config?.terminal?.initialOutput !== undefined
+            ? (config?.terminal?.initialOutput as string[])
+            : (defaults?.terminal?.initialOutput as string[])
+
     const finalAutofocus =
         config?.terminal?.autoFocus !== undefined
             ? config.terminal.autoFocus
             : defaults.terminal.autoFocus
+
+    const finalShouldTypewrite =
+        config?.terminal?.shouldTypewrite !== undefined
+            ? config.terminal.shouldTypewrite
+            : defaults.terminal.shouldTypewrite
 
     const finalMessages = {
         ...defaults.commands.messages,
@@ -171,6 +181,8 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
             formatPrompt: finalFormatPrompt,
+            initialOutput,
+            shouldTypewrite: finalShouldTypewrite,
         } as TerminalConfig,
         commands: {
             allCommands: finalCommands,

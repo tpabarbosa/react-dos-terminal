@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import _ from 'lodash'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import DOMPurify from 'dompurify'
 import { OutputTypewriter, UseOutputHandler } from '../hooks/useOutputHandler'
 import {
     OutputContainer,
@@ -65,7 +66,7 @@ const Print = ({
                                 {line !== '' ? (
                                     <PrintLine
                                         dangerouslySetInnerHTML={{
-                                            __html: line,
+                                            __html: DOMPurify.sanitize(line),
                                         }}
                                     />
                                 ) : (
@@ -78,7 +79,9 @@ const Print = ({
                     <PrintContent>
                         {output !== '' ? (
                             <PrintLine
-                                dangerouslySetInnerHTML={{ __html: output }}
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(output),
+                                }}
                             />
                         ) : (
                             <br />
@@ -194,7 +197,7 @@ const PrintWithTypewriter = ({
                                 {line !== '' ? (
                                     <PrintLine
                                         dangerouslySetInnerHTML={{
-                                            __html: line,
+                                            __html: DOMPurify.sanitize(line),
                                         }}
                                     />
                                 ) : (
@@ -207,7 +210,9 @@ const PrintWithTypewriter = ({
                     <PrintContent>
                         {output !== '' ? (
                             <PrintLine
-                                dangerouslySetInnerHTML={{ __html: output }}
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(output),
+                                }}
                             />
                         ) : (
                             <br />
@@ -235,7 +240,7 @@ const Typewriter = ({
     return (
         <>
             <Output.Print
-                output={output.outputHistory}
+                output={output.output}
                 {...rest}
                 colors={colors}
                 flashing={flashing}

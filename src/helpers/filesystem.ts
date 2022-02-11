@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify'
 import { FakeCommand } from '../contexts/CommandContext'
 import { FakeFileSystem } from '../contexts/FileSystemContext'
 
@@ -20,7 +21,7 @@ const replacePromptParams = (prompt: string, dir: string) => {
 
 const formatPrompt = (prompt: string, dir: string) => {
     const final = replacePromptParams(prompt, dir)
-    return final
+    return DOMPurify.sanitize(final)
 }
 
 const fullDirPath = (dir: string) => {

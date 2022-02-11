@@ -10,11 +10,11 @@ export interface OutputTypewriter {
 }
 
 export interface UseOutputHandler {
-    outputHistory: string[]
-    // changeOutputHistory: (value: string[]) => void,
-    addToHistory: (value: string[] | string) => void
-    removeFromHistory: (numberOfLines: number) => void
-    // clearHistory: () => void,
+    output: string[]
+    // changeOutput: (value: string[]) => void,
+    addToOutput: (value: string[] | string) => void
+    removeFromOutput: (numberOfLines: number) => void
+    clearOutput: () => void
     outputQueue: CommandToOutput[]
     addToQueue: (actions: CommandToOutput[]) => void
 
@@ -25,38 +25,46 @@ export interface UseOutputHandler {
     // print: () => void
 }
 
-export const useOutputHandler = (initial: string[]): UseOutputHandler => {
+export interface OutputHandlerProps {
+    initialOutput: string[]
+    shouldTypewrite?: boolean
+}
+
+export const useOutputHandler = ({
+    initialOutput,
+    shouldTypewrite = false,
+}: OutputHandlerProps): UseOutputHandler => {
     const [outputQueue, setOutputQueue] = useState<CommandToOutput[]>([
-        { action: 'add', value: initial },
+        { action: 'add', value: initialOutput },
     ])
-    const [outputHistory, setOutputHistory] = useState<string[]>([])
+    const [output, setOutput] = useState<string[]>([])
     const [lastOutput, setLastOutput] = useState<string[]>([])
     const [isTypewriting, setIsTypewriting] = useState(false)
     const [typeInterval, setTypeInterval] = useState(10)
 
-    // const changeOutputHistory = (value: string[]) => {
+    // const changeOutput = (value: string[]) => {
     //     setOutputHistory(value)
     // }
 
-    const addToHistory = (value: string[] | string) => {
+    const addToOutput = (value: string[] | string) => {
         if (typeof value === 'string') {
-            setOutputHistory((prev) => [...prev, value])
+            setOutput((prev) => [...prev, value])
         } else {
-            setOutputHistory((prev) => [...prev, ...value])
+            setOutput((prev) => [...prev, ...value])
         }
     }
 
-    const removeFromHistory = useCallback(
+    const removeFromOutput = useCallback(
         (value: number) => {
-            const newHistory = [...outputHistory]
-            newHistory.splice(0 - value)
-            setOutputHistory(newHistory)
+            const newOutput = [...output]
+            newOutput.splice(0 - value)
+            setOutput(newOutput)
         },
-        [outputHistory]
+        [output]
     )
 
-    const clearHistory = () => {
-        setOutputHistory([])
+    const clearOutput = () => {
+        setOutput([])
     }
 
     const addToQueue = (actions: CommandToOutput[]) => {
@@ -68,13 +76,17 @@ export const useOutputHandler = (initial: string[]): UseOutputHandler => {
     }
 
     const endTypewriting = () => {
-        setOutputHistory((prev) => [...prev, ...lastOutput])
+        setOutput((prev) => [...prev, ...lastOutput])
         setLastOutput([])
         setIsTypewriting(false)
     }
 
-    const changeLastOutput = (value: string[]) => {
-        setLastOutput(value)
+    const changeLastOutput = (value: string | string[]) => {
+        if (typeof value === 'string') {
+            setLastOutput((prev) => [...prev, value])
+        } else {
+            setLastOutput((prev) => [...prev, ...value])
+        }
     }
 
     const changeTypeInterval = (value: number) => {
@@ -85,18 +97,18 @@ export const useOutputHandler = (initial: string[]): UseOutputHandler => {
         if (outputQueue.length > 0 && !isTypewriting) {
             switch (outputQueue[0].action) {
                 case 'add':
-                    startTypewriting()
-                    if (typeof outputQueue[0].value === 'string') {
-                        changeLastOutput([outputQueue[0].value])
-                    } else {
+                    if (shouldTypewrite) {
+                        startTypewriting()
                         changeLastOutput(outputQueue[0].value)
+                    } else {
+                        addToOutput(outputQueue[0].value)
                     }
                     break
                 case 'remove':
-                    removeFromHistory(outputQueue[0].value)
+                    removeFromOutput(outputQueue[0].value)
                     break
                 case 'clear':
-                    clearHistory()
+                    clearOutput()
                     break
                 default:
             }
@@ -104,14 +116,14 @@ export const useOutputHandler = (initial: string[]): UseOutputHandler => {
             newQueue.shift()
             setOutputQueue(newQueue)
         }
-    }, [outputQueue, isTypewriting, removeFromHistory])
+    }, [outputQueue, isTypewriting, removeFromOutput, shouldTypewrite])
 
     return {
-        outputHistory,
+        output,
         // changeOutputHistory,
-        addToHistory,
-        removeFromHistory,
-        // clearHistory,
+        addToOutput,
+        removeFromOutput,
+        clearOutput,
         outputQueue,
         addToQueue,
         lastOutput,

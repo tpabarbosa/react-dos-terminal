@@ -1,20 +1,17 @@
 import { useState } from 'react'
 import { useCommand } from '../../contexts/CommandContext'
-import { UseOutputHandler } from '../useOutputHandler'
+import { useTerminal } from '../../contexts/TerminalContext'
 import { Machine, useStateMachine } from './useStateMachine'
 
 export type MainState = 'IDDLE' | 'RUNNING_COMMAND'
 export type MainAction = 'NEW_CMD' | 'FINISH_CMD'
 
-interface UseMachineProps {
-    outputHandler: UseOutputHandler
-}
-
-export const useMainMachine = ({ outputHandler }: UseMachineProps) => {
+export const useMainMachine = () => {
+    const terminal = useTerminal()
     const command = useCommand()
     const { isRunningCommand, endRunningCommand, setActualCmd } = command
-    const { outputQueue } = outputHandler
-    const { isTypewriting } = outputHandler.typewriter
+    const { outputQueue } = terminal.output
+    const { isTypewriting } = terminal.output.typewriter
 
     const [type, setType] = useState('')
 

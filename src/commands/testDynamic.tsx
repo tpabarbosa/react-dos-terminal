@@ -5,18 +5,17 @@ import Output from '../components/Output'
 import { Command, CommandProps, useCommand } from '../contexts/CommandContext'
 import colorsHelper from '../helpers/colors'
 import { useInput } from '../hooks/useInput'
-import { UseOutputHandler } from '../hooks/useOutputHandler'
 import { CommandScreen } from '../components/CommandScreen'
+import { useTerminal } from '../contexts/TerminalContext'
 
 export const TestDynamicOutput = ({
     name,
     args,
-    outputHandler,
 }: {
     name: string
     args: string
-    outputHandler?: UseOutputHandler
 }) => {
+    const terminal = useTerminal()
     const command = useCommand()
     const input = useInput()
 
@@ -35,15 +34,13 @@ export const TestDynamicOutput = ({
                 '',
             ]
 
-            if (outputHandler) {
-                const linesToRemove = args === 'with-output' ? 2 : 4
-                outputHandler.addToQueue([
-                    args === 'with-output'
-                        ? { action: 'clear' }
-                        : { action: 'remove', value: linesToRemove },
-                    { action: 'add', value: toOutput },
-                ])
-            }
+            const linesToRemove = args === 'with-output' ? 2 : 4
+            terminal.output.addToQueue([
+                args === 'with-output'
+                    ? { action: 'clear' }
+                    : { action: 'remove', value: linesToRemove },
+                { action: 'add', value: toOutput },
+            ])
             command.endRunningCommand()
         }
     }

@@ -2,12 +2,14 @@ import React, { createContext, useContext, useMemo, useReducer } from 'react'
 import { TerminalColors } from '../components/Terminal'
 import { TerminalConfig } from '../config'
 import ls from '../helpers/localStorage'
+import { useOutputHandler, UseOutputHandler } from '../hooks/useOutputHandler'
 
 export type TerminalConfigAction =
     | { config: 'setColors'; value: TerminalColors }
     | { config: 'isActive'; value: boolean }
 
 export interface TerminalContextAPI extends TerminalState {
+    output: UseOutputHandler
     setConfig: ({ config, value }: TerminalConfigAction) => void
     userHasInteracted: () => void
 }
@@ -31,6 +33,11 @@ export const TerminalContextProvider = ({
     children,
     config,
 }: TerminalProviderProps) => {
+    const output = useOutputHandler({
+        initialOutput: config.initialOutput,
+        shouldTypewrite: config.shouldTypewrite,
+    })
+
     const terminalInitialState: TerminalState = {
         colors: config.colors,
         showOldScreenEffect: config.showOldScreenEffect,
@@ -56,6 +63,7 @@ export const TerminalContextProvider = ({
     const t = useMemo(() => {
         return {
             ...state,
+            output,
             userHasInteracted: () => {
                 dispatch({ config: 'isActive', value: true })
             },
@@ -65,7 +73,7 @@ export const TerminalContextProvider = ({
                 }
             },
         }
-    }, [state])
+    }, [state, output])
 
     return (
         <TerminalContext.Provider value={t}>

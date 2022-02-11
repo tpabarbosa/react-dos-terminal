@@ -66,7 +66,8 @@ export const App = () => {
             showOldScreenEffect: false,
             //autoFocus: false,
             initialOutput: ['This is my <span style="color: green">custom</span> terminal', ''],
-            formatPrompt: '$d$s$t$_$p$g'
+            formatPrompt: '$d$s$t$_$p$g',
+            //shouldTypewrite: false
         },
         
         loadingScreen: {

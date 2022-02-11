@@ -12,19 +12,14 @@ import commandsHelper from '../helpers/commands'
 
 import fileSystemHelper from '../helpers/filesystem'
 import { MainAction, MainState } from './machines/useMainMachine'
-import { UseOutputHandler } from './useOutputHandler'
 
 type UseCommandsHandlerProps = {
     state: MainState
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     action: (action: MainAction, arg?: any) => void
-    outputHandler: UseOutputHandler
 }
 
-export const useCommandsHandler = ({
-    action,
-    outputHandler,
-}: UseCommandsHandlerProps) => {
+export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
     const terminal = useTerminal()
     const filesystem = useFileSystem()
     const command = useCommand()
@@ -60,7 +55,7 @@ export const useCommandsHandler = ({
         }
         const { name, args, isHelp } = getNameAndArgs(cmd)
 
-        outputHandler.addToHistory(
+        terminal.output.addToOutput(
             `${fileSystemHelper.formatPrompt(
                 terminal.formatPrompt,
                 actualDir
@@ -91,7 +86,7 @@ export const useCommandsHandler = ({
             }
 
             if (response.output) {
-                outputHandler.addToQueue(response.output)
+                terminal.output.addToQueue(response.output)
             }
 
             if (!waitingMessage) command.startRunningCommand()
@@ -106,7 +101,7 @@ export const useCommandsHandler = ({
         const runAction = async (cm: FakeCommand) => {
             const waitingMessage = cm?.async?.waitingMessage
             if (waitingMessage) {
-                outputHandler.addToQueue([
+                terminal.output.addToQueue([
                     { action: 'add', value: waitingMessage },
                 ])
                 action('NEW_CMD', 'async')

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useTerminal } from '../contexts/TerminalContext'
 import { useCommandsHistory } from '../hooks/useCommandsHistory'
 import { useInput } from '../hooks/useInput'
-import { useOutputHandler } from '../hooks/useOutputHandler'
 import Input from './Input'
 import Output from './Output'
 import { TerminalScreen } from './TerminalScreen'
@@ -13,7 +12,7 @@ import { useCommand } from '../contexts/CommandContext'
 import fileSystemHelper from '../helpers/filesystem'
 import { useFileSystem } from '../contexts/FileSystemContext'
 
-export const Main = ({ initialOutput }: { initialOutput: string[] }) => {
+export const Main = () => {
     const [hideOutput, setHideOutput] = useState(false)
     const terminal = useTerminal()
 
@@ -25,11 +24,10 @@ export const Main = ({ initialOutput }: { initialOutput: string[] }) => {
 
     const input = useInput()
     const commandsHistory = useCommandsHistory({ input: input.ref })
-    const outputHandler = useOutputHandler(initialOutput)
 
-    const { state, action } = useMainMachine({ outputHandler })
+    const { state, action } = useMainMachine()
 
-    const commandsHandler = useCommandsHandler({ state, action, outputHandler })
+    const commandsHandler = useCommandsHandler({ state, action })
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (!terminal.isActive) {
@@ -72,19 +70,16 @@ export const Main = ({ initialOutput }: { initialOutput: string[] }) => {
         <TerminalScreen onClick={() => input && input.setFocus()}>
             {!hideOutput && (
                 <Output>
-                    <Output.Typewriter output={outputHandler} />
+                    <Output.Typewriter output={terminal.output} />
                 </Output>
             )}
 
             {state === 'RUNNING_COMMAND' && dynamic && (
-                <UserDefinedElement
-                    element={dynamic?.element}
-                    outputHandler={outputHandler}
-                />
+                <UserDefinedElement element={dynamic?.element} />
             )}
 
             {state !== 'RUNNING_COMMAND' &&
-                !outputHandler.typewriter.isTypewriting && (
+                !terminal.output.typewriter.isTypewriting && (
                     <Input
                         onKeyUp={handleKeyUp}
                         id="terminal_input"
