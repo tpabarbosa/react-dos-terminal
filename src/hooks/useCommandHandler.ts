@@ -24,7 +24,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
     const filesystem = useFileSystem()
     const command = useCommand()
     const { messages, shouldAllowHelp, allCommands } = command
-    const { actualDir, allFiles: files } = filesystem
+    const { actualDir, files, totalSize } = filesystem
 
     const run = async (cmd: string) => {
         const getNameAndArgs = (c: string) => {
@@ -67,7 +67,15 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             return
         }
 
-        const props = { name, args, allCommands, messages, actualDir, files }
+        const props = {
+            name,
+            args,
+            allCommands,
+            messages,
+            actualDir,
+            files,
+            totalSize,
+        }
 
         const dispatch = (response: Command) => {
             command.setActualCmd({
@@ -98,12 +106,15 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         }
 
         const runAction = async (cm: FakeCommand) => {
+            const isAsync = cm?.async
             const waitingMessage = cm?.async?.waitingMessage
+            if (isAsync) {
+                action('NEW_CMD', 'async')
+            }
             if (waitingMessage) {
                 terminal.output.addToQueue([
                     { action: 'add', value: waitingMessage },
                 ])
-                action('NEW_CMD', 'async')
             }
 
             if (cm.action) {
@@ -112,14 +123,11 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 return
             }
 
-            dispatch(commandsHelper.commandNotFound(props))
-        }
-
-        const runHelp = (cm: FakeCommand) => {
-            if (cm.help) {
-                dispatch(help({ ...props, name: 'help', args: name }))
-            } else {
-                dispatch(commandsHelper.helpNotAvailable(props))
+            if (commandsHelper.commandNotFound.action) {
+                const response = await commandsHelper.commandNotFound.action(
+                    props
+                )
+                dispatch(response)
             }
         }
 
@@ -129,41 +137,17 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             }
 
             const pathsToSearch = [actualDir, '', '\\system']
+            const file = fileSystemHelper.getFile(files, p.name, pathsToSearch)
 
-            const c = pathsToSearch.reduce((acc, path) => {
-                if (_.isEmpty(acc)) {
-                    const dirContent = fileSystemHelper.getDir(files, path)
-
-                    if (dirContent && dirContent.files) {
-                        if (
-                            dirContent.files[p.name] &&
-                            (dirContent.files[p.name].t === 'e' ||
-                                dirContent.files[p.name].t === 's')
-                        ) {
-                            return dirContent.files[p.name].c as FakeCommand
-                        }
-                        if (
-                            dirContent.files[`${p.name}.com`] &&
-                            (dirContent.files[`${p.name}.com`].t === 'e' ||
-                                dirContent.files[`${p.name}.com`].t === 's')
-                        ) {
-                            return dirContent.files[`${p.name}.com`]
-                                .c as FakeCommand
-                        }
-                        if (
-                            dirContent.files[`${props.name}.exe`] &&
-                            (dirContent.files[`${props.name}.exe`].t === 'e' ||
-                                dirContent.files[`${props.name}.exe`].t === 's')
-                        ) {
-                            return dirContent.files[`${props.name}.exe`]
-                                .c as FakeCommand
-                        }
-                    }
+            if (file) {
+                if (
+                    file.type === 'application/executable' ||
+                    file.type === 'application/system'
+                ) {
+                    return file.content as FakeCommand
                 }
-                return acc
-            }, {} as FakeCommand)
-            if (!_.isEmpty(c)) {
-                return c
+
+                return commandsHelper.cantBeExecuted
             }
 
             return null
@@ -176,26 +160,21 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                     a.toLowerCase().includes(name.toLowerCase())
                 )
         )
-
+        if (isHelp) {
+            dispatch(await help({ ...props, name: 'help', args: name }))
+            return
+        }
         if (terminalCommand[0]) {
             // try internal commands
-            if (isHelp) {
-                runHelp(terminalCommand[0])
-                return
-            }
             runAction(terminalCommand[0])
         } else {
             // try exec-files
             const executableCommand = executable(props)
             if (executableCommand) {
-                if (isHelp) {
-                    runHelp(terminalCommand[0])
-                    return
-                }
                 runAction(executableCommand)
             } else {
                 // is not a valid command
-                dispatch(commandsHelper.commandNotFound(props))
+                runAction(commandsHelper.commandNotFound)
             }
         }
     }

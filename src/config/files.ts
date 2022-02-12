@@ -30,49 +30,43 @@ import { commandsList } from './commands'
 export const files: FakeFile[] = [
     {
         name: 'readme.txt',
-        type: 'file',
+        type: 'text/plain',
         content: reactDosTerminal.help,
-        attributes: 's',
+        attributes: 'p',
     },
     {
         name: 'system',
         type: 'directory',
-        attributes: 's',
+        attributes: 'p',
         content: [
             {
                 name: 'doskey.exe',
-                type: 'system-file',
-                attributes: 'sh',
-                content: {
-                    name: 'doskey',
-                    action: commandsHelper.cantBeExecuted,
-                },
-                fakeFileSize: fileSystemHelper.getFakeFileSize([
+                type: 'application/system',
+                attributes: 'ph',
+                content: commandsHelper.isAlreadyRunning,
+                size: fileSystemHelper.getFakeFileSize([
                     useCommandsHistory,
                     useCaretHandler,
                 ]),
             },
             {
                 name: 'help.com',
-                type: 'exec-file',
-                attributes: 's',
+                type: 'application/executable',
+                attributes: 'p',
                 content: {
                     name: 'help',
                     action: help,
                 },
-                fakeFileSize: fileSystemHelper.getFakeFileSize(help),
+                size: fileSystemHelper.getFakeFileSize(help),
             },
         ],
     },
     {
         name: 'command.com',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'command',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize:
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.isAlreadyRunning,
+        size:
             fileSystemHelper.getCommandsSize(commandsList) +
             fileSystemHelper.getFakeFileSize([
                 useCommandsHandler,
@@ -84,13 +78,10 @@ export const files: FakeFile[] = [
     },
     {
         name: 'io.sys',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'io',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize: fileSystemHelper.getFakeFileSize([
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.cantBeExecuted,
+        size: fileSystemHelper.getFakeFileSize([
             Main,
             TerminalScreen,
             TerminalContextProvider,
@@ -101,13 +92,10 @@ export const files: FakeFile[] = [
     },
     {
         name: 'msdos.sys',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'msdos',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize: fileSystemHelper.getFakeFileSize([
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.cantBeExecuted,
+        size: fileSystemHelper.getFakeFileSize([
             useFileSystem,
             FileSystemContextProvider,
             () => fileSystemHelper,

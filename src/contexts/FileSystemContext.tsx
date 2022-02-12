@@ -2,27 +2,23 @@ import React, { createContext, useContext, useMemo, useReducer } from 'react'
 import ls from '../helpers/localStorage'
 import { FakeCommand } from './CommandContext'
 
-export type FakeAttributes = 'r' | 'rh' | 'w' | 'wh' | 's' | 'sh'
-export type FakeFileTypes = 'file' | 'directory' | 'exec-file' | 'system-file'
-export type FakeFileTypesAbr = 'f' | 'd' | 'e' | 's'
+export type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph'
+export type FakeFileType =
+    | 'text/plain'
+    | 'directory'
+    | 'application/executable'
+    | 'application/system'
 
 export interface FakeFile {
     name: string
-    type: FakeFileTypes
+    type: FakeFileType
     content: string | string[] | FakeFile[] | FakeCommand
-    attributes: FakeAttributes
-    fakeFileSize?: number
+    attributes: FakeAttribute
+    size?: number
 }
 
 export type FakeFileSystem = {
-    files: {
-        [name: string]: {
-            c: string | string[] | FakeFileSystem | FakeCommand
-            a: FakeAttributes
-            t: FakeFileTypesAbr
-            s: number
-        }
-    }
+    files: FakeFile[]
     totalSize: number
 }
 export interface FileSystemContextAPI extends FileSystemState {
@@ -30,9 +26,8 @@ export interface FileSystemContextAPI extends FileSystemState {
     setActualDir: (value: string) => void
 }
 
-export interface FileSystemState {
+export interface FileSystemState extends FakeFileSystem {
     actualDir: string
-    allFiles: FakeFileSystem
 }
 
 export interface FileSystemProviderProps {
@@ -54,7 +49,8 @@ export const FileSystemContextProvider = ({
 }: FileSystemProviderProps): JSX.Element => {
     const fileSystemInitialState: FileSystemState = {
         actualDir: config.actualDir,
-        allFiles: config.allFiles,
+        files: config.files,
+        totalSize: config.totalSize,
     }
 
     const reducer = (state: FileSystemState, action: FileSystemAction) => {

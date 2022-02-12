@@ -1,5 +1,5 @@
 import React from 'react'
-import { defaults, TerminalDefaults } from '../config'
+import { TerminalDefaults } from '../config'
 import { TerminalContextProvider } from '../contexts/TerminalContext'
 import { AllowedColors } from '../helpers/colors'
 import { useInitializer } from '../hooks/useInitializer'
@@ -38,7 +38,10 @@ const LoadingScreen = ({
         return [] as string[]
     }
 
-    const output = useOutputHandler(getContent())
+    const output = useOutputHandler({
+        initialOutput: getContent(),
+        shouldTypewrite: true,
+    })
 
     return (
         <>
@@ -50,7 +53,7 @@ const LoadingScreen = ({
                 </TerminalScreen>
             )}
             {React.isValidElement(content) && (
-                <UserDefinedElement element={content} outputHandler={output} />
+                <UserDefinedElement element={content} />
             )}
         </>
     )
@@ -59,11 +62,6 @@ const LoadingScreen = ({
 const Terminal = ({ config }: TerminalProps) => {
     const initializer = useInitializer(config)
     const loadingScreen = useLoadingScreen(config?.loadingScreen)
-
-    const initialOutput =
-        config?.terminal?.initialOutput !== undefined
-            ? (config?.terminal?.initialOutput as string[])
-            : (defaults?.terminal?.initialOutput as string[])
 
     return (
         <React.StrictMode>
@@ -78,7 +76,7 @@ const Terminal = ({ config }: TerminalProps) => {
                                 <CommandContextProvider
                                     config={initializer.commands}
                                 >
-                                    <Main initialOutput={initialOutput} />
+                                    <Main />
                                 </CommandContextProvider>
                             </FileSystemContextProvider>
                         )}

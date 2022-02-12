@@ -24,6 +24,7 @@ export interface CommandsMessages {
     notFound: string
     cantBeExecuted: string
     helpNotAvailable: string
+    isAlreadyRunning: string
 }
 export interface CommandsConfig {
     customCommands: FakeCommand[]
@@ -79,6 +80,7 @@ export const defaults: TerminalDefaults = {
             notFound: `Error: "%n" is not a valid command.`,
             cantBeExecuted: `Error: "%n" can't be executed.`,
             helpNotAvailable: `Error: "%n" doesn't have any help available.`,
+            isAlreadyRunning: `Error: "%n" is already running.`,
         },
     },
     fileSystem: {

@@ -2,27 +2,15 @@
 import * as React from 'react';
 import React__default, { MouseEvent, FormEvent, KeyboardEvent } from 'react';
 
-declare type FakeAttributes = 'r' | 'rh' | 'w' | 'wh' | 's' | 'sh';
-declare type FakeFileTypes = 'file' | 'directory' | 'exec-file' | 'system-file';
-declare type FakeFileTypesAbr = 'f' | 'd' | 'e' | 's';
+declare type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph';
+declare type FakeFileType = 'text/plain' | 'directory' | 'application/executable' | 'application/system';
 interface FakeFile {
     name: string;
-    type: FakeFileTypes;
+    type: FakeFileType;
     content: string | string[] | FakeFile[] | FakeCommand;
-    attributes: FakeAttributes;
-    fakeFileSize?: number;
+    attributes: FakeAttribute;
+    size?: number;
 }
-declare type FakeFileSystem = {
-    files: {
-        [name: string]: {
-            c: string | string[] | FakeFileSystem | FakeCommand;
-            a: FakeAttributes;
-            t: FakeFileTypesAbr;
-            s: number;
-        };
-    };
-    totalSize: number;
-};
 
 interface FakeCommand {
     name: string;
@@ -37,7 +25,8 @@ interface CommandProps {
     name: string;
     args: string;
     actualDir: string;
-    files: FakeFileSystem;
+    files: FakeFile[];
+    totalSize: number;
     allCommands: FakeCommand[];
     messages: CommandsMessages;
 }
@@ -104,6 +93,7 @@ interface CommandsMessages {
     notFound: string;
     cantBeExecuted: string;
     helpNotAvailable: string;
+    isAlreadyRunning: string;
 }
 interface CommandsConfig {
     customCommands: FakeCommand[];
@@ -147,7 +137,8 @@ declare const Terminal: ({ config }: TerminalProps) => JSX.Element;
 
 declare const fileSystemHelper: {
     getFakeFileSize: (func: ((...args: never) => unknown)[] | ((...args: never) => unknown)) => number;
-    getDir: (files: FakeFileSystem, dirPath: string) => FakeFileSystem | null;
+    getDir: (files: FakeFile[], dirPath: string) => FakeFile[] | null;
+    getFile: (files: FakeFile[], name: string, pathsToSearch: string[], matchFullName?: boolean) => FakeFile | null;
     getCommandsSize: (commands: FakeCommand[]) => number;
     fullDirPath: (dir: string) => string;
     formatPrompt: (prompt: string, dir: string) => string;

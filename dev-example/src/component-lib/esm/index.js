@@ -1,7 +1,7 @@
-/* Version: 0.1.4 - February 11, 2022 08:15:01 */
+/* Version: 0.1.4 - February 12, 2022 15:52:23 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useCallback, useEffect, createContext, useReducer, useMemo, useContext, forwardRef, useRef, createRef, createElement } from 'react';
-import _ from 'lodash';
+import _, { split } from 'lodash';
 import styled, { css, keyframes, createGlobalStyle } from 'styled-components';
 
 /*! *****************************************************************************
@@ -94,48 +94,6 @@ function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 }
-
-var defaults = {
-    shouldPersisteUserData: true,
-    loadingScreen: {
-        showLoadingScreen: 'first-time',
-        messageOrElement: [
-            'Installing IOS react-dos-terminal',
-            '',
-            'Please wait...',
-            '',
-        ],
-        loadingTime: 5000,
-    },
-    terminal: {
-        colors: {
-            background: '#000000',
-            color: '#aaaaaa',
-        },
-        autoFocus: true,
-        showOldScreenEffect: true,
-        initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
-        formatPrompt: '$p$g',
-        shouldTypewrite: true,
-    },
-    commands: {
-        customCommands: [],
-        excludeInternalCommands: [],
-        shouldAllowHelp: true,
-        messages: {
-            toBeImplemented: "Error: \"%n\" command hasn't been implemented.",
-            notFound: "Error: \"%n\" is not a valid command.",
-            cantBeExecuted: "Error: \"%n\" can't be executed.",
-            helpNotAvailable: "Error: \"%n\" doesn't have any help available.",
-        },
-    },
-    fileSystem: {
-        customFiles: [],
-        initialDir: '',
-        useFakeFileSystem: true,
-        excludeInternalFiles: false,
-    },
-};
 
 var _a;
 var localStorageKey = (_a = process.env.REACT_APP_NAME) !== null && _a !== void 0 ? _a : 'react-dos-terminal';
@@ -306,6 +264,49 @@ var useTerminal = function () {
         throw new Error("useTerminal must be used within a TerminalContextProvider.");
     }
     return ctx;
+};
+
+var defaults = {
+    shouldPersisteUserData: true,
+    loadingScreen: {
+        showLoadingScreen: 'first-time',
+        messageOrElement: [
+            'Installing IOS react-dos-terminal',
+            '',
+            'Please wait...',
+            '',
+        ],
+        loadingTime: 5000,
+    },
+    terminal: {
+        colors: {
+            background: '#000000',
+            color: '#aaaaaa',
+        },
+        autoFocus: true,
+        showOldScreenEffect: true,
+        initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
+        formatPrompt: '$p$g',
+        shouldTypewrite: true,
+    },
+    commands: {
+        customCommands: [],
+        excludeInternalCommands: [],
+        shouldAllowHelp: true,
+        messages: {
+            toBeImplemented: "Error: \"%n\" command hasn't been implemented.",
+            notFound: "Error: \"%n\" is not a valid command.",
+            cantBeExecuted: "Error: \"%n\" can't be executed.",
+            helpNotAvailable: "Error: \"%n\" doesn't have any help available.",
+            isAlreadyRunning: "Error: \"%n\" is already running.",
+        },
+    },
+    fileSystem: {
+        customFiles: [],
+        initialDir: '',
+        useFakeFileSystem: true,
+        excludeInternalFiles: false,
+    },
 };
 
 /*! @license DOMPurify 2.3.5 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.3.5/LICENSE */
@@ -1774,18 +1775,55 @@ var fullDirPath = function (dir) {
 var getDir = function (files, dirPath) {
     var parts = dirPath.split('\\');
     var obj = files;
-    for (var i = 0; i < parts.length; i += 1) {
+    var _loop_1 = function (i) {
         if (parts[i] === '') {
-            continue;
+            return "continue";
         }
-        if (obj.files[parts[i]]) {
-            obj = obj.files[parts[i]].c;
+        var test = obj.find(function (c) { return c.name === parts[i]; });
+        if (test) {
+            obj = test.content;
         }
         else {
-            return null;
+            return { value: null };
         }
+    };
+    for (var i = 0; i < parts.length; i += 1) {
+        var state_1 = _loop_1(i);
+        if (typeof state_1 === "object")
+            return state_1.value;
     }
     return obj;
+};
+var getFile = function (files, name, pathsToSearch, matchFullName) {
+    if (matchFullName === void 0) { matchFullName = false; }
+    var regexAttrib = /(.+?)(\.[^.]*$|$)/;
+    var c = pathsToSearch.reduce(function (acc, path) {
+        if (_.isEmpty(acc)) {
+            var dirContent = getDir(files, path);
+            if (dirContent) {
+                var fileName_1 = name;
+                var file = void 0;
+                if (!matchFullName) {
+                    file = dirContent.find(function (f) {
+                        var match = f.name.match(regexAttrib);
+                        return (match &&
+                            (match[0] === fileName_1 || match[1] === fileName_1));
+                    });
+                }
+                else {
+                    file = dirContent.find(function (f) { return f.name === name; });
+                }
+                if (file) {
+                    return file;
+                }
+            }
+        }
+        return acc;
+    }, {});
+    if (!_.isEmpty(c)) {
+        return c;
+    }
+    return null;
 };
 var getFakeFileSize = function (func) {
     if (typeof func === 'function') {
@@ -1812,6 +1850,7 @@ var getCommandsSize = function (commands) {
 var fileSystemHelper = {
     getFakeFileSize: getFakeFileSize,
     getDir: getDir,
+    getFile: getFile,
     getCommandsSize: getCommandsSize,
     fullDirPath: fullDirPath,
     formatPrompt: formatPrompt,
@@ -2028,7 +2067,7 @@ var help$4 = [
     '',
 ];
 var run$4 = function (_a) {
-    var args = _a.args, files = _a.files, actualDir = _a.actualDir;
+    var args = _a.args, files = _a.files, actualDir = _a.actualDir, totalSize = _a.totalSize;
     var device = function () {
         var dvc = navigator.userAgent.match(/(MSIE|(?!Gecko.+)Firefox|(?!AppleWebKit.+Chrome.+)Safari|(?!AppleWebKit.+)Chrome|AppleWebKit(?!.+Chrome|.+Safari)|Gecko(?!.+Firefox))(?: |\/)([\d.apre]+)/);
         return dvc !== null && dvc !== void 0 ? dvc : 'OS';
@@ -2045,9 +2084,9 @@ var run$4 = function (_a) {
             '',
         ];
     };
-    var getFinalOutput = function (f, filesNumber, dirsNumber, size) {
+    var getFinalOutput = function (filesNumber, dirsNumber, size) {
         var _a;
-        var freeSize = (4194304 - f.totalSize).toLocaleString('en-US', {
+        var freeSize = (4194304 - totalSize).toLocaleString('en-US', {
             minimumFractionDigits: 0,
         });
         return [
@@ -2058,38 +2097,37 @@ var run$4 = function (_a) {
             '',
         ];
     };
-    var output = function (f, finalPath, content, showHidden) {
+    var output = function (finalPath, content, showHidden) {
         var filesNumber = 0;
         var dirsNumber = 0;
         var size = 0;
         var space = ' ';
-        if (!content.files) {
-            return __spreadArray(__spreadArray([], getInitialOutput(finalPath), true), getFinalOutput(f, filesNumber, dirsNumber, size), true);
+        if (_.isEmpty(content)) {
+            return __spreadArray(__spreadArray([], getInitialOutput(finalPath), true), getFinalOutput(filesNumber, dirsNumber, size), true);
         }
-        var dirContent = Object.keys(content.files).reduce(function (acc, item) {
+        var dirContent = content.reduce(function (acc, item) {
+            var _a, _b;
             var text = '';
-            if (showHidden || content.files[item].a[1] !== 'h') {
-                if (content.files[item].t === 'f' ||
-                    content.files[item].t === 'e' ||
-                    content.files[item].t === 's') {
+            if (showHidden || item.attributes[1] !== 'h') {
+                if (item.type !== 'directory') {
                     filesNumber += 1;
-                    size += content.files[item].s;
-                    text = "".concat(item).concat(space.repeat(28 - item.length)).concat(content.files[item].s.toLocaleString('en-US', {
+                    size += (_a = item.size) !== null && _a !== void 0 ? _a : 0;
+                    text = "".concat(item.name).concat(space.repeat(28 - item.name.length)).concat((_b = item.size) === null || _b === void 0 ? void 0 : _b.toLocaleString('en-US', {
                         minimumFractionDigits: 0,
                     }));
                 }
                 else {
                     dirsNumber += 1;
-                    text = "".concat(item).concat(space.repeat(20 - item.length), "&ltDIR&gt");
+                    text = "".concat(item.name).concat(space.repeat(20 - item.name.length), "&ltDIR&gt");
                 }
                 acc.push(text);
             }
             return acc;
         }, []);
         if (!dirContent || _.isEmpty(dirContent)) {
-            return __spreadArray(__spreadArray([], getInitialOutput(finalPath), true), getFinalOutput(files, filesNumber, dirsNumber, size), true);
+            return __spreadArray(__spreadArray([], getInitialOutput(finalPath), true), getFinalOutput(filesNumber, dirsNumber, size), true);
         }
-        return __spreadArray(__spreadArray(__spreadArray([], getInitialOutput(finalPath), true), dirContent, true), getFinalOutput(files, filesNumber, dirsNumber, size), true);
+        return __spreadArray(__spreadArray(__spreadArray([], getInitialOutput(finalPath), true), dirContent, true), getFinalOutput(filesNumber, dirsNumber, size), true);
     };
     var showHidden = false;
     var regexAttrib = /\/a:([a-zA-Z]+)/;
@@ -2117,7 +2155,7 @@ var run$4 = function (_a) {
                 output: [
                     {
                         action: 'add',
-                        value: output(files, actualDir, content, showHidden),
+                        value: output(actualDir, content, showHidden),
                     },
                 ],
             };
@@ -2131,7 +2169,7 @@ var run$4 = function (_a) {
             var finalPath = path[0] === '\\' ? path : actualDir + path;
             var content = fileSystemHelper.getDir(files, finalPath);
             if (content) {
-                result = output(files, finalPath, content, showHidden);
+                result = output(finalPath, content, showHidden);
             }
         }
     });
@@ -2150,33 +2188,55 @@ var replaceName = function (name, message) {
     var msg = message === null || message === void 0 ? void 0 : message.replace('%n', name.toLowerCase());
     return msg === null || msg === void 0 ? void 0 : msg.replace('%N', name.toUpperCase());
 };
-var commandNotFound = function (_a) {
-    var name = _a.name, messages = _a.messages;
-    var msg = replaceName(name, messages.notFound);
-    return {
-        output: [{ action: 'add', value: [msg, ''] }],
-    };
+var commandNotFound = {
+    name: 'notfound',
+    action: function (_a) {
+        var name = _a.name, messages = _a.messages;
+        var msg = replaceName(name, messages.notFound);
+        return {
+            output: [{ action: 'add', value: [msg, ''] }],
+        };
+    },
 };
-var toBeImplemented = function (_a) {
-    var name = _a.name, messages = _a.messages;
-    var msg = replaceName(name, messages.toBeImplemented);
-    return {
-        output: [{ action: 'add', value: [msg, ''] }],
-    };
+var toBeImplemented = {
+    name: 'toBeImplemented',
+    action: function (_a) {
+        var name = _a.name, messages = _a.messages;
+        var msg = replaceName(name, messages.toBeImplemented);
+        return {
+            output: [{ action: 'add', value: [msg, ''] }],
+        };
+    },
 };
-var cantBeExecuted = function (_a) {
-    var name = _a.name, messages = _a.messages;
-    var msg = replaceName(name, messages.cantBeExecuted);
-    return {
-        output: [{ action: 'add', value: [msg, ''] }],
-    };
+var cantBeExecuted = {
+    name: 'cantBeExecuted',
+    action: function (_a) {
+        var name = _a.name, messages = _a.messages;
+        var msg = replaceName(name, messages.cantBeExecuted);
+        return {
+            output: [{ action: 'add', value: [msg, ''] }],
+        };
+    },
 };
-var helpNotAvailable = function (_a) {
-    var name = _a.name, messages = _a.messages;
-    var msg = replaceName(name, messages.helpNotAvailable);
-    return {
-        output: [{ action: 'add', value: [msg, ''] }],
-    };
+var helpNotAvailable = {
+    name: 'helpNotAvailable',
+    action: function (_a) {
+        var name = _a.name, messages = _a.messages;
+        var msg = replaceName(name, messages.helpNotAvailable);
+        return {
+            output: [{ action: 'add', value: [msg, ''] }],
+        };
+    },
+};
+var isAlreadyRunning = {
+    name: 'isAlreadyRunning',
+    action: function (_a) {
+        var name = _a.name, messages = _a.messages;
+        var msg = replaceName(name, messages.isAlreadyRunning);
+        return {
+            output: [{ action: 'add', value: [msg, ''] }],
+        };
+    },
 };
 var link = function (href, text) {
     return "<a href=\"".concat(href, "\" target=\"_blank\" >").concat(text, "</a>");
@@ -2186,64 +2246,85 @@ var commandsHelper = {
     toBeImplemented: toBeImplemented,
     cantBeExecuted: cantBeExecuted,
     helpNotAvailable: helpNotAvailable,
+    isAlreadyRunning: isAlreadyRunning,
     link: link,
 };
 
-var help$3 = function (props) {
-    var commands = props.allCommands;
-    var args = props.args;
-    if (!args) {
-        var output = commands.reduce(function (acc, command) {
-            if (command.help) {
-                acc.push(command.name.toUpperCase());
+var help$3 = function (props) { return __awaiter(void 0, void 0, void 0, function () {
+    var commands, args, files, actualDir, helpText, output, h, cmd, systemPaths, file;
+    return __generator(this, function (_a) {
+        commands = props.allCommands;
+        args = props.args, files = props.files, actualDir = props.actualDir;
+        helpText = function (cmd) {
+            if (cmd && cmd.help) {
+                if (typeof cmd.help === 'function') {
+                    return cmd.help();
+                }
+                return cmd.help;
             }
-            return acc;
-        }, []);
-        return {
-            output: [
-                {
-                    action: 'add',
-                    value: __spreadArray(__spreadArray([
-                        '',
-                        'HELP',
-                        '',
-                        "The HELP command is used to access the help for available commands.",
-                        '',
-                        "HELP [command]",
-                        "",
-                        "command\tDisplays help information on that command.",
-                        '',
-                        'Help is available for those commands:',
-                        ''
-                    ], output.sort(), true), [
-                        '',
-                    ], false),
-                },
-            ],
+            return '';
         };
-    }
-    var cmd = commands.filter(function (command) {
-        return command.name === args ||
-            (command.alias && command.alias.includes(args));
+        if (!args) {
+            output = commands.reduce(function (acc, command) {
+                if (command.help) {
+                    acc.push(command.name.toUpperCase());
+                }
+                return acc;
+            }, []);
+            return [2, {
+                    output: [
+                        {
+                            action: 'add',
+                            value: __spreadArray(__spreadArray([
+                                '',
+                                'HELP',
+                                '',
+                                "The HELP command is used to access the help for available commands.",
+                                '',
+                                "HELP [command]",
+                                "",
+                                "command\tDisplays help information on that command.",
+                                '',
+                                'Help is available for those commands:',
+                                ''
+                            ], output.sort(), true), [
+                                '',
+                            ], false),
+                        },
+                    ],
+                }];
+        }
+        cmd = commands.filter(function (command) {
+            return command.name === args ||
+                (command.alias && command.alias.includes(args));
+        });
+        h = helpText(cmd[0]);
+        if (_.isEmpty(h)) {
+            systemPaths = [actualDir, '', '\\system'];
+            file = fileSystemHelper.getFile(files, args, systemPaths);
+            if (file &&
+                (file.type === 'application/executable' ||
+                    file.type === 'application/system')) {
+                h = helpText(file.content);
+            }
+        }
+        if (!_.isEmpty(h)) {
+            return [2, {
+                    output: [
+                        { action: 'add', value: ['', args.toUpperCase(), ''] },
+                        { action: 'add', value: h },
+                        { action: 'add', value: [''] },
+                    ],
+                }];
+        }
+        if (commandsHelper.helpNotAvailable.action) {
+            return [2, commandsHelper.helpNotAvailable.action(__assign(__assign({}, props), { name: args }))];
+        }
+        return [2, {
+                output: [{ action: 'add', value: 'Error: Unknown error' }],
+            }];
     });
-    if (cmd[0] && cmd[0].help) {
-        var h = void 0;
-        if (typeof cmd[0].help === 'function') {
-            h = cmd[0].help();
-        }
-        else {
-            h = cmd[0].help;
-        }
-        return {
-            output: [
-                { action: 'add', value: ['', args.toUpperCase(), ''] },
-                { action: 'add', value: h },
-                { action: 'add', value: [''] },
-            ],
-        };
-    }
-    return helpNotAvailable(__assign(__assign({}, props), { name: args }));
-};
+}); };
 
 var hidden = function () {
     return {
@@ -2783,8 +2864,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var content = fileSystemHelper.getDir(files, actualDir);
-    var file = (content === null || content === void 0 ? void 0 : content.files[args]) ? content === null || content === void 0 ? void 0 : content.files[args] : false;
+    var file = fileSystemHelper.getFile(files, args, [actualDir], true);
     if (!file) {
         return {
             output: [
@@ -2792,7 +2872,8 @@ var run$1 = function (_a) {
             ],
         };
     }
-    if (file.t !== 'f') {
+    var fileType = split(file.type, '/');
+    if (fileType[0] !== 'text') {
         return {
             output: [
                 {
@@ -2813,10 +2894,10 @@ var run$1 = function (_a) {
             ],
         };
     }
-    if (typeof file.c === 'string') {
-        return { output: [{ action: 'add', value: ['', file.c, ''] }] };
+    if (typeof file.content === 'string') {
+        return { output: [{ action: 'add', value: ['', file.content, ''] }] };
     }
-    var cont = file.c;
+    var cont = file.content;
     return { output: [{ action: 'add', value: __spreadArray(__spreadArray([''], cont, true), [''], false) }] };
 };
 var type = { run: run$1, help: help$1 };
@@ -2837,12 +2918,12 @@ var run = function (_a) {
             ],
         };
     }
-    var version = '0.1.4 - February 11, 2022 08:15:01';
+    var version = '0.1.4 - February 12, 2022 15:52:23';
     return {
         output: [
             {
                 action: 'add',
-                value: ['', "react-dos-terminal version: ".concat(version), ''],
+                value: ['', "react-dos-terminal", "version: ".concat(version), ''],
             },
         ],
     };
@@ -2913,7 +2994,7 @@ var fileSystemCommands = [
     },
     {
         name: 'edit',
-        action: commandsHelper.toBeImplemented,
+        action: commandsHelper.toBeImplemented.action,
     },
 ];
 var fileSystemSubstituteCommands = [
@@ -2958,76 +3039,10 @@ var excludeCommands = function (commands, toExclude) {
     var finalCommands = commands.filter(function (command) { return !toExclude.includes(command.name); });
     return finalCommands;
 };
-var calcFileSize = function (name, file) {
-    var _a;
-    var filesize = (name.length + 3) * 2;
-    if (file.t === 'e' || file.t === 's') {
-        var x = file.c;
-        filesize += fileSystemHelper.getCommandsSize([x]);
-    }
-    else if (file.t === 'f') {
-        filesize += JSON.stringify(file.c).length * 2;
-    }
-    else {
-        var content = file.c;
-        filesize += (_a = content.totalSize) !== null && _a !== void 0 ? _a : 0;
-    }
-    return filesize;
-};
-var createFileSystemFromArray = function (files) {
-    var final = {};
-    var totalSize = 0;
-    var obj = files.reduce(function (acc, file) {
-        var _a;
-        var _b;
-        var contentDir = {};
-        var contentOther = '';
-        if (file.type === 'directory') {
-            contentDir = createFileSystemFromArray(file.content);
-        }
-        else if (file.type === 'file' && typeof file.content === 'string') {
-            contentOther = file.content;
-        }
-        else if (file.type === 'file' && typeof file.content !== 'string') {
-            contentOther = file.content;
-        }
-        else {
-            contentOther = file.content;
-        }
-        var newFileType;
-        if (file.type === 'directory') {
-            newFileType = 'd';
-        }
-        else if (file.type === 'file') {
-            newFileType = 'f';
-        }
-        else if (file.type === 'exec-file') {
-            newFileType = 'e';
-        }
-        else {
-            newFileType = 's';
-        }
-        var newContent = file.type === 'directory' ? contentDir : contentOther;
-        var fileObj = {
-            c: newContent,
-            a: file.attributes,
-            t: newFileType,
-        };
-        var fs = (_b = file.fakeFileSize) !== null && _b !== void 0 ? _b : 0;
-        var filesize = calcFileSize(file.name, fileObj) + fs;
-        totalSize += filesize;
-        acc.files = __assign(__assign({}, acc.files), (_a = {}, _a[file.name] = __assign(__assign({}, fileObj), { s: filesize }), _a));
-        acc.totalSize = totalSize;
-        return acc;
-    }, final);
-    return obj;
-};
 var renameEqualFiles = function (contentA, contentB) {
     var finalContent = __spreadArray([], contentA, true);
     contentB.forEach(function (file) {
-        if (file.type === 'file' ||
-            file.type === 'exec-file' ||
-            file.type === 'system-file') {
+        if (file.type !== 'directory') {
             var found = contentA.filter(function (fileA) { return fileA.name === file.name; });
             if (found[0]) {
                 var re = /(.+?)(\.[^.]*$|$)/;
@@ -3089,21 +3104,66 @@ var mergeEqualDirs = function (a, b) {
     });
     return mergedDirs;
 };
+var calcSize = function (file) {
+    var _a;
+    var filesize = (_a = file.size) !== null && _a !== void 0 ? _a : 0;
+    filesize += (file.name.length + 3) * 2;
+    if (file.type === 'application/executable' ||
+        file.type === 'application/system') {
+        var x = file.content;
+        filesize += fileSystemHelper.getCommandsSize([x]);
+    }
+    else if (file.type.includes('text/')) {
+        filesize += JSON.stringify(file.content).length * 2;
+    }
+    else {
+        var content = file.content;
+        var final = content.map(function (f) {
+            return __assign(__assign({}, f), { size: calcSize(f) });
+        });
+        var finalS = final.reduce(function (acc, f) {
+            return acc + f.size;
+        }, 0);
+        filesize += finalS !== null && finalS !== void 0 ? finalS : 0;
+    }
+    return filesize;
+};
+var getFilesWithSize = function (files) {
+    var finalFiles = files.map(function (file) {
+        if (file.type !== 'directory') {
+            return __assign(__assign({}, file), { size: calcSize(file) });
+        }
+        var dir = file.content;
+        var newContent = getFilesWithSize(dir);
+        return __assign(__assign({}, file), { content: newContent, size: calcSize(file) });
+    });
+    return finalFiles;
+};
 var createFakeFileSystem = function (internal, external) {
     if (!internal) {
-        return { files: {}, totalSize: 0 };
+        return { files: [], totalSize: 0 };
     }
     if (!external) {
-        return createFileSystemFromArray(internal);
+        var totalSize_1 = internal.reduce(function (acc, file) { var _a; return acc + ((_a = file.size) !== null && _a !== void 0 ? _a : 0); }, 0);
+        return { files: __spreadArray([], internal, true), totalSize: totalSize_1 };
     }
     var mergedDirs = mergeEqualDirs(internal, external);
     var content = renameEqualFiles(internal, external);
-    var int = createFileSystemFromArray(internal);
-    var ext = createFileSystemFromArray(external);
-    var cont = createFileSystemFromArray(content);
-    var dirs = createFileSystemFromArray(mergedDirs);
-    var files = __assign(__assign(__assign(__assign({}, int.files), ext.files), cont.files), dirs.files);
-    var totalSize = Object.values(files).reduce(function (acc, file) { return acc + file.s; }, 0);
+    var test = content.map(function (file) {
+        var equalD = mergedDirs.find(function (dir) { return dir.name === file.name; });
+        if (equalD && !_.isEmpty(equalD)) {
+            return equalD;
+        }
+        return file;
+    });
+    external.forEach(function (file) {
+        var equalExt = test.find(function (f) { return f.name === file.name; });
+        if (!equalExt || _.isEmpty(equalExt)) {
+            test.push(file);
+        }
+    });
+    var files = getFilesWithSize(test);
+    var totalSize = files.reduce(function (acc, file) { var _a; return acc + ((_a = file.size) !== null && _a !== void 0 ? _a : 0); }, 0);
     var result = { files: files, totalSize: totalSize };
     return result;
 };
@@ -3184,7 +3244,8 @@ var FileSystemContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
     var fileSystemInitialState = {
         actualDir: config.actualDir,
-        allFiles: config.allFiles,
+        files: config.files,
+        totalSize: config.totalSize,
     };
     var reducer = function (state, action) {
         switch (action.type) {
@@ -3221,159 +3282,149 @@ var useCommandsHandler = function (_a) {
     var filesystem = useFileSystem();
     var command = useCommand();
     var messages = command.messages, shouldAllowHelp = command.shouldAllowHelp, allCommands = command.allCommands;
-    var actualDir = filesystem.actualDir, files = filesystem.allFiles;
+    var actualDir = filesystem.actualDir, files = filesystem.files, totalSize = filesystem.totalSize;
     var run = function (cmd) { return __awaiter(void 0, void 0, void 0, function () {
-        var getNameAndArgs, _a, name, args, isHelp, props, dispatch, runAction, runHelp, executable, terminalCommand, executableCommand;
-        return __generator(this, function (_b) {
-            getNameAndArgs = function (c) {
-                var index = c.indexOf(' ');
-                var name = '';
-                var args = '';
-                var isHelp = false;
-                if (index !== -1) {
-                    name = c.substring(0, index).trim();
-                    args = c.substring(index + 1).trim();
-                }
-                else {
-                    name = c.trim();
-                }
-                if (shouldAllowHelp) {
-                    var reg = /\/\?/;
-                    if (reg.test(name) && name !== '/?') {
-                        isHelp = true;
-                        name = name.substring(0, name.length - 2);
-                    }
-                    else if (args === '/?') {
-                        isHelp = true;
-                    }
-                    else if (!reg.test(name) && name === '/?') {
-                        isHelp = true;
-                    }
-                }
-                return { name: name, args: args, isHelp: isHelp };
-            };
-            _a = getNameAndArgs(cmd), name = _a.name, args = _a.args, isHelp = _a.isHelp;
-            terminal.output.addToOutput("".concat(fileSystemHelper.formatPrompt(terminal.formatPrompt, actualDir), " ").concat(cmd));
-            if (name === '') {
-                command.setActualCmd(null);
-                return [2];
-            }
-            props = { name: name, args: args, allCommands: allCommands, messages: messages, actualDir: actualDir, files: files };
-            dispatch = function (response) {
-                command.setActualCmd(__assign({ name: name, args: args }, response));
-                if (response.configTerminal !== undefined) {
-                    if (response.configTerminal.config === 'setColors')
-                        terminal.setConfig(response.configTerminal);
-                    if (response.configTerminal.config === 'setActualDir') {
-                        filesystem.setActualDir(response.configTerminal.value);
-                    }
-                }
-                if (response.output) {
-                    terminal.output.addToQueue(response.output);
-                }
-                command.startRunningCommand();
-                if (response.dynamic) {
-                    action('NEW_CMD', 'dynamic');
-                    return;
-                }
-                action('NEW_CMD', 'static');
-            };
-            runAction = function (cm) { return __awaiter(void 0, void 0, void 0, function () {
-                var waitingMessage, response;
-                var _a;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            waitingMessage = (_a = cm === null || cm === void 0 ? void 0 : cm.async) === null || _a === void 0 ? void 0 : _a.waitingMessage;
-                            if (waitingMessage) {
-                                terminal.output.addToQueue([
-                                    { action: 'add', value: waitingMessage },
-                                ]);
-                                action('NEW_CMD', 'async');
+        var getNameAndArgs, _a, name, args, isHelp, props, dispatch, runAction, executable, terminalCommand, _b, executableCommand;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    getNameAndArgs = function (c) {
+                        var index = c.indexOf(' ');
+                        var name = '';
+                        var args = '';
+                        var isHelp = false;
+                        if (index !== -1) {
+                            name = c.substring(0, index).trim();
+                            args = c.substring(index + 1).trim();
+                        }
+                        else {
+                            name = c.trim();
+                        }
+                        if (shouldAllowHelp) {
+                            var reg = /\/\?/;
+                            if (reg.test(name) && name !== '/?') {
+                                isHelp = true;
+                                name = name.substring(0, name.length - 2);
                             }
-                            if (!cm.action) return [3, 2];
-                            return [4, cm.action(props)];
-                        case 1:
-                            response = _b.sent();
-                            dispatch(response);
-                            return [2];
-                        case 2:
-                            dispatch(commandsHelper.commandNotFound(props));
-                            return [2];
-                    }
-                });
-            }); };
-            runHelp = function (cm) {
-                if (cm.help) {
-                    dispatch(help$3(__assign(__assign({}, props), { name: 'help', args: name })));
-                }
-                else {
-                    dispatch(commandsHelper.helpNotAvailable(props));
-                }
-            };
-            executable = function (p) {
-                if (_.isEmpty(p.files)) {
-                    return null;
-                }
-                var pathsToSearch = [actualDir, '', '\\system'];
-                var c = pathsToSearch.reduce(function (acc, path) {
-                    if (_.isEmpty(acc)) {
-                        var dirContent = fileSystemHelper.getDir(files, path);
-                        if (dirContent && dirContent.files) {
-                            if (dirContent.files[p.name] &&
-                                (dirContent.files[p.name].t === 'e' ||
-                                    dirContent.files[p.name].t === 's')) {
-                                return dirContent.files[p.name].c;
+                            else if (args === '/?') {
+                                isHelp = true;
                             }
-                            if (dirContent.files["".concat(p.name, ".com")] &&
-                                (dirContent.files["".concat(p.name, ".com")].t === 'e' ||
-                                    dirContent.files["".concat(p.name, ".com")].t === 's')) {
-                                return dirContent.files["".concat(p.name, ".com")]
-                                    .c;
-                            }
-                            if (dirContent.files["".concat(props.name, ".exe")] &&
-                                (dirContent.files["".concat(props.name, ".exe")].t === 'e' ||
-                                    dirContent.files["".concat(props.name, ".exe")].t === 's')) {
-                                return dirContent.files["".concat(props.name, ".exe")]
-                                    .c;
+                            else if (!reg.test(name) && name === '/?') {
+                                isHelp = true;
                             }
                         }
-                    }
-                    return acc;
-                }, {});
-                if (!_.isEmpty(c)) {
-                    return c;
-                }
-                return null;
-            };
-            terminalCommand = allCommands.filter(function (c) {
-                var _a;
-                return c.name.toLowerCase() === name.toLowerCase() ||
-                    ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) {
-                        return a.toLowerCase().includes(name.toLowerCase());
-                    }));
-            });
-            if (terminalCommand[0]) {
-                if (isHelp) {
-                    runHelp(terminalCommand[0]);
-                    return [2];
-                }
-                runAction(terminalCommand[0]);
-            }
-            else {
-                executableCommand = executable(props);
-                if (executableCommand) {
-                    if (isHelp) {
-                        runHelp(terminalCommand[0]);
+                        return { name: name, args: args, isHelp: isHelp };
+                    };
+                    _a = getNameAndArgs(cmd), name = _a.name, args = _a.args, isHelp = _a.isHelp;
+                    terminal.output.addToOutput("".concat(fileSystemHelper.formatPrompt(terminal.formatPrompt, actualDir), " ").concat(cmd));
+                    if (name === '') {
+                        command.setActualCmd(null);
                         return [2];
                     }
-                    runAction(executableCommand);
-                }
-                else {
-                    dispatch(commandsHelper.commandNotFound(props));
-                }
+                    props = {
+                        name: name,
+                        args: args,
+                        allCommands: allCommands,
+                        messages: messages,
+                        actualDir: actualDir,
+                        files: files,
+                        totalSize: totalSize,
+                    };
+                    dispatch = function (response) {
+                        command.setActualCmd(__assign({ name: name, args: args }, response));
+                        if (response.configTerminal !== undefined) {
+                            if (response.configTerminal.config === 'setColors')
+                                terminal.setConfig(response.configTerminal);
+                            if (response.configTerminal.config === 'setActualDir') {
+                                filesystem.setActualDir(response.configTerminal.value);
+                            }
+                        }
+                        if (response.output) {
+                            terminal.output.addToQueue(response.output);
+                        }
+                        command.startRunningCommand();
+                        if (response.dynamic) {
+                            action('NEW_CMD', 'dynamic');
+                            return;
+                        }
+                        action('NEW_CMD', 'static');
+                    };
+                    runAction = function (cm) { return __awaiter(void 0, void 0, void 0, function () {
+                        var isAsync, waitingMessage, response, response;
+                        var _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    isAsync = cm === null || cm === void 0 ? void 0 : cm.async;
+                                    waitingMessage = (_a = cm === null || cm === void 0 ? void 0 : cm.async) === null || _a === void 0 ? void 0 : _a.waitingMessage;
+                                    if (isAsync) {
+                                        action('NEW_CMD', 'async');
+                                    }
+                                    if (waitingMessage) {
+                                        terminal.output.addToQueue([
+                                            { action: 'add', value: waitingMessage },
+                                        ]);
+                                    }
+                                    if (!cm.action) return [3, 2];
+                                    return [4, cm.action(props)];
+                                case 1:
+                                    response = _b.sent();
+                                    dispatch(response);
+                                    return [2];
+                                case 2:
+                                    if (!commandsHelper.commandNotFound.action) return [3, 4];
+                                    return [4, commandsHelper.commandNotFound.action(props)];
+                                case 3:
+                                    response = _b.sent();
+                                    dispatch(response);
+                                    _b.label = 4;
+                                case 4: return [2];
+                            }
+                        });
+                    }); };
+                    executable = function (p) {
+                        if (_.isEmpty(p.files)) {
+                            return null;
+                        }
+                        var pathsToSearch = [actualDir, '', '\\system'];
+                        var file = fileSystemHelper.getFile(files, p.name, pathsToSearch);
+                        if (file) {
+                            if (file.type === 'application/executable' ||
+                                file.type === 'application/system') {
+                                return file.content;
+                            }
+                            return commandsHelper.cantBeExecuted;
+                        }
+                        return null;
+                    };
+                    terminalCommand = allCommands.filter(function (c) {
+                        var _a;
+                        return c.name.toLowerCase() === name.toLowerCase() ||
+                            ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) {
+                                return a.toLowerCase().includes(name.toLowerCase());
+                            }));
+                    });
+                    if (!isHelp) return [3, 2];
+                    _b = dispatch;
+                    return [4, help$3(__assign(__assign({}, props), { name: 'help', args: name }))];
+                case 1:
+                    _b.apply(void 0, [_c.sent()]);
+                    return [2];
+                case 2:
+                    if (terminalCommand[0]) {
+                        runAction(terminalCommand[0]);
+                    }
+                    else {
+                        executableCommand = executable(props);
+                        if (executableCommand) {
+                            runAction(executableCommand);
+                        }
+                        else {
+                            runAction(commandsHelper.commandNotFound);
+                        }
+                    }
+                    return [2];
             }
-            return [2];
         });
     }); };
     return {
@@ -3558,49 +3609,43 @@ var useLoadingScreen = function (config) {
 var files = [
     {
         name: 'readme.txt',
-        type: 'file',
+        type: 'text/plain',
         content: reactDosTerminal.help,
-        attributes: 's',
+        attributes: 'p',
     },
     {
         name: 'system',
         type: 'directory',
-        attributes: 's',
+        attributes: 'p',
         content: [
             {
                 name: 'doskey.exe',
-                type: 'system-file',
-                attributes: 'sh',
-                content: {
-                    name: 'doskey',
-                    action: commandsHelper.cantBeExecuted,
-                },
-                fakeFileSize: fileSystemHelper.getFakeFileSize([
+                type: 'application/system',
+                attributes: 'ph',
+                content: commandsHelper.isAlreadyRunning,
+                size: fileSystemHelper.getFakeFileSize([
                     useCommandsHistory,
                     useCaretHandler,
                 ]),
             },
             {
                 name: 'help.com',
-                type: 'exec-file',
-                attributes: 's',
+                type: 'application/executable',
+                attributes: 'p',
                 content: {
                     name: 'help',
                     action: help$3,
                 },
-                fakeFileSize: fileSystemHelper.getFakeFileSize(help$3),
+                size: fileSystemHelper.getFakeFileSize(help$3),
             },
         ],
     },
     {
         name: 'command.com',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'command',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize: fileSystemHelper.getCommandsSize(commandsList) +
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.isAlreadyRunning,
+        size: fileSystemHelper.getCommandsSize(commandsList) +
             fileSystemHelper.getFakeFileSize([
                 useCommandsHandler,
                 useCaretHandler,
@@ -3611,13 +3656,10 @@ var files = [
     },
     {
         name: 'io.sys',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'io',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize: fileSystemHelper.getFakeFileSize([
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.cantBeExecuted,
+        size: fileSystemHelper.getFakeFileSize([
             Main,
             TerminalScreen,
             TerminalContextProvider,
@@ -3628,13 +3670,10 @@ var files = [
     },
     {
         name: 'msdos.sys',
-        type: 'system-file',
-        attributes: 'sh',
-        content: {
-            name: 'msdos',
-            action: commandsHelper.cantBeExecuted,
-        },
-        fakeFileSize: fileSystemHelper.getFakeFileSize([
+        type: 'application/system',
+        attributes: 'ph',
+        content: commandsHelper.cantBeExecuted,
+        size: fileSystemHelper.getFakeFileSize([
             useFileSystem,
             FileSystemContextProvider,
             function () { return fileSystemHelper; },
@@ -3775,10 +3814,7 @@ var useInitializer = function (config) {
             messages: finalMessages,
         },
         isInitialized: isInitialized,
-        fileSystem: {
-            actualDir: finalInitialDir,
-            allFiles: finalFiles,
-        },
+        fileSystem: __assign({ actualDir: finalInitialDir }, finalFiles),
     };
 };
 
@@ -3797,18 +3833,17 @@ var LoadingScreen = function (_a) {
         }
         return [];
     };
-    var output = useOutputHandler(getContent());
-    return (jsxs(Fragment, { children: [!React.isValidElement(content) && (jsx(TerminalScreen, { children: jsx(Output, { children: jsx(Output.Typewriter, { output: output, flashing: true }, void 0) }, void 0) }, void 0)), React.isValidElement(content) && (jsx(UserDefinedElement, { element: content, outputHandler: output }, void 0))] }, void 0));
+    var output = useOutputHandler({
+        initialOutput: getContent(),
+        shouldTypewrite: true,
+    });
+    return (jsxs(Fragment, { children: [!React.isValidElement(content) && (jsx(TerminalScreen, { children: jsx(Output, { children: jsx(Output.Typewriter, { output: output, flashing: true }, void 0) }, void 0) }, void 0)), React.isValidElement(content) && (jsx(UserDefinedElement, { element: content }, void 0))] }, void 0));
 };
 var Terminal = function (_a) {
-    var _b, _c, _d;
     var config = _a.config;
     var initializer = useInitializer(config);
     var loadingScreen = useLoadingScreen(config === null || config === void 0 ? void 0 : config.loadingScreen);
-    var initialOutput = ((_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.initialOutput) !== undefined
-        ? (_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.initialOutput
-        : (_d = defaults === null || defaults === void 0 ? void 0 : defaults.terminal) === null || _d === void 0 ? void 0 : _d.initialOutput;
-    return (jsx(React.StrictMode, { children: initializer.isInitialized && (jsxs(Fragment, { children: [jsx(GlobalStyles, {}, void 0), jsxs(TerminalContextProvider, __assign({ config: initializer.terminal }, { children: [!loadingScreen.isLoading && (jsx(FileSystemContextProvider, __assign({ config: initializer.fileSystem }, { children: jsx(CommandContextProvider, __assign({ config: initializer.commands }, { children: jsx(Main, { initialOutput: initialOutput }, void 0) }), void 0) }), void 0)), loadingScreen.isLoading && (jsx(LoadingScreen, { content: loadingScreen.content }, void 0))] }), void 0)] }, void 0)) }, void 0));
+    return (jsx(React.StrictMode, { children: initializer.isInitialized && (jsxs(Fragment, { children: [jsx(GlobalStyles, {}, void 0), jsxs(TerminalContextProvider, __assign({ config: initializer.terminal }, { children: [!loadingScreen.isLoading && (jsx(FileSystemContextProvider, __assign({ config: initializer.fileSystem }, { children: jsx(CommandContextProvider, __assign({ config: initializer.commands }, { children: jsx(Main, {}, void 0) }), void 0) }), void 0)), loadingScreen.isLoading && (jsx(LoadingScreen, { content: loadingScreen.content }, void 0))] }), void 0)] }, void 0)) }, void 0));
 };
 
 export { CommandScreen, Input, Output, Terminal, colorsHelper, fileSystemHelper, useCommand, useInput, useStateMachine };

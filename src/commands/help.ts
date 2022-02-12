@@ -1,10 +1,22 @@
 /* eslint-disable max-len */
-import { Command, CommandProps } from '../contexts/CommandContext'
-import { helpNotAvailable } from '../helpers/commands'
+import _ from 'lodash'
+import { Command, CommandProps, FakeCommand } from '../contexts/CommandContext'
+import commandsHelper from '../helpers/commands'
+import fileSystemHelper from '../helpers/filesystem'
 
-export const help = (props: CommandProps): Command => {
+export const help = async (props: CommandProps): Promise<Command> => {
     const commands = props.allCommands
-    const { args } = props
+    const { args, files, actualDir } = props
+
+    const helpText = (cmd: FakeCommand): string | string[] => {
+        if (cmd && cmd.help) {
+            if (typeof cmd.help === 'function') {
+                return cmd.help()
+            }
+            return cmd.help
+        }
+        return ''
+    }
 
     if (!args) {
         const output = commands.reduce((acc, command) => {
@@ -38,20 +50,28 @@ export const help = (props: CommandProps): Command => {
         }
     }
 
+    let h: string | string[]
     const cmd = commands.filter(
         (command) =>
             command.name === args ||
             (command.alias && command.alias.includes(args))
     )
 
-    if (cmd[0] && cmd[0].help) {
-        let h
-        if (typeof cmd[0].help === 'function') {
-            h = cmd[0].help()
-        } else {
-            h = cmd[0].help
-        }
+    h = helpText(cmd[0])
 
+    if (_.isEmpty(h)) {
+        const systemPaths = [actualDir, '', '\\system']
+        const file = fileSystemHelper.getFile(files, args, systemPaths)
+        if (
+            file &&
+            (file.type === 'application/executable' ||
+                file.type === 'application/system')
+        ) {
+            h = helpText(file.content as FakeCommand)
+        }
+    }
+
+    if (!_.isEmpty(h)) {
         return {
             output: [
                 { action: 'add', value: ['', args.toUpperCase(), ''] },
@@ -61,5 +81,14 @@ export const help = (props: CommandProps): Command => {
         }
     }
 
-    return helpNotAvailable({ ...props, name: args })
+    if (commandsHelper.helpNotAvailable.action) {
+        return commandsHelper.helpNotAvailable.action({
+            ...props,
+            name: args,
+        })
+    }
+
+    return {
+        output: [{ action: 'add', value: 'Error: Unknown error' }],
+    }
 }

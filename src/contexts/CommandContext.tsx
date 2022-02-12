@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
 import { TerminalColors } from '../components/Terminal'
 import { CommandsMessages } from '../config'
-import { FakeFileSystem } from './FileSystemContext'
+import { FakeFile } from './FileSystemContext'
 
 export interface FakeCommand {
     name: string
@@ -17,7 +17,8 @@ export interface CommandProps {
     name: string
     args: string
     actualDir: string
-    files: FakeFileSystem
+    files: FakeFile[]
+    totalSize: number
     allCommands: FakeCommand[]
     messages: CommandsMessages
 }

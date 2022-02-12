@@ -1,5 +1,5 @@
+import { split } from 'lodash'
 import { Command, CommandProps } from '../contexts/CommandContext'
-import { FakeFileSystem } from '../contexts/FileSystemContext'
 import fakeFileSystemHelper from '../helpers/filesystem'
 
 const help = [
@@ -30,11 +30,7 @@ const run = ({ args, actualDir, files }: CommandProps): Command => {
         }
     }
 
-    const content = fakeFileSystemHelper.getDir(
-        files,
-        actualDir
-    ) as FakeFileSystem
-    const file = content?.files[args] ? content?.files[args] : false
+    const file = fakeFileSystemHelper.getFile(files, args, [actualDir], true)
 
     if (!file) {
         return {
@@ -44,7 +40,8 @@ const run = ({ args, actualDir, files }: CommandProps): Command => {
         }
     }
 
-    if (file.t !== 'f') {
+    const fileType = split(file.type, '/')
+    if (fileType[0] !== 'text') {
         return {
             output: [
                 {
@@ -67,11 +64,11 @@ const run = ({ args, actualDir, files }: CommandProps): Command => {
         }
     }
 
-    if (typeof file.c === 'string') {
-        return { output: [{ action: 'add', value: ['', file.c, ''] }] }
+    if (typeof file.content === 'string') {
+        return { output: [{ action: 'add', value: ['', file.content, ''] }] }
     }
 
-    const cont = file.c as string[]
+    const cont = file.content as string[]
     return { output: [{ action: 'add', value: ['', ...cont, ''] }] }
 }
 

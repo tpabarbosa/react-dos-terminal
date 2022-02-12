@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import _ from 'lodash'
 import { Command, CommandProps } from '../contexts/CommandContext'
-import { FakeFileSystem } from '../contexts/FileSystemContext'
+import { FakeFile } from '../contexts/FileSystemContext'
 import fileSystemHelper from '../helpers/filesystem'
 
 const help = [
@@ -15,7 +15,7 @@ const help = [
     '',
 ]
 
-const run = ({ args, files, actualDir }: CommandProps): Command => {
+const run = ({ args, files, actualDir, totalSize }: CommandProps): Command => {
     const device = () => {
         const dvc = navigator.userAgent.match(
             /(MSIE|(?!Gecko.+)Firefox|(?!AppleWebKit.+Chrome.+)Safari|(?!AppleWebKit.+)Chrome|AppleWebKit(?!.+Chrome|.+Safari)|Gecko(?!.+Firefox))(?: |\/)([\d.apre]+)/
@@ -37,12 +37,11 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
     }
 
     const getFinalOutput = (
-        f: FakeFileSystem,
         filesNumber: number,
         dirsNumber: number,
         size: number
     ) => {
-        const freeSize = (4194304 - f.totalSize).toLocaleString('en-US', {
+        const freeSize = (4194304 - totalSize).toLocaleString('en-US', {
             minimumFractionDigits: 0,
         })
 
@@ -58,9 +57,8 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
     }
 
     const output = (
-        f: FakeFileSystem,
         finalPath: string,
-        content: FakeFileSystem,
+        content: FakeFile[],
         showHidden: boolean
     ) => {
         let filesNumber = 0
@@ -68,31 +66,29 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
         let size = 0
         const space = ' '
 
-        if (!content.files) {
+        if (_.isEmpty(content)) {
             return [
                 ...getInitialOutput(finalPath),
-                ...getFinalOutput(f, filesNumber, dirsNumber, size),
+                ...getFinalOutput(filesNumber, dirsNumber, size),
             ]
         }
 
-        const dirContent = Object.keys(content.files).reduce((acc, item) => {
+        const dirContent = content.reduce((acc, item) => {
             let text = ''
-            if (showHidden || content.files[item].a[1] !== 'h') {
-                if (
-                    content.files[item].t === 'f' ||
-                    content.files[item].t === 'e' ||
-                    content.files[item].t === 's'
-                ) {
+            if (showHidden || item.attributes[1] !== 'h') {
+                if (item.type !== 'directory') {
                     filesNumber += 1
-                    size += content.files[item].s
-                    text = `${item}${space.repeat(
-                        28 - item.length
-                    )}${content.files[item].s.toLocaleString('en-US', {
+                    size += item.size ?? 0
+                    text = `${item.name}${space.repeat(
+                        28 - item.name.length
+                    )}${item.size?.toLocaleString('en-US', {
                         minimumFractionDigits: 0,
                     })}`
                 } else {
                     dirsNumber += 1
-                    text = `${item}${space.repeat(20 - item.length)}&ltDIR&gt`
+                    text = `${item.name}${space.repeat(
+                        20 - item.name.length
+                    )}&ltDIR&gt`
                 }
                 acc.push(text)
             }
@@ -102,14 +98,14 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
         if (!dirContent || _.isEmpty(dirContent)) {
             return [
                 ...getInitialOutput(finalPath),
-                ...getFinalOutput(files, filesNumber, dirsNumber, size),
+                ...getFinalOutput(filesNumber, dirsNumber, size),
             ]
         }
 
         return [
             ...getInitialOutput(finalPath),
             ...dirContent,
-            ...getFinalOutput(files, filesNumber, dirsNumber, size),
+            ...getFinalOutput(filesNumber, dirsNumber, size),
         ]
     }
 
@@ -142,7 +138,7 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
                 output: [
                     {
                         action: 'add',
-                        value: output(files, actualDir, content, showHidden),
+                        value: output(actualDir, content, showHidden),
                     },
                 ],
             }
@@ -158,7 +154,7 @@ const run = ({ args, files, actualDir }: CommandProps): Command => {
 
             const content = fileSystemHelper.getDir(files, finalPath)
             if (content) {
-                result = output(files, finalPath, content, showHidden)
+                result = output(finalPath, content, showHidden)
             }
         }
     })

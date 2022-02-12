@@ -1,11 +1,6 @@
 import _ from 'lodash'
 import { FakeCommand } from '../contexts/CommandContext'
-import {
-    FakeAttributes,
-    FakeFile,
-    FakeFileSystem,
-    FakeFileTypesAbr,
-} from '../contexts/FileSystemContext'
+import { FakeAttribute, FakeFile } from '../contexts/FileSystemContext'
 import fileSystemHelper from './filesystem'
 
 const createCommands = (internal: FakeCommand[], external?: FakeCommand[]) => {
@@ -54,89 +49,10 @@ const excludeCommands = (
     return finalCommands
 }
 
-const calcFileSize = (
-    name: string,
-    file: {
-        c: string | string[] | FakeCommand | FakeFileSystem
-        a: FakeAttributes
-        t: 'd' | 'f' | 'e' | 's'
-    }
-) => {
-    let filesize = (name.length + 3) * 2
-    if (file.t === 'e' || file.t === 's') {
-        const x = file.c as FakeCommand
-        filesize += fileSystemHelper.getCommandsSize([x])
-    } else if (file.t === 'f') {
-        filesize += JSON.stringify(file.c).length * 2
-    } else {
-        const content = file.c as FakeFileSystem
-        filesize += content.totalSize ?? 0
-    }
-    return filesize
-}
-
-const createFileSystemFromArray = (files: FakeFile[]) => {
-    const final: FakeFileSystem = {} as FakeFileSystem
-    let totalSize = 0
-    const obj = files.reduce((acc, file) => {
-        let contentDir: FakeFileSystem = {} as FakeFileSystem
-        let contentOther: string | string[] | FakeCommand = ''
-        if (file.type === 'directory') {
-            contentDir = createFileSystemFromArray(file.content as FakeFile[])
-        } else if (file.type === 'file' && typeof file.content === 'string') {
-            contentOther = file.content as string
-        } else if (file.type === 'file' && typeof file.content !== 'string') {
-            contentOther = file.content as string[]
-        } else {
-            contentOther = file.content as FakeCommand
-        }
-
-        let newFileType: FakeFileTypesAbr | undefined
-
-        if (file.type === 'directory') {
-            newFileType = 'd'
-        } else if (file.type === 'file') {
-            newFileType = 'f'
-        } else if (file.type === 'exec-file') {
-            newFileType = 'e'
-        } else {
-            newFileType = 's'
-        }
-
-        const newContent = file.type === 'directory' ? contentDir : contentOther
-
-        const fileObj = {
-            c: newContent,
-            a: file.attributes,
-            t: newFileType,
-        }
-
-        const fs = file.fakeFileSize ?? 0
-        const filesize = calcFileSize(file.name, fileObj) + fs
-        totalSize += filesize
-        acc.files = {
-            ...acc.files,
-            [file.name]: {
-                ...fileObj,
-                s: filesize,
-            },
-        }
-
-        acc.totalSize = totalSize
-        return acc
-    }, final)
-
-    return obj
-}
-
 const renameEqualFiles = (contentA: FakeFile[], contentB: FakeFile[]) => {
     const finalContent = [...contentA] as FakeFile[]
     contentB.forEach((file) => {
-        if (
-            file.type === 'file' ||
-            file.type === 'exec-file' ||
-            file.type === 'system-file'
-        ) {
+        if (file.type !== 'directory') {
             const found = contentA.filter((fileA) => fileA.name === file.name)
             if (found[0]) {
                 const re = /(.+?)(\.[^.]*$|$)/
@@ -184,7 +100,7 @@ const getMergedDir = (a: FakeFile, b: FakeFile): FakeFile => {
         type: 'directory',
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         content: mergeEqualDirs(contentA, contentB),
-        attributes: (mainAttrib(a, b) + hiddenAttrib(a, b)) as FakeAttributes,
+        attributes: (mainAttrib(a, b) + hiddenAttrib(a, b)) as FakeAttribute,
     }
 }
 
@@ -208,28 +124,80 @@ const mergeEqualDirs = (a: FakeFile[], b: FakeFile[]) => {
     return mergedDirs
 }
 
+const calcSize = (file: FakeFile) => {
+    let filesize = file.size ?? 0
+    filesize += (file.name.length + 3) * 2
+    if (
+        file.type === 'application/executable' ||
+        file.type === 'application/system'
+    ) {
+        const x = file.content as FakeCommand
+        filesize += fileSystemHelper.getCommandsSize([x])
+    } else if (file.type.includes('text/')) {
+        filesize += JSON.stringify(file.content).length * 2
+    } else {
+        const content = file.content as FakeFile[]
+        const final = content.map((f) => {
+            return { ...f, size: calcSize(f) }
+        })
+        const finalS = final.reduce((acc, f) => {
+            return acc + f.size
+        }, 0)
+        filesize += finalS ?? 0
+    }
+    return filesize
+}
+
+const getFilesWithSize = (files: FakeFile[]): FakeFile[] => {
+    const finalFiles = files.map((file) => {
+        if (file.type !== 'directory') {
+            return { ...file, size: calcSize(file) }
+        }
+        const dir = file.content as FakeFile[]
+        const newContent = getFilesWithSize(dir)
+        return { ...file, content: newContent, size: calcSize(file) }
+    })
+    return finalFiles
+}
+
 const createFakeFileSystem = (
     internal?: FakeFile[],
     external?: FakeFile[] | undefined
-): FakeFileSystem => {
+): { files: FakeFile[]; totalSize: number } => {
     if (!internal) {
-        return { files: {}, totalSize: 0 }
+        return { files: [], totalSize: 0 }
     }
 
     if (!external) {
-        return createFileSystemFromArray(internal)
+        const totalSize: number = internal.reduce(
+            (acc, file) => acc + (file.size ?? 0),
+            0
+        )
+        return { files: [...internal], totalSize }
     }
 
     const mergedDirs = mergeEqualDirs(internal, external)
     const content = renameEqualFiles(internal, external)
-    const int = createFileSystemFromArray(internal)
-    const ext = createFileSystemFromArray(external)
-    const cont = createFileSystemFromArray(content)
-    const dirs = createFileSystemFromArray(mergedDirs)
 
-    const files = { ...int.files, ...ext.files, ...cont.files, ...dirs.files }
-    const totalSize: number = Object.values(files).reduce(
-        (acc, file) => acc + file.s,
+    const test = content.map((file) => {
+        const equalD = mergedDirs.find((dir) => dir.name === file.name)
+        if (equalD && !_.isEmpty(equalD)) {
+            return equalD
+        }
+        return file
+    })
+
+    external.forEach((file) => {
+        const equalExt = test.find((f) => f.name === file.name)
+        if (!equalExt || _.isEmpty(equalExt)) {
+            test.push(file)
+        }
+    })
+
+    const files = getFilesWithSize(test)
+
+    const totalSize: number = files.reduce(
+        (acc, file) => acc + (file.size ?? 0),
         0
     )
 

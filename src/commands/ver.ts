@@ -23,7 +23,7 @@ const run = ({ args }: CommandProps): Command => {
         output: [
             {
                 action: 'add',
-                value: ['', `react-dos-terminal version: ${version}`, ''],
+                value: ['', `react-dos-terminal`, `version: ${version}`, ''],
             },
         ],
     }

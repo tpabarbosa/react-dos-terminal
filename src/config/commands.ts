@@ -80,7 +80,7 @@ export const fileSystemCommands: FakeCommand[] = [
     },
     {
         name: 'edit',
-        action: commandsHelper.toBeImplemented,
+        action: commandsHelper.toBeImplemented.action,
     },
 ]
 
@@ -90,8 +90,4 @@ export const fileSystemSubstituteCommands: FakeCommand[] = [
         alias: ['/?'],
         action: help,
     },
-    // {
-    //     alias: 'hangman',
-    //     action: hangman,
-    // },
 ]
