@@ -214,7 +214,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         isInitialized,
         fileSystem: {
             actualDir: finalInitialDir as string,
-            systemPaths: finalSystemPaths,
+            systemPaths: finalSystemPaths as string[],
             ...finalFiles,
         },
     }
