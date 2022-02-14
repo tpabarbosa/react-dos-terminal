@@ -76,9 +76,14 @@ const prodConfig = [{
             del({ targets: ['dist/*'] }),
             copy({
                 targets: [{
-                    src: ['src/assets/**/*'],
-                    dest: ['dist/assets'],
-                }, ],
+                        src: ['src/assets/**/*'],
+                        dest: ['dist/assets'],
+                    },
+                    {
+                        src: ['README.md'],
+                        dest: ['dist'],
+                    },
+                ],
             }),
         ],
         external: Object.keys(packageJson.peerDependencies || {}),
@@ -97,58 +102,3 @@ const prodConfig = [{
 ]
 
 export default DEV ? devConfig : prodConfig
-
-// export default [{
-//         input: 'src/index.tsx',
-//         output: [{
-//                 file: packageJson.main,
-//                 format: 'cjs',
-//             },
-//             {
-//                 file: 'dev-example/src/component-lib/esm/index.js',
-//                 format: 'esm',
-//                 banner: '/* eslint-disable */',
-//             },
-//             {
-//                 file: packageJson.module,
-//                 format: 'esm',
-//             },
-//         ],
-//         plugins: [
-//             ...plugins,
-//             typescript({ tsconfig: './tsconfig.json' }),
-//             del({ targets: ['dist/*', 'dev-example/src/component-lib/*'] }),
-//             copy({
-//                 targets: [{
-//                     src: ['src/assets/**/*'],
-//                     dest: [
-//                         'dist/assets',
-//                         'dev-example/src/component-lib/assets',
-//                     ],
-//                 }, ],
-//             }),
-//         ],
-//         external: Object.keys(packageJson.peerDependencies || {}),
-//     },
-//     {
-//         input: 'dist/esm/types/index.d.ts',
-//         output: [
-//             { file: 'dist/index.d.ts', format: 'esm' },
-//             {
-//                 file: 'dev-example/src/component-lib/esm/index.d.ts',
-//                 format: 'esm',
-//             },
-//         ],
-//         plugins: [
-//             dts(),
-//             del({
-//                 hook: 'buildEnd',
-//                 targets: [
-//                     'dist/esm/types',
-//                     'dist/cjs/types',
-//                     'dev-example/src/component-lib/esm/types',
-//                 ],
-//             }),
-//         ],
-//     },
-// ]
