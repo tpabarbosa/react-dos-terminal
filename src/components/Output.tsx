@@ -247,7 +247,7 @@ const Typewriter = ({
             />
             <PrintWithTypewriter
                 typewriter={output.typewriter}
-                output={output.lastOutput}
+                output={output.currentOutputting}
                 {...rest}
                 colors={colors}
                 flashing={flashing}

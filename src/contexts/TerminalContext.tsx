@@ -7,6 +7,7 @@ import { useOutputHandler, UseOutputHandler } from '../hooks/useOutputHandler'
 export type TerminalConfigAction =
     | { config: 'setColors'; value: TerminalColors }
     | { config: 'isActive'; value: boolean }
+    | { config: 'setPrompt'; value: string }
 
 export interface TerminalContextAPI extends TerminalState {
     output: UseOutputHandler
@@ -19,12 +20,13 @@ export interface TerminalState {
     showOldScreenEffect: boolean
     autoFocus: boolean
     isActive: boolean
-    formatPrompt: string
+    currentPrompt: string
+    defaultPrompt: string
 }
 
 export interface TerminalProviderProps {
     children: React.ReactNode
-    config: TerminalConfig
+    config: TerminalConfig & { currentPrompt: string }
 }
 
 const TerminalContext = createContext<TerminalContextAPI | undefined>(undefined)
@@ -43,7 +45,8 @@ export const TerminalContextProvider = ({
         showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
         isActive: config.autoFocus,
-        formatPrompt: config.formatPrompt,
+        currentPrompt: config.currentPrompt,
+        defaultPrompt: config.defaultPrompt,
     }
 
     const reducer = (state: TerminalState, action: TerminalConfigAction) => {
@@ -53,6 +56,9 @@ export const TerminalContextProvider = ({
             case 'setColors':
                 ls.set('colors', action.value)
                 return { ...state, colors: action.value }
+            case 'setPrompt':
+                ls.set('prompt', action.value)
+                return { ...state, currentPrompt: action.value }
             default:
                 return state
         }
@@ -71,9 +77,18 @@ export const TerminalContextProvider = ({
                 if (conf.config === 'setColors') {
                     dispatch({ config: 'setColors', value: conf.value })
                 }
+                if (conf.config === 'setPrompt') {
+                    dispatch({
+                        config: 'setPrompt',
+                        value:
+                            conf.value !== ''
+                                ? conf.value
+                                : terminalInitialState.defaultPrompt,
+                    })
+                }
             },
         }
-    }, [state, output])
+    }, [state, output, terminalInitialState.defaultPrompt])
 
     return (
         <TerminalContext.Provider value={t}>

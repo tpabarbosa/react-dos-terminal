@@ -1,13 +1,57 @@
+import { useEffect } from 'react'
 import './App.css'
 import {
     Terminal,
     fileSystemHelper,
-    TerminalColors,
+    commandsHelper,
     FakeCommand,
     FakeFile,
     Command,
+    Output,
+    useOutputHandler,
+    CommandScreen,
 } from './component-lib/esm'
 import { Hangman, hangman } from './components/Hangman/hangman'
+
+const LoadingScreenExample1 = () => {
+    return (
+        <div style={{margin: '8px'}}>
+            <h1>Hello, Terminal!</h1>
+            <h2>You can output anything</h2>
+            <div> This is just a showcase! </div>
+            <div> Loading...</div>
+        </div>
+    )
+}
+
+const LoadingScreenExample2 = () => {
+    const outputHandler = useOutputHandler({
+        initialOutput: '<h1>Hello, Terminal!</h1>', 
+        shouldTypewrite: true
+    })
+
+    useEffect(() => {
+        outputHandler.typewriter.changeTypeInterval(120)
+        outputHandler.addToQueue([
+            {action: 'add', value:'<h2>You can output anything</h2>'},
+            {action: 'add', value:'This is just a showcase!'},
+            {action: 'remove', value: 2}
+        ])
+    }, [])
+    return (
+        <CommandScreen fullscreen={true} colors={{
+                    background: '#0000aa',
+                    color: '#ffffff',
+                }}>
+            <Output >
+                <Output.Typewriter output={outputHandler} />
+                {!outputHandler.typewriter.isTypewriting &&
+                    <Output.Print output={'Loading...'} flashing={true}/>
+                }
+            </Output>
+        </CommandScreen>
+    )
+}
 
 export const App = () => {
     const customCommands: FakeCommand[] = [
@@ -43,13 +87,13 @@ export const App = () => {
 
                         return {
                             output: [
-                                // { action: 'remove', value: 1 },
-                                { action: 'clear' },
+                                { action: 'remove', value: 1 },
+                                //{ action: 'clear' },
                                 { action: 'add', value: ['Finished async command', 'Outputing data...'] },
                             ],
                         }
                     },
-            async: {waitingMessage: ['Getting something that takes some time...']}
+            async: { waitingMessage: ['Getting something that takes some time...']}
         }
     ]
 
@@ -57,21 +101,15 @@ export const App = () => {
         {
             name: 'readme.txt',
             type: 'text/plain',
-            content: 'This is a custom terminal README file.',
+            content: 'This is a README file.',
             attributes: 'p',
         },
         {   
-            name: 'system',
-            type: 'directory',
-            attributes: 'p',
-            content: [
-                { 
-                    name: 'example.txt',
-                    type: 'text/plain',
-                    content: 'This is an example.',
-                    attributes: 'p',
-                },
-            ],
+            name: 'command.com',
+            type: 'application/system', 
+            attributes: 'ph', 
+            size: 32302,
+            content: commandsHelper.isAlreadyRunning, 
         },
         {
             name: 'games',
@@ -99,38 +137,34 @@ export const App = () => {
             //     background: '#0000aa',
             //     color: '#ffffff',
             // } as TerminalColors,
-            showOldScreenEffect: false,
+            //showOldScreenEffect: false,
             //autoFocus: false,
-            initialOutput: ['This is my <span style="color: green">custom</span> terminal', ''],
-            formatPrompt: '$p$g',
-            shouldTypewrite: false
+            //initialOutput: [],//['This is my <span style="color: white">custom</span> terminal', ''],
+            defaultPrompt: '$d $t$_$p$g',
+            //shouldTypewrite: false
         },
         
         loadingScreen: {
-            showLoadingScreen: 'always',
-            messageOrElement: [
-                'Installing my custom terminal',
-                '',
-                'Please wait...',
-                '',
-            ],
-            loadingTime: 3000,
+            showLoadingScreen: 'never' as const,
+            messageOrElement: <LoadingScreenExample2 />,//[ 'Installing my custom terminal','','Please wait...',''],
+            loadingTime: 10000,
         },
         commands: {
             customCommands,
-            //excludeInternalCommands: ['test-static'],
-            //excludeInternalCommands: 'all'
+            //excludeInternalCommands: ['ver'],
+            //excludeInternalCommands: 'all' as const,
             //shouldAllowHelp: false,
             messages: {
                 notFound: 'My custom not Found message'
             },
         },
-        shouldPersisteUserData: false,
+        //shouldPersisteUserData: false,
         fileSystem: {
             //initialDir: 'system',
             customFiles,
             //useFakeFileSystem: false,
-            //excludeInternalFiles: true,
+            excludeInternalFiles: true,
+            systemPaths: ['', 'games', 'system']
         },
     }
 

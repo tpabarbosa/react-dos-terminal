@@ -3,9 +3,9 @@ import { FakeCommand } from '../contexts/CommandContext'
 import { FakeFile } from '../contexts/FileSystemContext'
 
 export type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time'
-
+export type ExcludeCommandsOptions = 'all' | 'dev'
 export interface TerminalLoadingScreen {
-    showLoadingScreen: string // TerminalLoadingScreenOptions;
+    showLoadingScreen: TerminalLoadingScreenOptions
     messageOrElement: string | string[] | JSX.Element
     loadingTime: number
 }
@@ -14,8 +14,8 @@ export interface TerminalConfig {
     colors: TerminalColors
     showOldScreenEffect: boolean
     autoFocus: boolean
-    initialOutput: string[]
-    formatPrompt: string
+    initialOutput: string | string[]
+    defaultPrompt: string
     shouldTypewrite: boolean
 }
 
@@ -28,7 +28,7 @@ export interface CommandsMessages {
 }
 export interface CommandsConfig {
     customCommands: FakeCommand[]
-    excludeInternalCommands: string[] | 'all'
+    excludeInternalCommands: string[] | ExcludeCommandsOptions
     shouldAllowHelp: boolean
     messages: Partial<CommandsMessages>
 }
@@ -38,6 +38,7 @@ export interface TerminalFileSystemConfig {
     initialDir: string
     useFakeFileSystem: boolean
     excludeInternalFiles: boolean
+    systemPaths: string[]
 }
 
 export interface TerminalDefaults {
@@ -68,12 +69,13 @@ export const defaults: TerminalDefaults = {
         autoFocus: true,
         showOldScreenEffect: true,
         initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
-        formatPrompt: '$p$g',
+        defaultPrompt: '$p$g',
         shouldTypewrite: true,
     },
     commands: {
         customCommands: [],
-        excludeInternalCommands: [],
+        excludeInternalCommands:
+            process.env.NODE_ENV === 'development' ? [] : 'dev',
         shouldAllowHelp: true,
         messages: {
             toBeImplemented: `Error: "%n" command hasn't been implemented.`,
@@ -85,6 +87,7 @@ export const defaults: TerminalDefaults = {
     },
     fileSystem: {
         customFiles: [],
+        systemPaths: ['', 'system'],
         initialDir: '',
         useFakeFileSystem: true,
         excludeInternalFiles: false,

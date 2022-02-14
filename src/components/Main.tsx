@@ -85,7 +85,7 @@ export const Main = () => {
                         id="terminal_input"
                         ref={input.ref}
                         prompt={fileSystemHelper.formatPrompt(
-                            terminal.formatPrompt,
+                            terminal.currentPrompt,
                             actualDir
                         )}
                     />

@@ -169,11 +169,12 @@ const createFakeFileSystem = (
     }
 
     if (!external) {
+        const files = getFilesWithSize(internal)
         const totalSize: number = internal.reduce(
             (acc, file) => acc + (file.size ?? 0),
             0
         )
-        return { files: [...internal], totalSize }
+        return { files, totalSize }
     }
 
     const mergedDirs = mergeEqualDirs(internal, external)
@@ -201,8 +202,7 @@ const createFakeFileSystem = (
         0
     )
 
-    const result = { files, totalSize }
-    return result
+    return { files, totalSize }
 }
 
 const initializer = {

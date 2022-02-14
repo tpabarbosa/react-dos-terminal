@@ -1,7 +1,7 @@
 {
     "name": "react-dos-terminal",
     "version": "0.1.4",
-    "description": "",
+    "description": "A collection of React Components to simulate a DOS command line interface.",
     "repository": {
         "type": "git",
         "url": "https://github.com/tpabarbosa/react-dos-terminal"

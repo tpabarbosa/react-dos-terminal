@@ -19,6 +19,7 @@ export interface CommandProps {
     actualDir: string
     files: FakeFile[]
     totalSize: number
+    systemPaths: string[]
     allCommands: FakeCommand[]
     messages: CommandsMessages
 }
@@ -31,6 +32,7 @@ export type CommandToOutput =
 export type CommandToConfigTerminal =
     | { config: 'setColors'; value: TerminalColors }
     | { config: 'setActualDir'; value: string }
+    | { config: 'setPrompt'; value: string }
 
 export interface Command {
     dynamic?: {

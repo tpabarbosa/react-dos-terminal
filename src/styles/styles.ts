@@ -85,7 +85,12 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
     overflow-y: auto;
     text-align: left;
     padding-bottom: 1px;
-    text-shadow: 7px 0px 20px #808080a8;
+    ${(props) =>
+        props.oldEffect
+            ? css`
+                  text-shadow: 7px 0px 20px #808080a8;
+              `
+            : ''}
     ${(props) => getColorsCSS(props.colors, props.oldEffect)};
     a {
         color: ${(props) => props.colors.background};

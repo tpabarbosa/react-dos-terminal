@@ -29,39 +29,6 @@ import { commandsList } from './commands'
 
 export const files: FakeFile[] = [
     {
-        name: 'readme.txt',
-        type: 'text/plain',
-        content: reactDosTerminal.help,
-        attributes: 'p',
-    },
-    {
-        name: 'system',
-        type: 'directory',
-        attributes: 'p',
-        content: [
-            {
-                name: 'doskey.exe',
-                type: 'application/system',
-                attributes: 'ph',
-                content: commandsHelper.isAlreadyRunning,
-                size: fileSystemHelper.getFakeFileSize([
-                    useCommandsHistory,
-                    useCaretHandler,
-                ]),
-            },
-            {
-                name: 'help.com',
-                type: 'application/executable',
-                attributes: 'p',
-                content: {
-                    name: 'help',
-                    action: help,
-                },
-                size: fileSystemHelper.getFakeFileSize(help),
-            },
-        ],
-    },
-    {
         name: 'command.com',
         type: 'application/system',
         attributes: 'ph',
@@ -106,5 +73,38 @@ export const files: FakeFile[] = [
             useInput,
             useOutputHandler,
         ]),
+    },
+    {
+        name: 'system',
+        type: 'directory',
+        attributes: 'p',
+        content: [
+            {
+                name: 'readme.txt',
+                type: 'text/plain',
+                content: reactDosTerminal.help,
+                attributes: 'p',
+            },
+            {
+                name: 'doskey.exe',
+                type: 'application/system',
+                attributes: 'ph',
+                content: commandsHelper.isAlreadyRunning,
+                size: fileSystemHelper.getFakeFileSize([
+                    useCommandsHistory,
+                    useCaretHandler,
+                ]),
+            },
+            {
+                name: 'help.com',
+                type: 'application/executable',
+                attributes: 'p',
+                content: {
+                    name: 'help',
+                    action: help,
+                },
+                size: fileSystemHelper.getFakeFileSize(help),
+            },
+        ],
     },
 ]

@@ -28,6 +28,7 @@ export interface FileSystemContextAPI extends FileSystemState {
 
 export interface FileSystemState extends FakeFileSystem {
     actualDir: string
+    systemPaths: string[]
 }
 
 export interface FileSystemProviderProps {
@@ -51,6 +52,7 @@ export const FileSystemContextProvider = ({
         actualDir: config.actualDir,
         files: config.files,
         totalSize: config.totalSize,
+        systemPaths: config.systemPaths,
     }
 
     const reducer = (state: FileSystemState, action: FileSystemAction) => {

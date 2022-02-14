@@ -4,19 +4,20 @@ import { FakeCommand } from '../contexts/CommandContext'
 import { FakeFile } from '../contexts/FileSystemContext'
 
 const replacePromptParams = (prompt: string, dir: string) => {
-    let p = prompt.replace(/\$p/g, `C:\\${dir}`)
-    p = p.replace(/\$g/g, '>')
-    p = p.replace(/\$l/g, '<')
-    p = p.replace(/\$n/g, 'C:')
-    p = p.replace(/\$b/g, '|')
-    p = p.replace(/\$\$/g, '$')
-    p = p.replace(/\$_/g, '\n')
-    p = p.replace(/\$a/g, '&')
-    p = p.replace(/\$c/g, '(')
-    p = p.replace(/\$f/g, ')')
-    p = p.replace(/\$s/g, ' ')
-    p = p.replace(/\$t/g, new Date().toLocaleTimeString())
-    p = p.replace(/\$d/g, new Date().toLocaleDateString())
+    let p = prompt.replace(/\$p/gi, `C:\\${dir}`)
+    p = p.replace(/\$q/gi, '=')
+    p = p.replace(/\$g/gi, '>')
+    p = p.replace(/\$l/gi, '<')
+    p = p.replace(/\$n/gi, 'C:')
+    p = p.replace(/\$b/gi, '|')
+    p = p.replace(/\$\$/gi, '$')
+    p = p.replace(/\$_/gi, '\n')
+    p = p.replace(/\$a/gi, '&')
+    p = p.replace(/\$c/gi, '(')
+    p = p.replace(/\$f/gi, ')')
+    p = p.replace(/\$s/gi, ' ')
+    p = p.replace(/\$t/gi, new Date().toLocaleTimeString())
+    p = p.replace(/\$d/gi, new Date().toLocaleDateString())
     return p
 }
 

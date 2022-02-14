@@ -24,7 +24,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
     const filesystem = useFileSystem()
     const command = useCommand()
     const { messages, shouldAllowHelp, allCommands } = command
-    const { actualDir, files, totalSize } = filesystem
+    const { actualDir, files, totalSize, systemPaths } = filesystem
 
     const run = async (cmd: string) => {
         const getNameAndArgs = (c: string) => {
@@ -55,11 +55,12 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         }
         const { name, args, isHelp } = getNameAndArgs(cmd)
 
-        terminal.output.addToOutput(
+        terminal.output.addLines(
             `${fileSystemHelper.formatPrompt(
-                terminal.formatPrompt,
+                terminal.currentPrompt,
                 actualDir
-            )} ${cmd}`
+            )} ${cmd}`,
+            true
         )
 
         if (name === '') {
@@ -75,6 +76,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             actualDir,
             files,
             totalSize,
+            systemPaths,
         }
 
         const dispatch = (response: Command) => {
@@ -85,7 +87,10 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             })
 
             if (response.configTerminal !== undefined) {
-                if (response.configTerminal.config === 'setColors')
+                if (
+                    response.configTerminal.config === 'setColors' ||
+                    response.configTerminal.config === 'setPrompt'
+                )
                     terminal.setConfig(response.configTerminal)
                 if (response.configTerminal.config === 'setActualDir') {
                     filesystem.setActualDir(response.configTerminal.value)
@@ -112,9 +117,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 action('NEW_CMD', 'async')
             }
             if (waitingMessage) {
-                terminal.output.addToQueue([
-                    { action: 'add', value: waitingMessage },
-                ])
+                terminal.output.addLines(waitingMessage)
             }
 
             if (cm.action) {
@@ -136,7 +139,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 return null
             }
 
-            const pathsToSearch = [actualDir, '', '\\system']
+            const pathsToSearch = [actualDir, ...systemPaths]
             const file = fileSystemHelper.getFile(files, p.name, pathsToSearch)
 
             if (file) {

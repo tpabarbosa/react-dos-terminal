@@ -9,6 +9,7 @@ import {
 import ls from '../helpers/localStorage'
 import {
     commandsList,
+    devCommands,
     fileSystemCommands,
     fileSystemSubstituteCommands,
     immutableCommands,
@@ -35,7 +36,12 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             ? config?.terminal?.showOldScreenEffect
             : defaults.terminal.showOldScreenEffect
 
-    const [finalFormatPrompt, setFinalFormatPrompt] = useState<
+    const finalDefaultPrompt =
+        config?.terminal?.defaultPrompt !== undefined
+            ? config?.terminal?.defaultPrompt
+            : defaults.terminal.defaultPrompt
+
+    const [finalCurrentPrompt, setFinalCurrentPrompt] = useState<
         string | undefined
     >()
 
@@ -61,27 +67,36 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         ...config?.commands?.messages,
     }
 
-    // const finalExcludeCommands =
-    //     config?.commands?.excludeInternalCommands !== undefined
-    //         ? config.commands.excludeInternalCommands
-    //         : defaults.commands.excludeInternalCommands
-
     const finalAllowHelp =
         config?.commands?.shouldAllowHelp !== undefined
             ? config.commands.shouldAllowHelp
             : defaults.commands.shouldAllowHelp
 
+    const finalExcludeCommands =
+        config?.commands?.excludeInternalCommands !== undefined
+            ? config.commands.excludeInternalCommands
+            : defaults.commands.excludeInternalCommands
+
     const finalCommands = useMemo(() => {
         let cmd: FakeCommand[]
+        let intCmd: FakeCommand[] = []
+        if (finalExcludeCommands === 'dev') {
+            intCmd = commandsList
+        }
+
+        if (typeof finalExcludeCommands !== 'string') {
+            intCmd = commandsList.concat(devCommands)
+            intCmd = initializer.excludeCommands(intCmd, finalExcludeCommands)
+        }
 
         if (config?.fileSystem?.useFakeFileSystem !== false) {
-            const fc = commandsList.concat(fileSystemCommands)
+            const fc = intCmd.concat(fileSystemCommands)
             cmd = initializer.createCommands(
                 fc,
                 config?.commands?.customCommands
             )
         } else {
-            const fc = commandsList.concat(fileSystemSubstituteCommands)
+            const fc = intCmd.concat(fileSystemSubstituteCommands)
             cmd = initializer.createCommands(
                 fc,
                 config?.commands?.customCommands
@@ -94,14 +109,17 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         if (!finalAllowHelp) {
             cmd = initializer.excludeCommands(cmd, ['help'])
         }
+
         cmd = initializer.createCommands(cmd, config?.commands?.customCommands)
 
-        return initializer.createCommands(cmd, immutableCommands)
+        const c = initializer.createCommands(cmd, immutableCommands)
+        return c
     }, [
         config?.commands?.customCommands,
         config?.fileSystem?.useFakeFileSystem,
         config?.fileSystem?.excludeInternalFiles,
         finalAllowHelp,
+        finalExcludeCommands,
     ])
 
     const finalFiles = useMemo(() => {
@@ -128,6 +146,11 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         return initializer.createFakeFileSystem()
     }, [config])
 
+    const finalSystemPaths =
+        config?.fileSystem?.systemPaths !== undefined
+            ? config.fileSystem.systemPaths
+            : defaults.fileSystem.systemPaths
+
     useEffect(() => {
         if (!isInitialized) {
             let col: TerminalColors | undefined
@@ -142,17 +165,17 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
                         ? (config?.fileSystem?.initialDir as string)
                         : (defaults.fileSystem.initialDir as string)
                 prompt =
-                    config?.terminal?.formatPrompt !== undefined
-                        ? (config?.terminal?.formatPrompt as string)
-                        : (defaults.terminal.formatPrompt as string)
+                    config?.terminal?.defaultPrompt !== undefined
+                        ? (config?.terminal?.defaultPrompt as string)
+                        : (defaults.terminal.defaultPrompt as string)
                 if (col) ls.set('colors', col)
                 ls.set('i', '1')
                 ls.set('actualDir', actualD)
-                ls.set('formatPrompt', prompt as string)
+                ls.set('prompt', prompt as string)
             } else {
                 col = ls.get('colors') as TerminalColors
                 const dir = ls.get('actualDir')
-                const promp = ls.get('formatPrompt')
+                const promp = ls.get('prompt')
                 actualD = typeof dir !== 'string' ? '' : dir
                 prompt = typeof promp !== 'string' ? '' : promp
             }
@@ -160,7 +183,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             setFinalColors(col)
             setFinalInitialDir(actualD)
             setIsInitialized(true)
-            setFinalFormatPrompt(prompt)
+            setFinalCurrentPrompt(prompt)
         }
     }, [
         config?.terminal?.colors,
@@ -170,8 +193,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         persisteData,
         finalOldScreenEffect,
         finalInitialDir,
-        config?.terminal?.formatPrompt,
-        finalFormatPrompt,
+        config?.terminal?.defaultPrompt,
     ])
 
     return {
@@ -179,10 +201,11 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             colors: finalColors,
             showOldScreenEffect: finalOldScreenEffect,
             autoFocus: finalAutofocus,
-            formatPrompt: finalFormatPrompt,
+            currentPrompt: finalCurrentPrompt,
+            defaultPrompt: finalDefaultPrompt,
             initialOutput,
             shouldTypewrite: finalShouldTypewrite,
-        } as TerminalConfig,
+        } as TerminalConfig & { currentPrompt: string },
         commands: {
             allCommands: finalCommands,
             shouldAllowHelp: finalAllowHelp,
@@ -191,6 +214,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         isInitialized,
         fileSystem: {
             actualDir: finalInitialDir as string,
+            systemPaths: finalSystemPaths,
             ...finalFiles,
         },
     }

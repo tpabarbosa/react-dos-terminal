@@ -44,18 +44,16 @@ const LoadingScreen = ({
     })
 
     return (
-        <>
+        <TerminalScreen>
             {!React.isValidElement(content) && (
-                <TerminalScreen>
-                    <Output>
-                        <Output.Typewriter output={output} flashing />
-                    </Output>
-                </TerminalScreen>
+                <Output>
+                    <Output.Typewriter output={output} flashing />
+                </Output>
             )}
             {React.isValidElement(content) && (
                 <UserDefinedElement element={content} />
             )}
-        </>
+        </TerminalScreen>
     )
 }
 
