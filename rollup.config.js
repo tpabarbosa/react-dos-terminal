@@ -76,14 +76,9 @@ const prodConfig = [{
             del({ targets: ['dist/*'] }),
             copy({
                 targets: [{
-                        src: ['src/assets/**/*'],
-                        dest: ['dist/assets'],
-                    },
-                    {
-                        src: ['README.md'],
-                        dest: ['dist'],
-                    },
-                ],
+                    src: ['src/assets/**/*'],
+                    dest: ['dist/assets'],
+                }, ],
             }),
         ],
         external: Object.keys(packageJson.peerDependencies || {}),

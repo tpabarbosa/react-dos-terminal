@@ -81,7 +81,8 @@ export const defaults: TerminalDefaults = {
             toBeImplemented: `Error: "%n" command hasn't been implemented.`,
             notFound: `Error: "%n" is not a valid command.`,
             cantBeExecuted: `Error: "%n" can't be executed.`,
-            helpNotAvailable: `Error: "%n" doesn't have any help available.`,
+            // eslint-disable-next-line max-len
+            helpNotAvailable: `Error: there isn't any help available for command "%n"`,
             isAlreadyRunning: `Error: "%n" is already running.`,
         },
     },
