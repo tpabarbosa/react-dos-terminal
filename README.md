@@ -2,6 +2,8 @@
 
 A collection of React Components to mock a DOS command line interface.
 
+[Test it now](https://codesandbox.io/s/7k3iv?file=/src/App.js)
+
 ![component screen shot](docs/main.png?raw=true)
 
 It was created using [React](https://github.com/facebook/react) and [Typescript](https://github.com/Microsoft/TypeScript). It also uses [styled-components](https://github.com/styled-components/styled-components) and [Lodash](https://lodash.com/)...
