@@ -53,13 +53,13 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             }
             return { name, args, isHelp }
         }
-        const { name, args, isHelp } = getNameAndArgs(cmd)
+        const { name, args, isHelp } = getNameAndArgs(cmd.replace(/</g, '&lt;'))
 
         terminal.output.addLines(
             `${fileSystemHelper.formatPrompt(
                 terminal.currentPrompt,
                 actualDir
-            )} ${cmd}`,
+            )} ${cmd.replace(/</g, '&lt;')}`,
             true
         )
 

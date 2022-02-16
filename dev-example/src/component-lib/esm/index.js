@@ -1,4 +1,4 @@
-/* Version: 0.1.5 - February 14, 2022 16:37:27 */
+/* Version: 0.1.5 - February 16, 2022 14:39:23 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useReducer, useMemo, useContext, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
@@ -323,7 +323,7 @@ var defaults = {
             toBeImplemented: "Error: \"%n\" command hasn't been implemented.",
             notFound: "Error: \"%n\" is not a valid command.",
             cantBeExecuted: "Error: \"%n\" can't be executed.",
-            helpNotAvailable: "Error: \"%n\" doesn't have any help available.",
+            helpNotAvailable: "Error: there isn't any help available for command \"%n\"",
             isAlreadyRunning: "Error: \"%n\" is already running.",
         },
     },
@@ -2949,7 +2949,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 14, 2022 16:37:27';
+    var version = '0.1.5 - February 16, 2022 14:39:23';
     return {
         output: [
             {
@@ -3397,8 +3397,8 @@ var useCommandsHandler = function (_a) {
                         }
                         return { name: name, args: args, isHelp: isHelp };
                     };
-                    _a = getNameAndArgs(cmd), name = _a.name, args = _a.args, isHelp = _a.isHelp;
-                    terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(terminal.currentPrompt, actualDir), " ").concat(cmd), true);
+                    _a = getNameAndArgs(cmd.replace(/</g, '&lt;')), name = _a.name, args = _a.args, isHelp = _a.isHelp;
+                    terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(terminal.currentPrompt, actualDir), " ").concat(cmd.replace(/</g, '&lt;')), true);
                     if (name === '') {
                         command.setActualCmd(null);
                         return [2];

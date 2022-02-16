@@ -154,9 +154,9 @@ export const App = () => {
             //excludeInternalCommands: ['ver'],
             //excludeInternalCommands: 'all' as const,
             //shouldAllowHelp: false,
-            messages: {
-                notFound: 'My custom not Found message'
-            },
+            // messages: {
+            //     notFound: 'My custom not Found message'
+            // },
         },
         //shouldPersisteUserData: false,
         fileSystem: {
