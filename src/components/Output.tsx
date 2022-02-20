@@ -11,6 +11,7 @@ import {
     PrintLine,
 } from '../styles/styles'
 import { TerminalColors } from './Terminal'
+import { useTerminal } from '../contexts/TerminalContext'
 
 interface OutputProps {
     children: React.ReactNode
@@ -42,55 +43,46 @@ const Print = ({
     ...rest
 }: PrintProps & React.HTMLAttributes<HTMLDivElement>) => {
     const divRef = useRef<HTMLDivElement | null>(null)
-    const endRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ block: 'end' })
-        }
-    })
     return (
-        <>
-            <PrintContainer
-                {...rest}
-                colors={colors}
-                flashing={flashing}
-                ref={divRef}
-            >
-                {typeof output === 'object' &&
-                    output.length > 0 &&
-                    output.map((line, index) => {
-                        return (
-                            // eslint-disable-next-line react/no-array-index-key
-                            <PrintContent key={`${index}|${line}`}>
-                                {line !== '' ? (
-                                    <PrintLine
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(line),
-                                        }}
-                                    />
-                                ) : (
-                                    <br />
-                                )}
-                            </PrintContent>
-                        )
-                    })}
-                {typeof output === 'string' && output.length > 0 && (
-                    <PrintContent>
-                        {output !== '' ? (
-                            <PrintLine
-                                dangerouslySetInnerHTML={{
-                                    __html: DOMPurify.sanitize(output),
-                                }}
-                            />
-                        ) : (
-                            <br />
-                        )}
-                    </PrintContent>
-                )}
-            </PrintContainer>
-            <div ref={endRef} />
-        </>
+        <PrintContainer
+            {...rest}
+            colors={colors}
+            flashing={flashing}
+            ref={divRef}
+        >
+            {typeof output === 'object' &&
+                output.length > 0 &&
+                output.map((line, index) => {
+                    return (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <PrintContent key={`${index}|${line}`}>
+                            {line !== '' ? (
+                                <PrintLine
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(line),
+                                    }}
+                                />
+                            ) : (
+                                <br />
+                            )}
+                        </PrintContent>
+                    )
+                })}
+            {typeof output === 'string' && output.length > 0 && (
+                <PrintContent>
+                    {output !== '' ? (
+                        <PrintLine
+                            dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(output),
+                            }}
+                        />
+                    ) : (
+                        <br />
+                    )}
+                </PrintContent>
+            )}
+        </PrintContainer>
     )
 }
 
@@ -108,6 +100,8 @@ const PrintWithTypewriter = ({
     colors,
     ...rest
 }: PrintWithTypewriterProps & React.HTMLAttributes<HTMLDivElement>) => {
+    const terminal = useTerminal()
+    const { isActive } = terminal
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string | string[]>([])
 
@@ -156,8 +150,10 @@ const PrintWithTypewriter = ({
             for (let j = 0; j < children.length; j += 1) {
                 const el = children[j].children[0]
                 await handleTypewrite(text[j], el).then()
-                if (endRef.current)
-                    endRef.current.scrollIntoView({ block: 'end' })
+                if (isActive && endRef.current) {
+                    endRef.current.scrollIntoView({ block: 'nearest' })
+                }
+
                 if (j === children.length - 1 && typewriter.isTypewriting) {
                     typewriter.endTypewriting()
                 }
@@ -178,7 +174,7 @@ const PrintWithTypewriter = ({
         if (!typewriter.isTypewriting && lastOutput.length !== 0) {
             setLastOutput([])
         }
-    }, [lastOutput, handleTypewrite, output, divRef, typewriter])
+    }, [lastOutput, handleTypewrite, output, divRef, typewriter, isActive])
 
     return (
         <>

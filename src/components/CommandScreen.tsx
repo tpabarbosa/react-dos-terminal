@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { useTerminal } from '../contexts/TerminalContext'
 import { CommandScreenContainer, CommandScreenContent } from '../styles/styles'
 import { TerminalColors } from './Terminal'
@@ -19,14 +19,6 @@ export const CommandScreen = ({
 }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
     const terminal = useTerminal()
 
-    const endRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ block: 'end' })
-        }
-    })
-
     return (
         <CommandScreenContainer
             {...rest}
@@ -34,10 +26,7 @@ export const CommandScreen = ({
             oldEffect={oldEffect ?? terminal.showOldScreenEffect}
             fullscreen={fullscreen}
         >
-            <CommandScreenContent>
-                {children}
-                <div ref={endRef} />
-            </CommandScreenContent>
+            <CommandScreenContent>{children}</CommandScreenContent>
         </CommandScreenContainer>
     )
 }
