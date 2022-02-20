@@ -1,6 +1,6 @@
-/* Version: 0.1.5 - February 16, 2022 14:39:23 */
+/* Version: 0.1.5 - February 20, 2022 09:40:09 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import React, { useState, useEffect, createContext, useReducer, useMemo, useContext, forwardRef, useRef, useCallback, createRef, createElement } from 'react';
+import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
 import styled, { css, keyframes, createGlobalStyle } from 'styled-components';
 
@@ -94,43 +94,6 @@ function __makeTemplateObject(cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 }
-
-var _a;
-var localStorageKey = (_a = process.env.REACT_APP_NAME) !== null && _a !== void 0 ? _a : 'react-dos-terminal';
-var setToLS = function (key, value) {
-    var stored = window.localStorage.getItem(localStorageKey);
-    var obj = {};
-    if (stored) {
-        obj = JSON.parse(stored);
-    }
-    obj[key] = value;
-    window.localStorage.setItem(localStorageKey, JSON.stringify(obj));
-};
-var getFromLS = function (key) {
-    var value = window.localStorage.getItem(localStorageKey);
-    var obj = {};
-    if (value) {
-        obj = JSON.parse(value);
-        if (obj) {
-            return obj[key];
-        }
-    }
-    return null;
-};
-var getLsFreeSize = function () {
-    var lsTotal = 0;
-    var xLen;
-    Object.keys(localStorage).forEach(function (x) {
-        if (Object.prototype.hasOwnProperty.call(localStorage, x)) {
-            xLen = (localStorage[x].length + x.length) * 2;
-            lsTotal += xLen;
-        }
-    });
-    return (5000000 - lsTotal).toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-    });
-};
-var ls = { set: setToLS, get: getFromLS, freeSize: getLsFreeSize };
 
 var useOutputHandler = function (_a) {
     var initialOutput = _a.initialOutput, _b = _a.shouldTypewrite, shouldTypewrite = _b === void 0 ? false : _b;
@@ -235,9 +198,64 @@ var useOutputHandler = function (_a) {
     };
 };
 
+var LocalStorageContext = createContext(undefined);
+var LocalStorageContextProvider = function (_a) {
+    var children = _a.children, id = _a.id;
+    var localStorageKey = "react-dos-terminal@".concat(id);
+    var setToLS = useCallback(function (key, value) {
+        var stored = window.localStorage.getItem(localStorageKey);
+        var obj = {};
+        if (stored) {
+            obj = JSON.parse(stored);
+        }
+        obj[key] = value;
+        window.localStorage.setItem(localStorageKey, JSON.stringify(obj));
+    }, [localStorageKey]);
+    var getFromLS = useCallback(function (key) {
+        var value = window.localStorage.getItem(localStorageKey);
+        var obj = {};
+        if (value) {
+            obj = JSON.parse(value);
+            if (obj) {
+                return obj[key];
+            }
+        }
+        return null;
+    }, [localStorageKey]);
+    var getLSFreeSize = useCallback(function () {
+        var lsTotal = 0;
+        var xLen;
+        Object.keys(localStorage).forEach(function (x) {
+            if (Object.prototype.hasOwnProperty.call(localStorage, x)) {
+                xLen = (localStorage[x].length + x.length) * 2;
+                lsTotal += xLen;
+            }
+        });
+        return (5000000 - lsTotal).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+        });
+    }, []);
+    var ls = useMemo(function () {
+        return {
+            set: setToLS,
+            get: getFromLS,
+            getLSFreeSize: getLSFreeSize,
+        };
+    }, [getFromLS, getLSFreeSize, setToLS]);
+    return (jsx(LocalStorageContext.Provider, __assign({ value: ls }, { children: children }), void 0));
+};
+var useLocalStorage = function () {
+    var ctx = useContext(LocalStorageContext);
+    if (ctx === undefined) {
+        throw new Error("useLocalStorage must be used within a LocalStorageContextProvider.");
+    }
+    return ctx;
+};
+
 var TerminalContext = createContext(undefined);
 var TerminalContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
+    var ls = useLocalStorage();
     var output = useOutputHandler({
         initialOutput: config.initialOutput,
         shouldTypewrite: config.shouldTypewrite,
@@ -2513,7 +2531,7 @@ var getColorsCSS = function (colors, oldEffect) {
     }
     return ';';
 };
-var preStyles = css(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none;\n    margin: 0;\n    white-space: pre-wrap;\n    word-wrap: break-word;\n"], ["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none;\n    margin: 0;\n    white-space: pre-wrap;\n    word-wrap: break-word;\n"])));
+var preStyles = css(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none !important;\n    margin: 0 !important;\n    white-space: pre-wrap !important;\n    word-wrap: break-word !important;\n    border: 0 !important;\n    background-color: transparent !important;\n    border-radius: 0 !important;\n    padding: 0 !important;\n"], ["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none !important;\n    margin: 0 !important;\n    white-space: pre-wrap !important;\n    word-wrap: break-word !important;\n    border: 0 !important;\n    background-color: transparent !important;\n    border-radius: 0 !important;\n    padding: 0 !important;\n"])));
 var flash = keyframes(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n    50% {\n        opacity: 1;\n    }\n"], ["\n    50% {\n        opacity: 1;\n    }\n"])));
 var blink = keyframes(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n    50% {\n    border-color: transparent;\n    }\n"], ["\n    50% {\n    border-color: transparent;\n    }\n"])));
 var ScreenContainer = styled.div(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"], ["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"])), function (props) {
@@ -2587,24 +2605,20 @@ var Output = function (_a) {
 var Print = function (_a) {
     var output = _a.output, _b = _a.flashing, flashing = _b === void 0 ? false : _b, colors = _a.colors, rest = __rest(_a, ["output", "flashing", "colors"]);
     var divRef = useRef(null);
-    var endRef = useRef(null);
-    useEffect(function () {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ block: 'end' });
-        }
-    });
-    return (jsxs(Fragment, { children: [jsxs(PrintContainer, __assign({}, rest, { colors: colors, flashing: flashing, ref: divRef }, { children: [typeof output === 'object' &&
-                        output.length > 0 &&
-                        output.map(function (line, index) {
-                            return (jsx(PrintContent, { children: line !== '' ? (jsx(PrintLine, { dangerouslySetInnerHTML: {
-                                        __html: purify.sanitize(line),
-                                    } }, void 0)) : (jsx("br", {}, void 0)) }, "".concat(index, "|").concat(line)));
-                        }), typeof output === 'string' && output.length > 0 && (jsx(PrintContent, { children: output !== '' ? (jsx(PrintLine, { dangerouslySetInnerHTML: {
-                                __html: purify.sanitize(output),
-                            } }, void 0)) : (jsx("br", {}, void 0)) }, void 0))] }), void 0), jsx("div", { ref: endRef }, void 0)] }, void 0));
+    return (jsxs(PrintContainer, __assign({}, rest, { colors: colors, flashing: flashing, ref: divRef }, { children: [typeof output === 'object' &&
+                output.length > 0 &&
+                output.map(function (line, index) {
+                    return (jsx(PrintContent, { children: line !== '' ? (jsx(PrintLine, { dangerouslySetInnerHTML: {
+                                __html: purify.sanitize(line),
+                            } }, void 0)) : (jsx("br", {}, void 0)) }, "".concat(index, "|").concat(line)));
+                }), typeof output === 'string' && output.length > 0 && (jsx(PrintContent, { children: output !== '' ? (jsx(PrintLine, { dangerouslySetInnerHTML: {
+                        __html: purify.sanitize(output),
+                    } }, void 0)) : (jsx("br", {}, void 0)) }, void 0))] }), void 0));
 };
 var PrintWithTypewriter = function (_a) {
     var output = _a.output, typewriter = _a.typewriter, _b = _a.flashing, flashing = _b === void 0 ? false : _b, colors = _a.colors, rest = __rest(_a, ["output", "typewriter", "flashing", "colors"]);
+    var terminal = useTerminal();
+    var isActive = terminal.isActive;
     var divRef = useRef(null);
     var _c = useState([]), lastOutput = _c[0], setLastOutput = _c[1];
     var endRef = useRef(null);
@@ -2665,8 +2679,9 @@ var PrintWithTypewriter = function (_a) {
                         return [4, handleTypewrite(text[j], el).then()];
                     case 2:
                         _b.sent();
-                        if (endRef.current)
-                            endRef.current.scrollIntoView({ block: 'end' });
+                        if (isActive && endRef.current) {
+                            endRef.current.scrollIntoView({ block: 'nearest' });
+                        }
                         if (j === children.length - 1 && typewriter.isTypewriting) {
                             typewriter.endTypewriting();
                         }
@@ -2689,7 +2704,7 @@ var PrintWithTypewriter = function (_a) {
         if (!typewriter.isTypewriting && lastOutput.length !== 0) {
             setLastOutput([]);
         }
-    }, [lastOutput, handleTypewrite, output, divRef, typewriter]);
+    }, [lastOutput, handleTypewrite, output, divRef, typewriter, isActive]);
     return (jsxs(Fragment, { children: [jsxs(PrintContainer, __assign({}, rest, { colors: colors, flashing: flashing, ref: divRef }, { children: [typeof output === 'object' &&
                         output.length > 0 &&
                         output.map(function (line, index) {
@@ -2777,13 +2792,7 @@ var useInput = function () {
 var CommandScreen = function (_a) {
     var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, _b = _a.fullscreen, fullscreen = _b === void 0 ? false : _b, rest = __rest(_a, ["children", "colors", "oldEffect", "fullscreen"]);
     var terminal = useTerminal();
-    var endRef = useRef(null);
-    useEffect(function () {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ block: 'end' });
-        }
-    });
-    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect, fullscreen: fullscreen }, { children: jsxs(CommandScreenContent, { children: [children, jsx("div", { ref: endRef }, void 0)] }, void 0) }), void 0));
+    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect, fullscreen: fullscreen }, { children: jsx(CommandScreenContent, { children: children }, void 0) }), void 0));
 };
 
 var TestDynamicOutput = function (_a) {
@@ -2949,7 +2958,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 16, 2022 14:39:23';
+    var version = '0.1.5 - February 20, 2022 09:40:09';
     return {
         output: [
             {
@@ -3311,18 +3320,23 @@ var useCommandsHistory = function (_a) {
 var TerminalScreen = function (_a) {
     var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, rest = __rest(_a, ["children", "colors", "oldEffect"]);
     var terminal = useTerminal();
+    var autoFocus = terminal.autoFocus;
+    var _b = useState(false), gotFocus = _b[0], setGotFocus = _b[1];
     var endRef = useRef(null);
     useEffect(function () {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ block: 'end' });
+        if (!gotFocus && autoFocus && endRef.current) {
+            endRef.current.scrollIntoView({ block: 'start' });
+            window.scrollBy(0, -8);
+            setGotFocus(true);
         }
     });
-    return (jsx(ScreenContainer, __assign({ colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect }, { children: jsxs(ScreenContent, __assign({}, rest, { children: [children, jsx("div", { ref: endRef }, void 0)] }), void 0) }), void 0));
+    return (jsxs(Fragment, { children: [jsx("div", { ref: endRef }, void 0), jsx(ScreenContainer, __assign({ colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect }, { children: jsx(ScreenContent, __assign({}, rest, { children: children }), void 0) }), void 0)] }, void 0));
 };
 
 var FileSystemContext = createContext(undefined);
 var FileSystemContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
+    var ls = useLocalStorage();
     var fileSystemInitialState = {
         actualDir: config.actualDir,
         files: config.files,
@@ -3654,6 +3668,7 @@ var Main = function () {
 };
 
 var useLoadingScreen = function (config) {
+    var ls = useLocalStorage();
     var shouldShowLoading = function (loadingScreen, isInstalled) {
         var _a;
         var ss = (_a = loadingScreen.showLoadingScreen) !== null && _a !== void 0 ? _a : 'first-time';
@@ -3771,6 +3786,7 @@ var files = [
 
 var useInitializer = function (config) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+    var ls = useLocalStorage();
     var isInstalled = ls.get('i');
     var _v = useState(false), isInitialized = _v[0], setIsInitialized = _v[1];
     var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteUserData) !== undefined
@@ -3898,6 +3914,7 @@ var useInitializer = function (config) {
         finalOldScreenEffect,
         finalInitialDir,
         (_u = config === null || config === void 0 ? void 0 : config.terminal) === null || _u === void 0 ? void 0 : _u.defaultPrompt,
+        ls,
     ]);
     return {
         terminal: {
@@ -3940,11 +3957,18 @@ var LoadingScreen = function (_a) {
     });
     return (jsxs(TerminalScreen, { children: [!React.isValidElement(content) && (jsx(Output, { children: jsx(Output.Typewriter, { output: output, flashing: true }, void 0) }, void 0)), React.isValidElement(content) && (jsx(UserDefinedElement, { element: content }, void 0))] }, void 0));
 };
-var Terminal = function (_a) {
+var InitializeTerminal = function (_a) {
     var config = _a.config;
     var initializer = useInitializer(config);
     var loadingScreen = useLoadingScreen(config === null || config === void 0 ? void 0 : config.loadingScreen);
-    return (jsx(React.StrictMode, { children: initializer.isInitialized && (jsxs(Fragment, { children: [jsx(GlobalStyles, {}, void 0), jsxs(TerminalContextProvider, __assign({ config: initializer.terminal }, { children: [!loadingScreen.isLoading && (jsx(FileSystemContextProvider, __assign({ config: initializer.fileSystem }, { children: jsx(CommandContextProvider, __assign({ config: initializer.commands }, { children: jsx(Main, {}, void 0) }), void 0) }), void 0)), loadingScreen.isLoading && (jsx(LoadingScreen, { content: loadingScreen.content }, void 0))] }), void 0)] }, void 0)) }, void 0));
+    return (jsx(Fragment, { children: initializer.isInitialized && (jsxs(Fragment, { children: [jsx(GlobalStyles, {}, void 0), jsxs(TerminalContextProvider, __assign({ config: initializer.terminal }, { children: [!loadingScreen.isLoading && (jsx(FileSystemContextProvider, __assign({ config: initializer.fileSystem }, { children: jsx(CommandContextProvider, __assign({ config: initializer.commands }, { children: jsx(Main, {}, void 0) }), void 0) }), void 0)), loadingScreen.isLoading && (jsx(LoadingScreen, { content: loadingScreen.content }, void 0))] }), void 0)] }, void 0)) }, void 0));
+};
+var Terminal = function (_a) {
+    var config = _a.config, id = _a.id;
+    if (id === '') {
+        throw new Error("Id can not be empty");
+    }
+    return (jsx(React.StrictMode, { children: jsx(LocalStorageContextProvider, __assign({ id: id }, { children: jsx(InitializeTerminal, { config: config }, void 0) }), void 0) }, void 0));
 };
 
 export { CommandScreen, Input, Output, Terminal, colorsHelper, commandsHelper, fileSystemHelper, useCommand, useCommandsHistory, useFileSystem, useInput, useOutputHandler, useStateMachine, useTerminal };

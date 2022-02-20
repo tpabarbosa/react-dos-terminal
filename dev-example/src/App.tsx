@@ -138,7 +138,7 @@ export const App = () => {
             //     color: '#ffffff',
             // } as TerminalColors,
             //showOldScreenEffect: false,
-            //autoFocus: false,
+            autoFocus: false,
             //initialOutput: [],//['This is my <span style="color: white">custom</span> terminal', ''],
             defaultPrompt: '$d $t$_$p$g',
             //shouldTypewrite: false
@@ -169,11 +169,16 @@ export const App = () => {
     }
 
     return (
-        // <div id="App">
-        //     <h1>react-dos-terminal example</h1>
-            <div id="My-Terminal" style={{marginTop: "30px", width: '600px', height: '400px'}}>
-                <Terminal config={config} />
+        <div id="App">
+             <h1>react-dos-terminal example</h1>
+             <div style={{height: '600px'}}>My page elements</div>
+             {/* <div id="My-Terminal" style={{marginTop: "30px", width: '600px', height: '400px'}}> */}
+             <div id="Test">
+                <Terminal config={config} id='myTerminal'/>
             </div>
-        // </div>
+            <div style={{height: '600px'}}>My page elements
+                <input type='text'></input>
+            </div>
+        </div>
     )
 }

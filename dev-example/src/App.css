@@ -15,3 +15,11 @@ body {
     resize: both;
     overflow-y: hidden;
 }
+
+#Test {
+    overflow: hidden;
+    height: 75vh;
+    border: 6px ridge blue;
+    background-color: yellow;
+    border-radius: 1rem;
+}

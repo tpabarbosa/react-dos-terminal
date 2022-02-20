@@ -153,7 +153,10 @@ declare type TerminalColors = Colors<'background' | 'color'>;
 interface TerminalProps {
     config?: Partial<TerminalDefaults>;
 }
-declare const Terminal: ({ config }: TerminalProps) => JSX.Element;
+interface TerminalPropsWithId extends TerminalProps {
+    id: string;
+}
+declare const Terminal: ({ config, id }: TerminalPropsWithId) => JSX.Element;
 
 declare const fileSystemHelper: {
     getFakeFileSize: (func: ((...args: never) => unknown)[] | ((...args: never) => unknown)) => number;
