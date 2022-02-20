@@ -13,6 +13,7 @@ import { TerminalScreen } from './TerminalScreen'
 import { UserDefinedElement } from './UserDefinedElement'
 import { CommandContextProvider } from '../contexts/CommandContext'
 import { FileSystemContextProvider } from '../contexts/FileSystemContext'
+import { LocalStorageContextProvider } from '../contexts/LocalStorageContext'
 
 // type Data<T extends string> = { [field in T]: string | {} | null | object };
 
@@ -21,6 +22,10 @@ export type TerminalColors = Colors<'background' | 'color'>
 
 interface TerminalProps {
     config?: Partial<TerminalDefaults>
+}
+
+interface TerminalPropsWithId extends TerminalProps {
+    id: string
 }
 
 const LoadingScreen = ({
@@ -57,12 +62,13 @@ const LoadingScreen = ({
     )
 }
 
-const Terminal = ({ config }: TerminalProps) => {
+const InitializeTerminal = ({ config }: TerminalProps) => {
     const initializer = useInitializer(config)
     const loadingScreen = useLoadingScreen(config?.loadingScreen)
 
     return (
-        <React.StrictMode>
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <>
             {initializer.isInitialized && (
                 <>
                     <GlobalStyles />
@@ -84,6 +90,19 @@ const Terminal = ({ config }: TerminalProps) => {
                     </TerminalContextProvider>
                 </>
             )}
+        </>
+    )
+}
+
+const Terminal = ({ config, id }: TerminalPropsWithId) => {
+    if (id === '') {
+        throw new Error(`Id can not be empty`)
+    }
+    return (
+        <React.StrictMode>
+            <LocalStorageContextProvider id={id}>
+                <InitializeTerminal config={config} />
+            </LocalStorageContextProvider>
         </React.StrictMode>
     )
 }
