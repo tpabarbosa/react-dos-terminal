@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
-import ls from '../helpers/localStorage'
 import { FakeCommand } from './CommandContext'
+import { useLocalStorage } from './LocalStorageContext'
 
 export type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph'
 export type FakeFileType =
@@ -48,6 +48,8 @@ export const FileSystemContextProvider = ({
     children,
     config,
 }: FileSystemProviderProps): JSX.Element => {
+    const ls = useLocalStorage()
+
     const fileSystemInitialState: FileSystemState = {
         actualDir: config.actualDir,
         files: config.files,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { defaults, TerminalLoadingScreen } from '../config'
-import ls from '../helpers/localStorage'
+import { useLocalStorage } from '../contexts/LocalStorageContext'
 
 export interface UseLoadingScreen {
     isLoading: boolean
@@ -10,6 +10,8 @@ export interface UseLoadingScreen {
 export const useLoadingScreen = (
     config: Partial<TerminalLoadingScreen> | undefined
 ): UseLoadingScreen => {
+    const ls = useLocalStorage()
+
     const shouldShowLoading = (
         loadingScreen: Partial<TerminalLoadingScreen>,
         isInstalled: string | null

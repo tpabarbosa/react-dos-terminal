@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
 import { TerminalColors } from '../components/Terminal'
 import { TerminalConfig } from '../config'
-import ls from '../helpers/localStorage'
 import { useOutputHandler, UseOutputHandler } from '../hooks/useOutputHandler'
+import { useLocalStorage } from './LocalStorageContext'
 
 export type TerminalConfigAction =
     | { config: 'setColors'; value: TerminalColors }
@@ -35,6 +35,8 @@ export const TerminalContextProvider = ({
     children,
     config,
 }: TerminalProviderProps) => {
+    const ls = useLocalStorage()
+
     const output = useOutputHandler({
         initialOutput: config.initialOutput,
         shouldTypewrite: config.shouldTypewrite,
