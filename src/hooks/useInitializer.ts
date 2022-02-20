@@ -6,7 +6,7 @@ import {
     TerminalDefaults,
     CommandsMessages,
 } from '../config'
-import ls from '../helpers/localStorage'
+// import ls from '../helpers/localStorage'
 import {
     commandsList,
     devCommands,
@@ -17,8 +17,11 @@ import {
 import { CommandState, FakeCommand } from '../contexts/CommandContext'
 import initializer from '../helpers/initializer'
 import { files } from '../config/files'
+import { useLocalStorage } from '../contexts/LocalStorageContext'
 
 export const useInitializer = (config?: Partial<TerminalDefaults>) => {
+    const ls = useLocalStorage()
+
     const isInstalled = ls.get('i')
     const [isInitialized, setIsInitialized] = useState<boolean>(false)
 
@@ -194,6 +197,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         finalOldScreenEffect,
         finalInitialDir,
         config?.terminal?.defaultPrompt,
+        ls,
     ])
 
     return {
