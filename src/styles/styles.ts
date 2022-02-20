@@ -59,10 +59,14 @@ const preStyles = css`
     font-family: 'IBM VGA 9x16', monospace !important;
     font-size: 18px !important;
     line-height: 18px !important;
-    outline: none;
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    outline: none !important;
+    margin: 0 !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    border: 0 !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
 `
 
 const flash = keyframes`
