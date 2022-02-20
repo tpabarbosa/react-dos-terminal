@@ -159,9 +159,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         const terminalCommand: FakeCommand[] = allCommands.filter(
             (c) =>
                 c.name.toLowerCase() === name.toLowerCase() ||
-                c.alias?.find((a) =>
-                    a.toLowerCase().includes(name.toLowerCase())
-                )
+                c.alias?.find((a) => a.toLowerCase() === name.toLowerCase())
         )
         if (isHelp) {
             dispatch(await help({ ...props, name: 'help', args: name }))

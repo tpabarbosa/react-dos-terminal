@@ -1,4 +1,4 @@
-/* Version: 0.1.5 - February 20, 2022 09:40:09 */
+/* Version: 0.1.5 - February 20, 2022 13:03:48 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
@@ -2958,7 +2958,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 20, 2022 09:40:09';
+    var version = '0.1.5 - February 20, 2022 13:03:48';
     return {
         output: [
             {
@@ -3496,9 +3496,7 @@ var useCommandsHandler = function (_a) {
                     terminalCommand = allCommands.filter(function (c) {
                         var _a;
                         return c.name.toLowerCase() === name.toLowerCase() ||
-                            ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) {
-                                return a.toLowerCase().includes(name.toLowerCase());
-                            }));
+                            ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) { return a.toLowerCase() === name.toLowerCase(); }));
                     });
                     if (!isHelp) return [3, 2];
                     _b = dispatch;

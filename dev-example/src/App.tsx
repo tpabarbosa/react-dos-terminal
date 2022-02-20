@@ -138,7 +138,7 @@ export const App = () => {
             //     color: '#ffffff',
             // } as TerminalColors,
             //showOldScreenEffect: false,
-            autoFocus: false,
+            //autoFocus: false,
             //initialOutput: [],//['This is my <span style="color: white">custom</span> terminal', ''],
             defaultPrompt: '$d $t$_$p$g',
             //shouldTypewrite: false
