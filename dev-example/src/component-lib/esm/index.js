@@ -1,4 +1,4 @@
-/* Version: 0.1.5 - February 21, 2022 09:25:34 */
+/* Version: 0.1.5 - February 21, 2022 14:08:40 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
@@ -306,10 +306,10 @@ var TerminalContextProvider = function (_a) {
     }, [state, output, terminalInitialState.defaultPrompt]);
     return (jsx(TerminalContext.Provider, __assign({ value: t }, { children: children }), void 0));
 };
-var useTerminal = function () {
+var useTerminalInternal = function () {
     var ctx = useContext(TerminalContext);
     if (ctx === undefined) {
-        throw new Error("useTerminal must be used within a TerminalContextProvider.");
+        throw new Error("useTerminalInternal must be used within a TerminalContextProvider.");
     }
     return ctx;
 };
@@ -1907,15 +1907,15 @@ var fileSystemHelper = {
 };
 
 var run$8 = function (_a) {
-    var name = _a.name, args = _a.args, files = _a.files, actualDir = _a.actualDir;
+    var name = _a.name, args = _a.args, files = _a.files, currentDir = _a.currentDir;
     if (!args && (name === 'cd' || name === 'chdir')) {
         return {};
     }
     if (name === 'cd\\' || name === 'chdir\\') {
-        return { configTerminal: { config: 'setActualDir', value: '' } };
+        return { configTerminal: { config: 'setCurrentDir', value: '' } };
     }
     var regexNameReturn = /\.\./;
-    if (regexNameReturn.test(name) && actualDir === '') {
+    if (regexNameReturn.test(name) && currentDir === '') {
         return {
             output: [
                 {
@@ -1925,18 +1925,18 @@ var run$8 = function (_a) {
             ],
         };
     }
-    if (regexNameReturn.test(name) && actualDir !== '') {
-        return { configTerminal: { config: 'setActualDir', value: '' } };
+    if (regexNameReturn.test(name) && currentDir !== '') {
+        return { configTerminal: { config: 'setCurrentDir', value: '' } };
     }
     if (args[0] === '\\' && args.length === 1) {
-        return { configTerminal: { config: 'setActualDir', value: '' } };
+        return { configTerminal: { config: 'setCurrentDir', value: '' } };
     }
     if (args[0] === '\\' && args.length > 1) {
         var dirPath = args.substring(1);
         var dirContent = fileSystemHelper.getDir(files, dirPath);
         if (dirContent) {
             return {
-                configTerminal: { config: 'setActualDir', value: dirPath },
+                configTerminal: { config: 'setCurrentDir', value: dirPath },
             };
         }
         return {
@@ -1949,11 +1949,13 @@ var run$8 = function (_a) {
         };
     }
     if (args[0] !== '\\') {
-        var dirPath = "".concat(actualDir, "\\").concat(args);
+        var dirPath = "".concat(currentDir, "\\").concat(args);
         var dirContent = fileSystemHelper.getDir(files, dirPath);
-        var newDir = actualDir === '' ? args : "".concat(actualDir, "\\").concat(args);
+        var newDir = currentDir === '' ? args : "".concat(currentDir, "\\").concat(args);
         if (dirContent) {
-            return { configTerminal: { config: 'setActualDir', value: newDir } };
+            return {
+                configTerminal: { config: 'setCurrentDir', value: newDir },
+            };
         }
         return {
             output: [
@@ -2117,7 +2119,7 @@ var help$5 = [
     '',
 ];
 var run$5 = function (_a) {
-    var args = _a.args, files = _a.files, actualDir = _a.actualDir, totalSize = _a.totalSize;
+    var args = _a.args, files = _a.files, currentDir = _a.currentDir, totalSize = _a.totalSize;
     var device = function () {
         var dvc = navigator.userAgent.match(/(MSIE|(?!Gecko.+)Firefox|(?!AppleWebKit.+Chrome.+)Safari|(?!AppleWebKit.+)Chrome|AppleWebKit(?!.+Chrome|.+Safari)|Gecko(?!.+Firefox))(?: |\/)([\d.apre]+)/);
         return dvc !== null && dvc !== void 0 ? dvc : 'OS';
@@ -2199,13 +2201,13 @@ var run$5 = function (_a) {
         };
     }
     if (args === '' || (match && args === match[0])) {
-        var content = fileSystemHelper.getDir(files, actualDir);
+        var content = fileSystemHelper.getDir(files, currentDir);
         if (content) {
             return {
                 output: [
                     {
                         action: 'add',
-                        value: output(actualDir, content, showHidden),
+                        value: output(currentDir, content, showHidden),
                     },
                 ],
             };
@@ -2216,7 +2218,7 @@ var run$5 = function (_a) {
     options.forEach(function (option) {
         if ((match !== null && option !== match[0]) || !match) {
             var path = option;
-            var finalPath = path[0] === '\\' ? path : actualDir + path;
+            var finalPath = path[0] === '\\' ? path : currentDir + path;
             var content = fileSystemHelper.getDir(files, finalPath);
             if (content) {
                 result = output(finalPath, content, showHidden);
@@ -2289,7 +2291,7 @@ var isAlreadyRunning = {
     },
 };
 var link = function (href, text) {
-    return "<a href=\"".concat(href, "\" target=\"_blank\" >").concat(text, "</a>");
+    return "<a href=\"".concat(href, "\" target=\"_blank\">").concat(text, "</a>");
 };
 var commandsHelper = {
     commandNotFound: commandNotFound,
@@ -2301,10 +2303,10 @@ var commandsHelper = {
 };
 
 var help$4 = function (props) { return __awaiter(void 0, void 0, void 0, function () {
-    var commands, args, files, actualDir, helpText, output, h, cmd, systemPaths, file;
+    var commands, args, files, currentDir, helpText, output, h, cmd, systemPaths, file;
     return __generator(this, function (_a) {
         commands = props.allCommands;
-        args = props.args, files = props.files, actualDir = props.actualDir;
+        args = props.args, files = props.files, currentDir = props.currentDir;
         helpText = function (cmd) {
             if (cmd && cmd.help) {
                 if (typeof cmd.help === 'function') {
@@ -2350,7 +2352,7 @@ var help$4 = function (props) { return __awaiter(void 0, void 0, void 0, functio
         });
         h = helpText(cmd[0]);
         if (_.isEmpty(h)) {
-            systemPaths = [actualDir, '', '\\system'];
+            systemPaths = [currentDir, '', '\\system'];
             file = fileSystemHelper.getFile(files, args, systemPaths);
             if (file &&
                 (file.type === 'application/executable' ||
@@ -2410,7 +2412,7 @@ var help$3 = [
     ' |  |___ |  \\ |  | | | \\| |  | |___ ',
     '',
     '',
-    "This project was made by ".concat(commandsHelper.link('https://tpabarbosa.github.io/#/contact', 'Tatiana Barbosa'), " with create-react-app and typescript. It's a simple component to mimic the behavior of a DOS command line interface."),
+    "This project was made by ".concat(commandsHelper.link('https://tpabarbosa.github.io/#/contact', 'Tatiana Barbosa'), " with React and typescript. It's a simple component to mock the behavior of a DOS command line interface."),
     '',
     '',
     "By now only a few commands are available, but much more can be done to improve it. See ".concat(commandsHelper.link('https://github.com/tpabarbosa', 'documentation'), " to get more information."),
@@ -2461,7 +2463,7 @@ var testAsync = {
 var useCaretHandler = function () {
     var _a = useState(0), caretCorrection = _a[0], setCaretCorrection = _a[1];
     var _b = useState(null), actualInput = _b[0], setActualInput = _b[1];
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var userHasInteracted = terminal.userHasInteracted, autoFocus = terminal.autoFocus;
     var setInputRef = function (input) {
         setActualInput(input);
@@ -2538,10 +2540,12 @@ var getColorsCSS = function (colors, oldEffect) {
 var preStyles = css(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none !important;\n    margin: 0 !important;\n    white-space: pre-wrap !important;\n    word-wrap: break-word !important;\n    border: 0 !important;\n    background-color: transparent !important;\n    border-radius: 0 !important;\n    padding: 0 !important;\n"], ["\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    outline: none !important;\n    margin: 0 !important;\n    white-space: pre-wrap !important;\n    word-wrap: break-word !important;\n    border: 0 !important;\n    background-color: transparent !important;\n    border-radius: 0 !important;\n    padding: 0 !important;\n"])));
 var flash = keyframes(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n    50% {\n        opacity: 1;\n    }\n"], ["\n    50% {\n        opacity: 1;\n    }\n"])));
 var blink = keyframes(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n    50% {\n    border-color: transparent;\n    }\n"], ["\n    50% {\n    border-color: transparent;\n    }\n"])));
-var ScreenContainer = styled.div(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"], ["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n"])), function (props) {
+var ScreenContainer = styled.div(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n\n    ::-webkit-scrollbar {\n        width: 8px;\n    }\n\n    ::-webkit-scrollbar:horizontal {\n        height: 16px;\n    }\n\n    ::-webkit-scrollbar-corner {\n        background: #555;\n    }\n\n    ::-webkit-scrollbar-track {\n        background: ", ";\n    }\n\n    ::-webkit-scrollbar-thumb {\n        background: ", ";\n    }\n"], ["\n    height: 100%;\n    width: 100%;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    text-align: left;\n    padding-bottom: 1px;\n    ", "\n    ", ";\n    a {\n        color: ", ";\n        background-color: ", ";\n    }\n\n    ::-webkit-scrollbar {\n        width: 8px;\n    }\n\n    ::-webkit-scrollbar:horizontal {\n        height: 16px;\n    }\n\n    ::-webkit-scrollbar-corner {\n        background: #555;\n    }\n\n    ::-webkit-scrollbar-track {\n        background: ", ";\n    }\n\n    ::-webkit-scrollbar-thumb {\n        background: ", ";\n    }\n"])), function (props) {
     return props.oldEffect
         ? css(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n                  text-shadow: 7px 0px 20px #808080a8;\n              "], ["\n                  text-shadow: 7px 0px 20px #808080a8;\n              "]))) : '';
-}, function (props) { return getColorsCSS(props.colors, props.oldEffect); }, function (props) { return props.colors.background; }, function (props) { return props.colors.color; });
+}, function (props) { return getColorsCSS(props.colors, props.oldEffect); }, function (props) { return props.colors.background; }, function (props) { return props.colors.color; }, function (props) { return props.colors.background; }, function (props) {
+    return "repeating-linear-gradient(6deg, ".concat(props.colors.color, "e0 1px, ").concat(props.colors.color, " 3px)");
+});
 var ScreenContent = styled.div(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n    width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%;\n"], ["\n    width: 134%;\n    height: 100%;\n    word-break: break-all;\n    font-family: 'IBM VGA 9x16', monospace !important;\n    font-size: 18px !important;\n    line-height: 18px !important;\n    transform: scaleX(0.75);\n    position: relative;\n    left: -16.7%;\n"])));
 var CommandScreenContainer = styled.div(templateObject_8 || (templateObject_8 = __makeTemplateObject(["\n    height: ", ";\n    ", "\n"], ["\n    height: ", ";\n    ", "\n"])), function (props) { return (props.fullscreen ? '100%' : 'auto'); }, function (props) { return getColorsCSS(props.colors, props.oldEffect); });
 var CommandScreenContent = styled.div(templateObject_9 || (templateObject_9 = __makeTemplateObject([""], [""])));
@@ -2602,6 +2606,12 @@ var Input = forwardRef(function (_a, ref) {
     return (jsxs(InputContainer, __assign({}, rest, { colors: colors }, { children: [jsx("pre", { children: prompt }, void 0), jsx(InputContent, { ref: ref, id: id, contentEditable: "true", onClick: handleClick, onInput: handleInput, onKeyUp: handleKeyUp, onKeyDown: handleKeyDown, onKeyPress: handleKeyPress, autoCorrect: "off", autoCapitalize: "none", spellCheck: false, inputMode: "text" }, void 0), jsx(Caret, { correction: caretHandler.caretCorrection, colors: caretColors }, void 0)] }), void 0));
 });
 
+purify.addHook('afterSanitizeAttributes', function (node) {
+    if ('target' in node) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+    }
+});
 var Output = function (_a) {
     var children = _a.children, colors = _a.colors, rest = __rest(_a, ["children", "colors"]);
     return (jsx(OutputContainer, __assign({ colors: colors }, rest, { children: jsx(OutputContent, { children: children }, void 0) }), void 0));
@@ -2621,7 +2631,7 @@ var Print = function (_a) {
 };
 var PrintWithTypewriter = function (_a) {
     var output = _a.output, typewriter = _a.typewriter, _b = _a.flashing, flashing = _b === void 0 ? false : _b, colors = _a.colors, rest = __rest(_a, ["output", "typewriter", "flashing", "colors"]);
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var userHasInteracted = terminal.userHasInteracted;
     var divRef = useRef(null);
     var _c = useState([]), lastOutput = _c[0], setLastOutput = _c[1];
@@ -2733,6 +2743,39 @@ var Typewriter = function (_a) {
 Output.Typewriter = Typewriter;
 Output.Print = Print;
 
+var useInput = function () {
+    var ref = createRef();
+    var getText = function () {
+        var text = '';
+        if (ref.current) {
+            text = ref.current.textContent ? ref.current.textContent : '';
+        }
+        return text.trim();
+    };
+    var setText = function (text) {
+        if (ref.current) {
+            ref.current.textContent = text;
+        }
+    };
+    var setFocus = function () {
+        if (ref.current) {
+            ref.current.focus();
+        }
+    };
+    return {
+        ref: ref,
+        getText: getText,
+        setText: setText,
+        setFocus: setFocus,
+    };
+};
+
+var CommandScreen = function (_a) {
+    var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, _b = _a.fullscreen, fullscreen = _b === void 0 ? false : _b, rest = __rest(_a, ["children", "colors", "oldEffect", "fullscreen"]);
+    var terminal = useTerminalInternal();
+    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect, fullscreen: fullscreen }, { children: jsx(CommandScreenContent, { children: children }, void 0) }), void 0));
+};
+
 var CommandContext = createContext(undefined);
 var CommandContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
@@ -2773,43 +2816,19 @@ var useCommand = function () {
     return ctx;
 };
 
-var useInput = function () {
-    var ref = createRef();
-    var getText = function () {
-        var text = '';
-        if (ref.current) {
-            text = ref.current.textContent ? ref.current.textContent : '';
-        }
-        return text.trim();
-    };
-    var setText = function (text) {
-        if (ref.current) {
-            ref.current.textContent = text;
-        }
-    };
-    var setFocus = function () {
-        if (ref.current) {
-            ref.current.focus();
-        }
-    };
+var useTerminal = function () {
+    var terminal = useTerminalInternal();
+    var command = useCommand();
     return {
-        ref: ref,
-        getText: getText,
-        setText: setText,
-        setFocus: setFocus,
+        output: terminal.output,
+        isRunningCommand: command.isRunningCommand,
+        endRunningCommand: command.endRunningCommand,
     };
-};
-
-var CommandScreen = function (_a) {
-    var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, _b = _a.fullscreen, fullscreen = _b === void 0 ? false : _b, rest = __rest(_a, ["children", "colors", "oldEffect", "fullscreen"]);
-    var terminal = useTerminal();
-    return (jsx(CommandScreenContainer, __assign({}, rest, { colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect, fullscreen: fullscreen }, { children: jsx(CommandScreenContent, { children: children }, void 0) }), void 0));
 };
 
 var TestDynamicOutput = function (_a) {
     var name = _a.name, args = _a.args;
     var terminal = useTerminal();
-    var command = useCommand();
     var input = useInput();
     var _b = useState(''), internalOutput = _b[0], setInternalOutput = _b[1];
     var handleKeyDown = function (e) {
@@ -2830,7 +2849,7 @@ var TestDynamicOutput = function (_a) {
                     : { action: 'remove', value: linesToRemove },
                 { action: 'add', value: toOutput },
             ]);
-            command.endRunningCommand();
+            terminal.endRunningCommand();
         }
     };
     var handleInput = function () {
@@ -2840,7 +2859,7 @@ var TestDynamicOutput = function (_a) {
         background: colorsHelper.getColorByName('red'),
         color: colorsHelper.getColorByName('brightwhite'),
     };
-    return (jsxs(CommandScreen, __assign({ colors: colors, fullscreen: !!(args === 'with-output' && command.isRunningCommand) }, { children: [args === 'with-output' && command.isRunningCommand && (jsx(Output, __assign({ style: { height: '95%' } }, { children: jsx(Output.Print, { output: [
+    return (jsxs(CommandScreen, __assign({ colors: colors, fullscreen: !!(args === 'with-output' && terminal.isRunningCommand) }, { children: [args === 'with-output' && terminal.isRunningCommand && (jsx(Output, __assign({ style: { height: '95%' } }, { children: jsx(Output.Print, { output: [
                         "just testing... Type your name: ".concat(internalOutput, " "),
                     ] }, void 0) }), void 0)), jsx(Input, { onInput: handleInput, onKeyDown: function (e) {
                     return handleKeyDown(e);
@@ -2901,7 +2920,7 @@ var help$2 = [
     '',
 ];
 var run$2 = function (_a) {
-    var args = _a.args, actualDir = _a.actualDir, files = _a.files;
+    var args = _a.args, currentDir = _a.currentDir, files = _a.files;
     if (!args) {
         return {
             output: [
@@ -2915,7 +2934,7 @@ var run$2 = function (_a) {
             ],
         };
     }
-    var file = fileSystemHelper.getFile(files, args, [actualDir], true);
+    var file = fileSystemHelper.getFile(files, args, [currentDir], true);
     if (!file) {
         return {
             output: [
@@ -2969,7 +2988,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 21, 2022 09:25:34';
+    var version = '0.1.5 - February 21, 2022 14:08:40';
     return {
         output: [
             {
@@ -3330,7 +3349,7 @@ var useCommandsHistory = function (_a) {
 
 var TerminalScreen = function (_a) {
     var children = _a.children, colors = _a.colors, oldEffect = _a.oldEffect, rest = __rest(_a, ["children", "colors", "oldEffect"]);
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var autoFocus = terminal.autoFocus;
     var _b = useState(false), gotFocus = _b[0], setGotFocus = _b[1];
     var endRef = useRef(null);
@@ -3349,16 +3368,16 @@ var FileSystemContextProvider = function (_a) {
     var children = _a.children, config = _a.config;
     var ls = useLocalStorage();
     var fileSystemInitialState = {
-        actualDir: config.actualDir,
+        currentDir: config.currentDir,
         files: config.files,
         totalSize: config.totalSize,
         systemPaths: config.systemPaths,
     };
     var reducer = function (state, action) {
         switch (action.type) {
-            case 'setActualDir':
-                ls.set('actualDir', action.value);
-                return __assign(__assign({}, state), { actualDir: action.value });
+            case 'setCurrentDir':
+                ls.set('currentDir', action.value);
+                return __assign(__assign({}, state), { currentDir: action.value });
             case 'setFiles':
                 return __assign(__assign({}, state), { allFiles: action.value });
             default:
@@ -3369,8 +3388,8 @@ var FileSystemContextProvider = function (_a) {
     var fs = useMemo(function () {
         return __assign(__assign({}, state), { setFiles: function (files) {
                 dispatch({ type: 'setFiles', value: files });
-            }, setActualDir: function (value) {
-                dispatch({ type: 'setActualDir', value: value });
+            }, setCurrentDir: function (value) {
+                dispatch({ type: 'setCurrentDir', value: value });
             } });
     }, [state]);
     return (jsx(FileSystemContext.Provider, __assign({ value: fs }, { children: children }), void 0));
@@ -3385,11 +3404,11 @@ var useFileSystem = function () {
 
 var useCommandsHandler = function (_a) {
     var action = _a.action;
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var filesystem = useFileSystem();
     var command = useCommand();
     var messages = command.messages, shouldAllowHelp = command.shouldAllowHelp, allCommands = command.allCommands;
-    var actualDir = filesystem.actualDir, files = filesystem.files, totalSize = filesystem.totalSize, systemPaths = filesystem.systemPaths;
+    var currentDir = filesystem.currentDir, files = filesystem.files, totalSize = filesystem.totalSize, systemPaths = filesystem.systemPaths;
     var run = function (cmd) { return __awaiter(void 0, void 0, void 0, function () {
         var getNameAndArgs, _a, name, args, isHelp, props, dispatch, runAction, executable, terminalCommand, _b, executableCommand;
         return __generator(this, function (_c) {
@@ -3423,7 +3442,7 @@ var useCommandsHandler = function (_a) {
                         return { name: name, args: args, isHelp: isHelp };
                     };
                     _a = getNameAndArgs(cmd.replace(/</g, '&lt;')), name = _a.name, args = _a.args, isHelp = _a.isHelp;
-                    terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(terminal.currentPrompt, actualDir), " ").concat(cmd.replace(/</g, '&lt;')), true);
+                    terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(terminal.currentPrompt, currentDir), " ").concat(cmd.replace(/</g, '&lt;')), true);
                     if (name === '') {
                         command.setActualCmd(null);
                         return [2];
@@ -3433,7 +3452,7 @@ var useCommandsHandler = function (_a) {
                         args: args,
                         allCommands: allCommands,
                         messages: messages,
-                        actualDir: actualDir,
+                        currentDir: currentDir,
                         files: files,
                         totalSize: totalSize,
                         systemPaths: systemPaths,
@@ -3444,8 +3463,8 @@ var useCommandsHandler = function (_a) {
                             if (response.configTerminal.config === 'setColors' ||
                                 response.configTerminal.config === 'setPrompt')
                                 terminal.setConfig(response.configTerminal);
-                            if (response.configTerminal.config === 'setActualDir') {
-                                filesystem.setActualDir(response.configTerminal.value);
+                            if (response.configTerminal.config === 'setCurrentDir') {
+                                filesystem.setCurrentDir(response.configTerminal.value);
                             }
                         }
                         if (response.output) {
@@ -3493,7 +3512,7 @@ var useCommandsHandler = function (_a) {
                         if (_.isEmpty(p.files)) {
                             return null;
                         }
-                        var pathsToSearch = __spreadArray([actualDir], systemPaths, true);
+                        var pathsToSearch = __spreadArray([currentDir], systemPaths, true);
                         var file = fileSystemHelper.getFile(files, p.name, pathsToSearch);
                         if (file) {
                             if (file.type === 'application/executable' ||
@@ -3569,7 +3588,7 @@ var useStateMachine = function (machine) {
 };
 
 var useMainMachine = function () {
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var command = useCommand();
     var isRunningCommand = command.isRunningCommand, endRunningCommand = command.endRunningCommand, setActualCmd = command.setActualCmd;
     var outputQueue = terminal.output.outputQueue;
@@ -3630,9 +3649,9 @@ var UserDefinedElement = function (_a) {
 var Main = function () {
     var _a;
     var _b = useState(false), hideOutput = _b[0], setHideOutput = _b[1];
-    var terminal = useTerminal();
+    var terminal = useTerminalInternal();
     var filesystem = useFileSystem();
-    var actualDir = filesystem.actualDir;
+    var currentDir = filesystem.currentDir;
     var command = useCommand();
     var dynamic = (_a = command.actualCmd) === null || _a === void 0 ? void 0 : _a.dynamic;
     var input = useInput();
@@ -3673,7 +3692,7 @@ var Main = function () {
         }
     }, [state, dynamic]);
     return (jsxs(TerminalScreen, __assign({ onClick: function () { return input && input.setFocus(); } }, { children: [!hideOutput && (jsx(Output, { children: jsx(Output.Typewriter, { output: terminal.output }, void 0) }, void 0)), state === 'RUNNING_COMMAND' && dynamic && (jsx(UserDefinedElement, { element: dynamic === null || dynamic === void 0 ? void 0 : dynamic.element }, void 0)), state !== 'RUNNING_COMMAND' &&
-                !terminal.output.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(terminal.currentPrompt, actualDir) }, void 0))] }), void 0));
+                !terminal.output.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(terminal.currentPrompt, currentDir) }, void 0))] }), void 0));
 };
 
 var useLoadingScreen = function (config) {
@@ -3898,12 +3917,12 @@ var useInitializer = function (config) {
                 if (col)
                     ls.set('colors', col);
                 ls.set('i', '1');
-                ls.set('actualDir', actualD);
+                ls.set('currentDir', actualD);
                 ls.set('prompt', prompt_1);
             }
             else {
                 col = ls.get('colors');
-                var dir = ls.get('actualDir');
+                var dir = ls.get('currentDir');
                 var promp = ls.get('prompt');
                 actualD = typeof dir !== 'string' ? '' : dir;
                 prompt_1 = typeof promp !== 'string' ? '' : promp;
@@ -3941,7 +3960,7 @@ var useInitializer = function (config) {
             messages: finalMessages,
         },
         isInitialized: isInitialized,
-        fileSystem: __assign({ actualDir: finalInitialDir, systemPaths: finalSystemPaths }, finalFiles),
+        fileSystem: __assign({ currentDir: finalInitialDir, systemPaths: finalSystemPaths }, finalFiles),
     };
 };
 
@@ -3980,4 +3999,4 @@ var Terminal = function (_a) {
     return (jsx(React.StrictMode, { children: jsx(LocalStorageContextProvider, __assign({ id: id }, { children: jsx(InitializeTerminal, { config: config }, void 0) }), void 0) }, void 0));
 };
 
-export { CommandScreen, Input, Output, Terminal, colorsHelper, commandsHelper, fileSystemHelper, useCommand, useCommandsHistory, useFileSystem, useInput, useOutputHandler, useStateMachine, useTerminal };
+export { CommandScreen, Input, Output, Terminal, colorsHelper, commandsHelper, fileSystemHelper, useCommandsHistory, useInput, useOutputHandler, useStateMachine, useTerminal };

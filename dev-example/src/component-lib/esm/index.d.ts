@@ -11,19 +11,6 @@ interface FakeFile {
     attributes: FakeAttribute;
     size?: number;
 }
-declare type FakeFileSystem = {
-    files: FakeFile[];
-    totalSize: number;
-};
-interface FileSystemContextAPI extends FileSystemState {
-    setFiles: (files: FakeFileSystem) => void;
-    setActualDir: (value: string) => void;
-}
-interface FileSystemState extends FakeFileSystem {
-    actualDir: string;
-    systemPaths: string[];
-}
-declare const useFileSystem: () => FileSystemContextAPI;
 
 interface FakeCommand {
     name: string;
@@ -37,7 +24,7 @@ interface FakeCommand {
 interface CommandProps {
     name: string;
     args: string;
-    actualDir: string;
+    currentDir: string;
     files: FakeFile[];
     totalSize: number;
     systemPaths: string[];
@@ -57,7 +44,7 @@ declare type CommandToConfigTerminal = {
     config: 'setColors';
     value: TerminalColors;
 } | {
-    config: 'setActualDir';
+    config: 'setCurrentDir';
     value: string;
 } | {
     config: 'setPrompt';
@@ -73,24 +60,6 @@ interface Command {
     output?: CommandToOutput[];
     configTerminal?: CommandToConfigTerminal;
 }
-interface TerminalCommand extends Command {
-    name: string;
-    args: string;
-    waitingMessage?: string[];
-}
-interface CommandContextAPI extends CommandState {
-    startRunningCommand: () => void;
-    endRunningCommand: () => void;
-    setActualCmd: (cmd: TerminalCommand | null) => void;
-}
-interface CommandState {
-    allCommands: FakeCommand[];
-    shouldAllowHelp: boolean;
-    actualCmd?: TerminalCommand | null;
-    isRunningCommand: boolean;
-    messages: CommandsMessages;
-}
-declare const useCommand: () => CommandContextAPI;
 
 declare type TerminalLoadingScreenOptions = 'always' | 'never' | 'first-time';
 declare type ExcludeCommandsOptions = 'all' | 'dev';
@@ -267,29 +236,11 @@ declare const commandsHelper: {
     link: (href: string, text: string) => string;
 };
 
-declare type TerminalConfigAction = {
-    config: 'setColors';
-    value: TerminalColors;
-} | {
-    config: 'setUserHasInteracted';
-    value: boolean;
-} | {
-    config: 'setPrompt';
-    value: string;
-};
-interface TerminalContextAPI extends TerminalState {
+declare const useTerminal: () => {
     output: UseOutputHandler;
-    setConfig: ({ config, value }: TerminalConfigAction) => void;
-}
-interface TerminalState {
-    colors: TerminalColors;
-    showOldScreenEffect: boolean;
-    autoFocus: boolean;
-    userHasInteracted: boolean;
-    currentPrompt: string;
-    defaultPrompt: string;
-}
-declare const useTerminal: () => TerminalContextAPI;
+    isRunningCommand: boolean;
+    endRunningCommand: () => void;
+};
 
 declare type CommandsHistoryProps = {
     input: React.RefObject<HTMLDivElement>;
@@ -301,4 +252,4 @@ declare const useCommandsHistory: ({ input }: CommandsHistoryProps) => {
     length: number;
 };
 
-export { Command, CommandProps, CommandScreen, ExcludeCommandsOptions, FakeCommand, FakeFile, Input, Machine, Output, Terminal, TerminalColors, TerminalLoadingScreenOptions, colorsHelper, commandsHelper, fileSystemHelper, useCommand, useCommandsHistory, useFileSystem, useInput, useOutputHandler, useStateMachine, useTerminal };
+export { Command, CommandProps, CommandScreen, ExcludeCommandsOptions, FakeCommand, FakeFile, Input, Machine, Output, Terminal, TerminalColors, TerminalLoadingScreenOptions, colorsHelper, commandsHelper, fileSystemHelper, useCommandsHistory, useInput, useOutputHandler, useStateMachine, useTerminal };

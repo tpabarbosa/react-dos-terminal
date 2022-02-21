@@ -1,6 +1,5 @@
 import { FormEvent, useState } from 'react'
 import {
-    useCommand,
     useInput,
     CommandScreen,
     Output,
@@ -9,6 +8,7 @@ import {
     useStateMachine,
     Command,
     Machine,
+    useTerminal,
 } from '../../component-lib/esm'
 
 import { generateAlphabet, getRandomWord } from './words'
@@ -37,8 +37,8 @@ export type Action =
     | 'END_GAME'
 
 export const Hangman: React.FC = () => {
-    const command = useCommand()
-    const { endRunningCommand: endGame } = command
+    const terminal = useTerminal()
+    const { endRunningCommand: endGame } = terminal
 
     const input = useInput()
 
