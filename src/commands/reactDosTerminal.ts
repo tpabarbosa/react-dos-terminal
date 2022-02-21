@@ -19,7 +19,7 @@ const help = [
     `This project was made by ${commandsHelper.link(
         'https://tpabarbosa.github.io/#/contact',
         'Tatiana Barbosa'
-    )} with create-react-app and typescript. It's a simple component to mimic the behavior of a DOS command line interface.`,
+    )} with React and typescript. It's a simple component to mock the behavior of a DOS command line interface.`,
     '',
     '',
     `By now only a few commands are available, but much more can be done to improve it. See ${commandsHelper.link(
