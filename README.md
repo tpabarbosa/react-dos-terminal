@@ -424,27 +424,15 @@ And that is the result:
 
 **🚧 this section is under construction 🚧**
 
+When running dynamic commands ([see Commands](#commands)) you might want to use some of the provided hooks:
+
 -   #### `useTerminal()`
 
-    This hook is mainly used internally but when creating dynamic commands ([see Commands](#commands)) you will definely need **output** and maybe **setConfig**:
-
-    | Attributes                   | Description                                     |
-    | :--------------------------- | :---------------------------------------------- |
-    | colors: TerminalColors       | return terminal current colors                  |
-    | showOldScreenEffect: boolean | return if terminal old screen effect is enabled |
-    | autoFocus: boolean           | return if terminal has focus enabled            |
-    | userHasInteracted: boolean   | return if user has interacted with terminal     |
-    | currentPrompt: string        | return current prompt                           |
-    | defaultPrompt: string        | return default prompt                           |
-    | output: UseOutputHandler     | [see useOutputHandler](#hooks)                  |
-
-    | Method                                                       | Description                                                                                |
-    | :----------------------------------------------------------- | :----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- |
-    | setConfig: ({ config, value }: TerminalConfigAction) => void | set terminal attributes: <br> `{`<br>`config: 'setColors'; value: TerminalColors ` <br> `} | `<br>`{`<br>` config: 'userHasInteracted'; value: boolean `<br>`} | `<br>`{`<br>` config: 'setPrompt'; value: string `<br>`}` |
-
--   #### `useCommand()`
-
--   #### `useFileSystem()`
+    | Attributes/Methods              | Description                     |
+    | :------------------------------ | :------------------------------ |
+    | output: `UseOutputHandler`      | [see useOutputHandler](#hooks)  |
+    | isRunningCommand: `boolean`     | return if a command is running  |
+    | endRunningCommand: `() => void` | set _isRunningCommand_ to false |
 
 -   #### `useOutputHandler()`
 
@@ -467,6 +455,63 @@ And that is the result:
 ## Commands
 
 **🚧 this section is under construction 🚧**
+
+#### Interfaces
+
+-   ##### CommandProps
+    When a command action is executed it receives a `CommandProps` object from terminal:
+
+```ts
+interface CommandProps {
+    name: string // command name
+    args: string // command arguments
+    currentDir: string // current Path
+    files: FakeFile[] // all files registered in terminal
+    totalSize: number // all files total fake size
+    systemPaths: string[] // all system paths registered in terminal
+    allCommands: FakeCommand[] // all commands registered in terminal
+    messages: CommandsMessages // all default messages registered in terminal
+}
+```
+
+-   ##### Command
+
+    When a command action is executed it must return a `Command` or a `Promise<Command>`.
+
+    This means that a command can output something, or it can change some terminal state or it can call another component that does something (for example, interacts with user).
+
+> I am still working in an interface to allow fileSystem CRUD functionality, so it's not available yet.
+
+```ts
+interface Command {
+    output?: CommandToOutput[]
+    configTerminal?: CommandToConfigTerminal
+    dynamic?: {
+        element: JSX.Element
+        options?: {
+            shouldHideTerminalOutput?: boolean
+        }
+    }
+}
+```
+
+Where, `CommandToOutput` must be one of the following:
+
+```ts
+type CommandToOutput =
+    | { action: 'clear' }
+    | { action: 'add'; value: string | string[] }
+    | { action: 'remove'; value: number }
+```
+
+And, `CommandToConfigTerminal` must be one of the following:
+
+```ts
+type CommandToConfigTerminal =
+    | { config: 'setColors'; value: TerminalColors }
+    | { config: 'setCurrentDir'; value: string }
+    | { config: 'setPrompt'; value: string }
+```
 
 #### Internal Commands
 
@@ -516,3 +561,7 @@ And that is the result:
 -   ##### `dir`
 
 -   ##### `type`
+
+## Special Thanks
+
+Thanks to "VileR" from [THE OLDSCHOOL PC FONT RESOURCE](https://int10h.org/oldschool-pc-fonts), for adapting and providing various oldschool fonts. **WebPlus_IBM_VGA_9x16.woff** was the chosen font for this project.
