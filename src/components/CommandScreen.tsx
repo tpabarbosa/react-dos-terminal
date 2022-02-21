@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
 import { CommandScreenContainer, CommandScreenContent } from '../styles/styles'
 import { TerminalColors } from './Terminal'
 
@@ -17,7 +17,7 @@ export const CommandScreen = ({
     fullscreen = false,
     ...rest
 }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
 
     return (
         <CommandScreenContainer

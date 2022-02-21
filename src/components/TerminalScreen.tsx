@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
 import { ScreenContainer, ScreenContent } from '../styles/styles'
 import { TerminalColors } from './Terminal'
 
@@ -15,7 +15,7 @@ export const TerminalScreen = ({
     oldEffect,
     ...rest
 }: ScreenProps & React.HTMLAttributes<HTMLDivElement>) => {
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
     const { autoFocus } = terminal
     const [gotFocus, setGotFocus] = useState(false)
 

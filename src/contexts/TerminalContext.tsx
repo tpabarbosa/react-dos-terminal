@@ -101,12 +101,12 @@ export const TerminalContextProvider = ({
     )
 }
 
-export const useTerminal = () => {
+export const useTerminalInternal = () => {
     const ctx = useContext(TerminalContext)
 
     if (ctx === undefined) {
         throw new Error(
-            `useTerminal must be used within a TerminalContextProvider.`
+            `useTerminalInternal must be used within a TerminalContextProvider.`
         )
     }
 

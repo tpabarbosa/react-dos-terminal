@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useCommand } from '../../contexts/CommandContext'
-import { useTerminal } from '../../contexts/TerminalContext'
+import { useTerminalInternal } from '../../contexts/TerminalContext'
 import { Machine, useStateMachine } from './useStateMachine'
 
 export type MainState = 'IDDLE' | 'RUNNING_COMMAND'
 export type MainAction = 'NEW_CMD' | 'FINISH_CMD'
 
 export const useMainMachine = () => {
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
     const command = useCommand()
     const { isRunningCommand, endRunningCommand, setActualCmd } = command
     const { outputQueue } = terminal.output

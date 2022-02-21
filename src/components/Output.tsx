@@ -11,7 +11,15 @@ import {
     PrintLine,
 } from '../styles/styles'
 import { TerminalColors } from './Terminal'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
+
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    // set all elements owning target to target=_blank
+    if ('target' in node) {
+        node.setAttribute('target', '_blank')
+        node.setAttribute('rel', 'noopener noreferrer')
+    }
+})
 
 interface OutputProps {
     children: React.ReactNode
@@ -100,7 +108,7 @@ const PrintWithTypewriter = ({
     colors,
     ...rest
 }: PrintWithTypewriterProps & React.HTMLAttributes<HTMLDivElement>) => {
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
     const { userHasInteracted } = terminal
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string | string[]>([])

@@ -14,7 +14,7 @@ const help = [
     '',
 ]
 
-const run = ({ args, actualDir, files }: CommandProps): Command => {
+const run = ({ args, currentDir, files }: CommandProps): Command => {
     if (!args) {
         return {
             output: [
@@ -30,7 +30,7 @@ const run = ({ args, actualDir, files }: CommandProps): Command => {
         }
     }
 
-    const file = fakeFileSystemHelper.getFile(files, args, [actualDir], true)
+    const file = fakeFileSystemHelper.getFile(files, args, [currentDir], true)
 
     if (!file) {
         return {

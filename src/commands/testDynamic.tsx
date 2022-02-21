@@ -2,11 +2,11 @@
 import React, { useState } from 'react'
 import Input from '../components/Input'
 import Output from '../components/Output'
-import { Command, CommandProps, useCommand } from '../contexts/CommandContext'
+import { Command, CommandProps } from '../contexts/CommandContext'
 import colorsHelper from '../helpers/colors'
 import { useInput } from '../hooks/useInput'
 import { CommandScreen } from '../components/CommandScreen'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminal } from '../hooks/useTerminal'
 
 export const TestDynamicOutput = ({
     name,
@@ -16,7 +16,6 @@ export const TestDynamicOutput = ({
     args: string
 }) => {
     const terminal = useTerminal()
-    const command = useCommand()
     const input = useInput()
 
     const [internalOutput, setInternalOutput] = useState('')
@@ -41,7 +40,7 @@ export const TestDynamicOutput = ({
                     : { action: 'remove', value: linesToRemove },
                 { action: 'add', value: toOutput },
             ])
-            command.endRunningCommand()
+            terminal.endRunningCommand()
         }
     }
 
@@ -56,9 +55,9 @@ export const TestDynamicOutput = ({
     return (
         <CommandScreen
             colors={colors}
-            fullscreen={!!(args === 'with-output' && command.isRunningCommand)}
+            fullscreen={!!(args === 'with-output' && terminal.isRunningCommand)}
         >
-            {args === 'with-output' && command.isRunningCommand && (
+            {args === 'with-output' && terminal.isRunningCommand && (
                 <Output style={{ height: '95%' }}>
                     <Output.Print
                         output={[

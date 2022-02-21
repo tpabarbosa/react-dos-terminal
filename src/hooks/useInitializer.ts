@@ -173,11 +173,11 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
                         : (defaults.terminal.defaultPrompt as string)
                 if (col) ls.set('colors', col)
                 ls.set('i', '1')
-                ls.set('actualDir', actualD)
+                ls.set('currentDir', actualD)
                 ls.set('prompt', prompt as string)
             } else {
                 col = ls.get('colors') as TerminalColors
-                const dir = ls.get('actualDir')
+                const dir = ls.get('currentDir')
                 const promp = ls.get('prompt')
                 actualD = typeof dir !== 'string' ? '' : dir
                 prompt = typeof promp !== 'string' ? '' : promp
@@ -217,7 +217,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         } as CommandState,
         isInitialized,
         fileSystem: {
-            actualDir: finalInitialDir as string,
+            currentDir: finalInitialDir as string,
             systemPaths: finalSystemPaths as string[],
             ...finalFiles,
         },

@@ -6,7 +6,7 @@ import fileSystemHelper from '../helpers/filesystem'
 
 export const help = async (props: CommandProps): Promise<Command> => {
     const commands = props.allCommands
-    const { args, files, actualDir } = props
+    const { args, files, currentDir } = props
 
     const helpText = (cmd: FakeCommand): string | string[] => {
         if (cmd && cmd.help) {
@@ -60,7 +60,7 @@ export const help = async (props: CommandProps): Promise<Command> => {
     h = helpText(cmd[0])
 
     if (_.isEmpty(h)) {
-        const systemPaths = [actualDir, '', '\\system']
+        const systemPaths = [currentDir, '', '\\system']
         const file = fileSystemHelper.getFile(files, args, systemPaths)
         if (
             file &&

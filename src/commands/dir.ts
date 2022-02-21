@@ -15,7 +15,7 @@ const help = [
     '',
 ]
 
-const run = ({ args, files, actualDir, totalSize }: CommandProps): Command => {
+const run = ({ args, files, currentDir, totalSize }: CommandProps): Command => {
     const device = () => {
         const dvc = navigator.userAgent.match(
             /(MSIE|(?!Gecko.+)Firefox|(?!AppleWebKit.+Chrome.+)Safari|(?!AppleWebKit.+)Chrome|AppleWebKit(?!.+Chrome|.+Safari)|Gecko(?!.+Firefox))(?: |\/)([\d.apre]+)/
@@ -131,14 +131,14 @@ const run = ({ args, files, actualDir, totalSize }: CommandProps): Command => {
     }
 
     if (args === '' || (match && args === match[0])) {
-        const content = fileSystemHelper.getDir(files, actualDir)
+        const content = fileSystemHelper.getDir(files, currentDir)
 
         if (content) {
             return {
                 output: [
                     {
                         action: 'add',
-                        value: output(actualDir, content, showHidden),
+                        value: output(currentDir, content, showHidden),
                     },
                 ],
             }
@@ -150,7 +150,7 @@ const run = ({ args, files, actualDir, totalSize }: CommandProps): Command => {
     options.forEach((option) => {
         if ((match !== null && option !== match[0]) || !match) {
             const path = option
-            const finalPath = path[0] === '\\' ? path : actualDir + path
+            const finalPath = path[0] === '\\' ? path : currentDir + path
 
             const content = fileSystemHelper.getDir(files, finalPath)
             if (content) {

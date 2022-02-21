@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
 import { useCommandsHistory } from '../hooks/useCommandsHistory'
 import { useInput } from '../hooks/useInput'
 import Input from './Input'
@@ -14,10 +14,10 @@ import { useFileSystem } from '../contexts/FileSystemContext'
 
 export const Main = () => {
     const [hideOutput, setHideOutput] = useState(false)
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
 
     const filesystem = useFileSystem()
-    const { actualDir } = filesystem
+    const { currentDir } = filesystem
 
     const command = useCommand()
     const dynamic = command.actualCmd?.dynamic
@@ -86,7 +86,7 @@ export const Main = () => {
                         ref={input.ref}
                         prompt={fileSystemHelper.formatPrompt(
                             terminal.currentPrompt,
-                            actualDir
+                            currentDir
                         )}
                     />
                 )}

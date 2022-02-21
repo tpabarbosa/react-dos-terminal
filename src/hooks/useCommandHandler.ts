@@ -7,7 +7,7 @@ import {
     useCommand,
 } from '../contexts/CommandContext'
 import { useFileSystem } from '../contexts/FileSystemContext'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
 import commandsHelper from '../helpers/commands'
 
 import fileSystemHelper from '../helpers/filesystem'
@@ -20,11 +20,11 @@ type UseCommandsHandlerProps = {
 }
 
 export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
     const filesystem = useFileSystem()
     const command = useCommand()
     const { messages, shouldAllowHelp, allCommands } = command
-    const { actualDir, files, totalSize, systemPaths } = filesystem
+    const { currentDir, files, totalSize, systemPaths } = filesystem
 
     const run = async (cmd: string) => {
         const getNameAndArgs = (c: string) => {
@@ -58,7 +58,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         terminal.output.addLines(
             `${fileSystemHelper.formatPrompt(
                 terminal.currentPrompt,
-                actualDir
+                currentDir
             )} ${cmd.replace(/</g, '&lt;')}`,
             true
         )
@@ -73,7 +73,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             args,
             allCommands,
             messages,
-            actualDir,
+            currentDir,
             files,
             totalSize,
             systemPaths,
@@ -92,8 +92,8 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                     response.configTerminal.config === 'setPrompt'
                 )
                     terminal.setConfig(response.configTerminal)
-                if (response.configTerminal.config === 'setActualDir') {
-                    filesystem.setActualDir(response.configTerminal.value)
+                if (response.configTerminal.config === 'setCurrentDir') {
+                    filesystem.setCurrentDir(response.configTerminal.value)
                 }
             }
 
@@ -139,7 +139,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 return null
             }
 
-            const pathsToSearch = [actualDir, ...systemPaths]
+            const pathsToSearch = [currentDir, ...systemPaths]
             const file = fileSystemHelper.getFile(files, p.name, pathsToSearch)
 
             if (file) {

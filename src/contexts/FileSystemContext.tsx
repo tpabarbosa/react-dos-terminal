@@ -23,11 +23,11 @@ export type FakeFileSystem = {
 }
 export interface FileSystemContextAPI extends FileSystemState {
     setFiles: (files: FakeFileSystem) => void
-    setActualDir: (value: string) => void
+    setCurrentDir: (value: string) => void
 }
 
 export interface FileSystemState extends FakeFileSystem {
-    actualDir: string
+    currentDir: string
     systemPaths: string[]
 }
 
@@ -37,7 +37,7 @@ export interface FileSystemProviderProps {
 }
 
 export type FileSystemAction =
-    | { type: 'setActualDir'; value: string }
+    | { type: 'setCurrentDir'; value: string }
     | { type: 'setFiles'; value: FakeFileSystem }
 
 const FileSystemContext = createContext<FileSystemContextAPI | undefined>(
@@ -51,7 +51,7 @@ export const FileSystemContextProvider = ({
     const ls = useLocalStorage()
 
     const fileSystemInitialState: FileSystemState = {
-        actualDir: config.actualDir,
+        currentDir: config.currentDir,
         files: config.files,
         totalSize: config.totalSize,
         systemPaths: config.systemPaths,
@@ -59,9 +59,9 @@ export const FileSystemContextProvider = ({
 
     const reducer = (state: FileSystemState, action: FileSystemAction) => {
         switch (action.type) {
-            case 'setActualDir':
-                ls.set('actualDir', action.value)
-                return { ...state, actualDir: action.value }
+            case 'setCurrentDir':
+                ls.set('currentDir', action.value)
+                return { ...state, currentDir: action.value }
             case 'setFiles':
                 return { ...state, allFiles: action.value }
             default:
@@ -77,8 +77,8 @@ export const FileSystemContextProvider = ({
             setFiles: (files: FakeFileSystem) => {
                 dispatch({ type: 'setFiles', value: files })
             },
-            setActualDir: (value: string) => {
-                dispatch({ type: 'setActualDir', value })
+            setCurrentDir: (value: string) => {
+                dispatch({ type: 'setCurrentDir', value })
             },
         }
     }, [state])

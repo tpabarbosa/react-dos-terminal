@@ -2,17 +2,17 @@
 import { Command, CommandProps } from '../contexts/CommandContext'
 import fileSystemHelper from '../helpers/filesystem'
 
-const run = ({ name, args, files, actualDir }: CommandProps): Command => {
+const run = ({ name, args, files, currentDir }: CommandProps): Command => {
     if (!args && (name === 'cd' || name === 'chdir')) {
         return {}
     }
 
     if (name === 'cd\\' || name === 'chdir\\') {
-        return { configTerminal: { config: 'setActualDir', value: '' } }
+        return { configTerminal: { config: 'setCurrentDir', value: '' } }
     }
 
     const regexNameReturn = /\.\./
-    if (regexNameReturn.test(name) && actualDir === '') {
+    if (regexNameReturn.test(name) && currentDir === '') {
         return {
             output: [
                 {
@@ -22,12 +22,12 @@ const run = ({ name, args, files, actualDir }: CommandProps): Command => {
             ],
         }
     }
-    if (regexNameReturn.test(name) && actualDir !== '') {
-        return { configTerminal: { config: 'setActualDir', value: '' } }
+    if (regexNameReturn.test(name) && currentDir !== '') {
+        return { configTerminal: { config: 'setCurrentDir', value: '' } }
     }
 
     if (args[0] === '\\' && args.length === 1) {
-        return { configTerminal: { config: 'setActualDir', value: '' } }
+        return { configTerminal: { config: 'setCurrentDir', value: '' } }
     }
 
     if (args[0] === '\\' && args.length > 1) {
@@ -35,7 +35,7 @@ const run = ({ name, args, files, actualDir }: CommandProps): Command => {
         const dirContent = fileSystemHelper.getDir(files, dirPath)
         if (dirContent) {
             return {
-                configTerminal: { config: 'setActualDir', value: dirPath },
+                configTerminal: { config: 'setCurrentDir', value: dirPath },
             }
         }
 
@@ -50,11 +50,13 @@ const run = ({ name, args, files, actualDir }: CommandProps): Command => {
     }
 
     if (args[0] !== '\\') {
-        const dirPath = `${actualDir}\\${args}`
+        const dirPath = `${currentDir}\\${args}`
         const dirContent = fileSystemHelper.getDir(files, dirPath)
-        const newDir = actualDir === '' ? args : `${actualDir}\\${args}`
+        const newDir = currentDir === '' ? args : `${currentDir}\\${args}`
         if (dirContent) {
-            return { configTerminal: { config: 'setActualDir', value: newDir } }
+            return {
+                configTerminal: { config: 'setCurrentDir', value: newDir },
+            }
         }
 
         return {

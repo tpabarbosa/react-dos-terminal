@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useTerminal } from '../contexts/TerminalContext'
+import { useTerminalInternal } from '../contexts/TerminalContext'
 
 export type UseCaretHandler = {
     caretCorrection: number
@@ -13,7 +13,7 @@ export const useCaretHandler = (): UseCaretHandler => {
     const [caretCorrection, setCaretCorrection] = useState(0)
     const [actualInput, setActualInput] = useState<HTMLDivElement | null>(null)
 
-    const terminal = useTerminal()
+    const terminal = useTerminalInternal()
     const { userHasInteracted, autoFocus } = terminal
 
     const setInputRef = (input: HTMLDivElement | null) => {
