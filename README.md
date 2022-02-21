@@ -4,7 +4,7 @@ A collection of React Components to mock a DOS command line interface.
 
 [Test it now](https://codesandbox.io/s/7k3iv?file=/src/App.js)
 
-![component screen shot](docs/main.png?raw=true)
+![component screen shot](docs/social-media.png?raw=true)
 
 It was created using [React](https://github.com/facebook/react) and [Typescript](https://github.com/Microsoft/TypeScript). It also uses [styled-components](https://github.com/styled-components/styled-components) and [Lodash](https://lodash.com/)...
 
@@ -40,6 +40,8 @@ In a React project, run the following command:
 npm install react-dos-terminal
 ```
 
+> This component has peer dependencies of lodash and styled-components. If you get some error, please check if your project have those installed.
+
 ## Usage
 
 To start using it you must import the Terminal component:
@@ -51,7 +53,7 @@ import { Terminal } from 'react-dos-terminal'
 const App = () => {
     return (
         <div style={{ width: '600px', height: '400px' }}>
-            <Terminal />
+            <Terminal id="myCustomTerminal" />
         </div>
     )
 }
@@ -75,7 +77,7 @@ And that's all you need to have a running terminal!!
 
 ## Configuration
 
-Terminal component accepts an optional **config** object as a prop. In this config object you can define custom commands, files and directories and some other attributes. All attributes are optional:
+Terminal component accepts two props, a required **id** _string_ and an optional **config** object. In this config object you can define custom commands, files and directories and some other attributes. All attributes are optional:
 
 ```ts
 {
@@ -117,6 +119,8 @@ Terminal component accepts an optional **config** object as a prop. In this conf
     shouldPersisteUserData: boolean,
 }
 ```
+
+> Terminal component makes use of the prop **id** to identify persisted data in _localStorage_, so it is important to choose a **constant** id that can be used to distinguish between different instances of the component.
 
 | Property                 | Attribute                   |                                                                                                                                                                             Description                                                                                                                                                                              | Default                                                                                                                                                                                                                                                                                                                                      |
 | ------------------------ | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -421,6 +425,22 @@ And that is the result:
 **🚧 this section is under construction 🚧**
 
 -   #### `useTerminal()`
+
+    This hook is mainly used internally but when creating dynamic commands ([see Commands](#commands)) you will definely need **output** and maybe **setConfig**:
+
+    | Attributes                   | Description                                     |
+    | :--------------------------- | :---------------------------------------------- |
+    | colors: TerminalColors       | return terminal current colors                  |
+    | showOldScreenEffect: boolean | return if terminal old screen effect is enabled |
+    | autoFocus: boolean           | return if terminal has focus enabled            |
+    | userHasInteracted: boolean   | return if user has interacted with terminal     |
+    | currentPrompt: string        | return current prompt                           |
+    | defaultPrompt: string        | return default prompt                           |
+    | output: UseOutputHandler     | [see useOutputHandler](#hooks)                  |
+
+    | Method                                                       | Description                                                                                |
+    | :----------------------------------------------------------- | :----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- |
+    | setConfig: ({ config, value }: TerminalConfigAction) => void | set terminal attributes: <br> `{`<br>`config: 'setColors'; value: TerminalColors ` <br> `} | `<br>`{`<br>` config: 'userHasInteracted'; value: boolean `<br>`} | `<br>`{`<br>` config: 'setPrompt'; value: string `<br>`}` |
 
 -   #### `useCommand()`
 
