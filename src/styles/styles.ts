@@ -100,6 +100,28 @@ export const ScreenContainer = styled.div<ScreenContainerProps>`
         color: ${(props) => props.colors.background};
         background-color: ${(props) => props.colors.color};
     }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar:horizontal {
+        height: 16px;
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: #555;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: ${(props) => props.colors.background};
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) =>
+            // eslint-disable-next-line max-len
+            `repeating-linear-gradient(6deg, ${props.colors.color}e0 1px, ${props.colors.color} 3px)`};
+    }
 `
 
 export const ScreenContent = styled.div<ScreenContentProps>`
