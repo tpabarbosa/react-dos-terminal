@@ -1,4 +1,4 @@
-/* Version: 0.1.5 - February 21, 2022 14:08:40 */
+/* Version: 0.1.6 - February 21, 2022 14:29:01 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
@@ -2291,7 +2291,7 @@ var isAlreadyRunning = {
     },
 };
 var link = function (href, text) {
-    return "<a href=\"".concat(href, "\" target=\"_blank\">").concat(text, "</a>");
+    return "<a href=\"".concat(href, "\" target=\"_blank\" >").concat(text, "</a>");
 };
 var commandsHelper = {
     commandNotFound: commandNotFound,
@@ -2988,7 +2988,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 21, 2022 14:08:40';
+    var version = '0.1.6 - February 21, 2022 14:29:01';
     return {
         output: [
             {
