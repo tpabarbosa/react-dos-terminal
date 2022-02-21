@@ -271,7 +271,7 @@ declare type TerminalConfigAction = {
     config: 'setColors';
     value: TerminalColors;
 } | {
-    config: 'isActive';
+    config: 'setUserHasInteracted';
     value: boolean;
 } | {
     config: 'setPrompt';
@@ -280,13 +280,12 @@ declare type TerminalConfigAction = {
 interface TerminalContextAPI extends TerminalState {
     output: UseOutputHandler;
     setConfig: ({ config, value }: TerminalConfigAction) => void;
-    userHasInteracted: () => void;
 }
 interface TerminalState {
     colors: TerminalColors;
     showOldScreenEffect: boolean;
     autoFocus: boolean;
-    isActive: boolean;
+    userHasInteracted: boolean;
     currentPrompt: string;
     defaultPrompt: string;
 }

@@ -14,7 +14,7 @@ export const useCaretHandler = (): UseCaretHandler => {
     const [actualInput, setActualInput] = useState<HTMLDivElement | null>(null)
 
     const terminal = useTerminal()
-    const { isActive, autoFocus } = terminal
+    const { userHasInteracted, autoFocus } = terminal
 
     const setInputRef = (input: HTMLDivElement | null) => {
         setActualInput(input)
@@ -68,9 +68,9 @@ export const useCaretHandler = (): UseCaretHandler => {
     }
 
     useEffect(() => {
-        if (isActive && actualInput) actualInput.focus()
-        if (!isActive && autoFocus && actualInput) actualInput.focus()
-    }, [actualInput, isActive, autoFocus])
+        if (userHasInteracted && actualInput) actualInput.focus()
+        if (!userHasInteracted && autoFocus && actualInput) actualInput.focus()
+    }, [actualInput, userHasInteracted, autoFocus])
 
     return {
         caretCorrection,

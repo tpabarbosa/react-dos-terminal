@@ -30,8 +30,8 @@ export const Main = () => {
     const commandsHandler = useCommandsHandler({ state, action })
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (!terminal.isActive) {
-            terminal.userHasInteracted()
+        if (!terminal.userHasInteracted) {
+            terminal.setConfig({ config: 'setUserHasInteracted', value: true })
         }
         switch (e.key) {
             case 'ArrowUp':

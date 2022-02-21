@@ -6,20 +6,19 @@ import { useLocalStorage } from './LocalStorageContext'
 
 export type TerminalConfigAction =
     | { config: 'setColors'; value: TerminalColors }
-    | { config: 'isActive'; value: boolean }
+    | { config: 'setUserHasInteracted'; value: boolean }
     | { config: 'setPrompt'; value: string }
 
 export interface TerminalContextAPI extends TerminalState {
     output: UseOutputHandler
     setConfig: ({ config, value }: TerminalConfigAction) => void
-    userHasInteracted: () => void
 }
 
 export interface TerminalState {
     colors: TerminalColors
     showOldScreenEffect: boolean
     autoFocus: boolean
-    isActive: boolean
+    userHasInteracted: boolean
     currentPrompt: string
     defaultPrompt: string
 }
@@ -46,15 +45,15 @@ export const TerminalContextProvider = ({
         colors: config.colors,
         showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
-        isActive: config.autoFocus,
+        userHasInteracted: config.autoFocus,
         currentPrompt: config.currentPrompt,
         defaultPrompt: config.defaultPrompt,
     }
 
     const reducer = (state: TerminalState, action: TerminalConfigAction) => {
         switch (action.config) {
-            case 'isActive':
-                return { ...state, isActive: action.value }
+            case 'setUserHasInteracted':
+                return { ...state, userHasInteracted: action.value }
             case 'setColors':
                 ls.set('colors', action.value)
                 return { ...state, colors: action.value }
@@ -72,9 +71,6 @@ export const TerminalContextProvider = ({
         return {
             ...state,
             output,
-            userHasInteracted: () => {
-                dispatch({ config: 'isActive', value: true })
-            },
             setConfig: (conf: TerminalConfigAction) => {
                 if (conf.config === 'setColors') {
                     dispatch({ config: 'setColors', value: conf.value })
@@ -86,6 +82,12 @@ export const TerminalContextProvider = ({
                             conf.value !== ''
                                 ? conf.value
                                 : terminalInitialState.defaultPrompt,
+                    })
+                }
+                if (conf.config === 'setUserHasInteracted') {
+                    dispatch({
+                        config: 'setUserHasInteracted',
+                        value: conf.value,
                     })
                 }
             },

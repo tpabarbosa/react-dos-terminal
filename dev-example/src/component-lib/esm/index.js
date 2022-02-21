@@ -1,4 +1,4 @@
-/* Version: 0.1.5 - February 20, 2022 13:03:48 */
+/* Version: 0.1.5 - February 21, 2022 09:25:34 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
@@ -264,14 +264,14 @@ var TerminalContextProvider = function (_a) {
         colors: config.colors,
         showOldScreenEffect: config.showOldScreenEffect,
         autoFocus: config.autoFocus,
-        isActive: config.autoFocus,
+        userHasInteracted: config.autoFocus,
         currentPrompt: config.currentPrompt,
         defaultPrompt: config.defaultPrompt,
     };
     var reducer = function (state, action) {
         switch (action.config) {
-            case 'isActive':
-                return __assign(__assign({}, state), { isActive: action.value });
+            case 'setUserHasInteracted':
+                return __assign(__assign({}, state), { userHasInteracted: action.value });
             case 'setColors':
                 ls.set('colors', action.value);
                 return __assign(__assign({}, state), { colors: action.value });
@@ -284,9 +284,7 @@ var TerminalContextProvider = function (_a) {
     };
     var _b = useReducer(reducer, terminalInitialState), state = _b[0], dispatch = _b[1];
     var t = useMemo(function () {
-        return __assign(__assign({}, state), { output: output, userHasInteracted: function () {
-                dispatch({ config: 'isActive', value: true });
-            }, setConfig: function (conf) {
+        return __assign(__assign({}, state), { output: output, setConfig: function (conf) {
                 if (conf.config === 'setColors') {
                     dispatch({ config: 'setColors', value: conf.value });
                 }
@@ -296,6 +294,12 @@ var TerminalContextProvider = function (_a) {
                         value: conf.value !== ''
                             ? conf.value
                             : terminalInitialState.defaultPrompt,
+                    });
+                }
+                if (conf.config === 'setUserHasInteracted') {
+                    dispatch({
+                        config: 'setUserHasInteracted',
+                        value: conf.value,
                     });
                 }
             } });
@@ -2458,7 +2462,7 @@ var useCaretHandler = function () {
     var _a = useState(0), caretCorrection = _a[0], setCaretCorrection = _a[1];
     var _b = useState(null), actualInput = _b[0], setActualInput = _b[1];
     var terminal = useTerminal();
-    var isActive = terminal.isActive, autoFocus = terminal.autoFocus;
+    var userHasInteracted = terminal.userHasInteracted, autoFocus = terminal.autoFocus;
     var setInputRef = function (input) {
         setActualInput(input);
     };
@@ -2506,11 +2510,11 @@ var useCaretHandler = function () {
         setCaretCorrection(pos - tex.length);
     };
     useEffect(function () {
-        if (isActive && actualInput)
+        if (userHasInteracted && actualInput)
             actualInput.focus();
-        if (!isActive && autoFocus && actualInput)
+        if (!userHasInteracted && autoFocus && actualInput)
             actualInput.focus();
-    }, [actualInput, isActive, autoFocus]);
+    }, [actualInput, userHasInteracted, autoFocus]);
     return {
         caretCorrection: caretCorrection,
         updateCaretPosition: updateCaretPosition,
@@ -2618,7 +2622,7 @@ var Print = function (_a) {
 var PrintWithTypewriter = function (_a) {
     var output = _a.output, typewriter = _a.typewriter, _b = _a.flashing, flashing = _b === void 0 ? false : _b, colors = _a.colors, rest = __rest(_a, ["output", "typewriter", "flashing", "colors"]);
     var terminal = useTerminal();
-    var isActive = terminal.isActive;
+    var userHasInteracted = terminal.userHasInteracted;
     var divRef = useRef(null);
     var _c = useState([]), lastOutput = _c[0], setLastOutput = _c[1];
     var endRef = useRef(null);
@@ -2679,7 +2683,7 @@ var PrintWithTypewriter = function (_a) {
                         return [4, handleTypewrite(text[j], el).then()];
                     case 2:
                         _b.sent();
-                        if (isActive && endRef.current) {
+                        if (userHasInteracted && endRef.current) {
                             endRef.current.scrollIntoView({ block: 'nearest' });
                         }
                         if (j === children.length - 1 && typewriter.isTypewriting) {
@@ -2704,7 +2708,14 @@ var PrintWithTypewriter = function (_a) {
         if (!typewriter.isTypewriting && lastOutput.length !== 0) {
             setLastOutput([]);
         }
-    }, [lastOutput, handleTypewrite, output, divRef, typewriter, isActive]);
+    }, [
+        lastOutput,
+        handleTypewrite,
+        output,
+        divRef,
+        typewriter,
+        userHasInteracted,
+    ]);
     return (jsxs(Fragment, { children: [jsxs(PrintContainer, __assign({}, rest, { colors: colors, flashing: flashing, ref: divRef }, { children: [typeof output === 'object' &&
                         output.length > 0 &&
                         output.map(function (line, index) {
@@ -2958,7 +2969,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.5 - February 20, 2022 13:03:48';
+    var version = '0.1.5 - February 21, 2022 09:25:34';
     return {
         output: [
             {
@@ -3629,8 +3640,8 @@ var Main = function () {
     var _c = useMainMachine(), state = _c.state, action = _c.action;
     var commandsHandler = useCommandsHandler({ state: state, action: action });
     var handleKeyUp = function (e) {
-        if (!terminal.isActive) {
-            terminal.userHasInteracted();
+        if (!terminal.userHasInteracted) {
+            terminal.setConfig({ config: 'setUserHasInteracted', value: true });
         }
         switch (e.key) {
             case 'ArrowUp':

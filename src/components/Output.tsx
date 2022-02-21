@@ -101,7 +101,7 @@ const PrintWithTypewriter = ({
     ...rest
 }: PrintWithTypewriterProps & React.HTMLAttributes<HTMLDivElement>) => {
     const terminal = useTerminal()
-    const { isActive } = terminal
+    const { userHasInteracted } = terminal
     const divRef = useRef<HTMLDivElement | null>(null)
     const [lastOutput, setLastOutput] = useState<string | string[]>([])
 
@@ -150,7 +150,7 @@ const PrintWithTypewriter = ({
             for (let j = 0; j < children.length; j += 1) {
                 const el = children[j].children[0]
                 await handleTypewrite(text[j], el).then()
-                if (isActive && endRef.current) {
+                if (userHasInteracted && endRef.current) {
                     endRef.current.scrollIntoView({ block: 'nearest' })
                 }
 
@@ -174,7 +174,14 @@ const PrintWithTypewriter = ({
         if (!typewriter.isTypewriting && lastOutput.length !== 0) {
             setLastOutput([])
         }
-    }, [lastOutput, handleTypewrite, output, divRef, typewriter, isActive])
+    }, [
+        lastOutput,
+        handleTypewrite,
+        output,
+        divRef,
+        typewriter,
+        userHasInteracted,
+    ])
 
     return (
         <>
