@@ -60,19 +60,22 @@ const getFile = (
         if (_.isEmpty(acc)) {
             const dirContent = getDir(files, path)
             if (dirContent) {
-                const fileName = name
-                // (.+?)(\.[^.]*$|$) Regex to get filename
+                const fileName = name.toLowerCase()
+
                 let file: FakeFile | undefined
                 if (!matchFullName) {
                     file = dirContent.find((f) => {
                         const match = f.name.match(regexAttrib)
                         return (
                             match &&
-                            (match[0] === fileName || match[1] === fileName)
+                            (match[0].toLowerCase() === fileName ||
+                                match[1].toLowerCase() === fileName)
                         )
                     })
                 } else {
-                    file = dirContent.find((f) => f.name === name)
+                    file = dirContent.find(
+                        (f) => f.name.toLowerCase() === fileName
+                    )
                 }
 
                 if (file) {
