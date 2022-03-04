@@ -11,11 +11,16 @@ export interface FakeCommand {
         waitingMessage?: string[]
     }
     help?: (() => string | string[]) | string | string[]
+    beforeFinishMiddleware?: (
+        props: CommandProps,
+        command: Command | Promise<Command>
+    ) => Command | Promise<Command>
 }
 
 export interface CommandProps {
     name: string
     args: string
+    colors: TerminalColors
     currentDir: string
     files: FakeFile[]
     totalSize: number

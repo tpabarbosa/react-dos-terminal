@@ -23,6 +23,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
     const terminal = useTerminalInternal()
     const filesystem = useFileSystem()
     const command = useCommand()
+    const { colors } = terminal
     const { messages, shouldAllowHelp, allCommands } = command
     const { currentDir, files, totalSize, systemPaths } = filesystem
 
@@ -75,6 +76,7 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         const props = {
             name,
             args,
+            colors,
             allCommands,
             messages,
             currentDir,
@@ -126,6 +128,12 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
             if (cm.action) {
                 const response = await cm.action(props)
+                if (cm.beforeFinishMiddleware) {
+                    const responseAfterMiddleware =
+                        await cm.beforeFinishMiddleware(props, response)
+                    dispatch(responseAfterMiddleware)
+                    return
+                }
                 dispatch(response)
                 return
             }
@@ -166,7 +174,9 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                 c.alias?.find((a) => a.toLowerCase() === name.toLowerCase())
         )
         if (isHelp) {
-            dispatch(await help({ ...props, name: 'help', args: name }))
+            props.name = 'help'
+            props.args = name
+            runAction(allCommands.filter((c) => c.name === 'help')[0])
             return
         }
         if (terminalCommand[0]) {
