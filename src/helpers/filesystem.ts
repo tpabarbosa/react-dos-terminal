@@ -1,4 +1,3 @@
-import DOMPurify from 'dompurify'
 import _ from 'lodash'
 import { FakeCommand } from '../contexts/CommandContext'
 import { FakeFile } from '../contexts/FileSystemContext'
@@ -6,8 +5,8 @@ import { FakeFile } from '../contexts/FileSystemContext'
 const replacePromptParams = (prompt: string, dir: string) => {
     let p = prompt.replace(/\$p/gi, `C:\\${dir}`)
     p = p.replace(/\$q/gi, '=')
-    p = p.replace(/\$g/gi, '>')
-    p = p.replace(/\$l/gi, '<')
+    p = p.replace(/\$g/gi, '&gt;')
+    p = p.replace(/\$l/gi, '&lt')
     p = p.replace(/\$n/gi, 'C:')
     p = p.replace(/\$b/gi, '|')
     p = p.replace(/\$\$/gi, '$')
@@ -22,8 +21,7 @@ const replacePromptParams = (prompt: string, dir: string) => {
 }
 
 const formatPrompt = (prompt: string, dir: string) => {
-    const final = replacePromptParams(prompt, dir)
-    return DOMPurify.sanitize(final)
+    return replacePromptParams(prompt, dir)
 }
 
 const fullDirPath = (dir: string) => {

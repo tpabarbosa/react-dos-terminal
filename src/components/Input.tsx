@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify'
 import React, {
     FormEvent,
     ForwardedRef,
@@ -8,7 +9,12 @@ import React, {
     useState,
 } from 'react'
 import { useCaretHandler } from '../hooks/useCaretHandler'
-import { InputCaret, InputContainer, InputContent } from '../styles/styles'
+import {
+    InputCaret,
+    InputContainer,
+    InputContent,
+    PrintLine,
+} from '../styles/styles'
 import { TerminalColors } from './Terminal'
 
 type InputProps = {
@@ -90,7 +96,11 @@ const Input = forwardRef(
 
         return (
             <InputContainer {...rest} colors={colors}>
-                <pre>{prompt}</pre>
+                <PrintLine
+                    dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(prompt),
+                    }}
+                />
                 <InputContent
                     ref={ref}
                     id={id}
