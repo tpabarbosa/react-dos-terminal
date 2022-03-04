@@ -3,14 +3,26 @@ import * as React$1 from 'react';
 import React__default, { MouseEvent, FormEvent, KeyboardEvent } from 'react';
 
 declare type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph';
-declare type FakeFileType = 'text/plain' | 'directory' | 'application/executable' | 'application/system';
+declare type FakeFileType = 'text/plain' | 'directory' | 'application/executable' | 'application/system' | 'application/bat';
+interface FakeFileCommand {
+    text?: string | string[];
+    action?: (props: CommandProps) => Command | Promise<Command>;
+    async?: {
+        waitingMessage?: string[];
+    };
+    help?: (() => string | string[]) | string | string[];
+}
 interface FakeFile {
     name: string;
     type: FakeFileType;
-    content: string | string[] | FakeFile[] | FakeCommand;
+    content: FakeFile[] | FakeFileCommand;
     attributes: FakeAttribute;
     size?: number;
 }
+declare type FakeFileSystem = {
+    files: FakeFile[];
+    totalSize: number;
+};
 
 interface FakeCommand {
     name: string;
@@ -20,10 +32,12 @@ interface FakeCommand {
         waitingMessage?: string[];
     };
     help?: (() => string | string[]) | string | string[];
+    beforeFinishMiddleware?: (props: CommandProps, command: Command | Promise<Command>) => Command | Promise<Command>;
 }
 interface CommandProps {
     name: string;
     args: string;
+    colors: TerminalColors;
     currentDir: string;
     files: FakeFile[];
     totalSize: number;
@@ -74,6 +88,7 @@ interface TerminalConfig {
     autoFocus: boolean;
     initialOutput: string | string[];
     defaultPrompt: string;
+    promptCallback: ((prompt: string) => string) | undefined;
     shouldTypewrite: boolean;
 }
 interface CommandsMessages {
@@ -238,6 +253,10 @@ declare const commandsHelper: {
 
 declare const useTerminal: () => {
     output: UseOutputHandler;
+    setColors: (value: TerminalColors) => void;
+    setPrompt: (value: string) => void;
+    setFiles: (files: FakeFileSystem) => void;
+    setCurrentDir: (value: string) => void;
     isRunningCommand: boolean;
     endRunningCommand: () => void;
 };
@@ -252,4 +271,4 @@ declare const useCommandsHistory: ({ input }: CommandsHistoryProps) => {
     length: number;
 };
 
-export { Command, CommandProps, CommandScreen, ExcludeCommandsOptions, FakeCommand, FakeFile, Input, Machine, Output, Terminal, TerminalColors, TerminalLoadingScreenOptions, colorsHelper, commandsHelper, fileSystemHelper, useCommandsHistory, useInput, useOutputHandler, useStateMachine, useTerminal };
+export { Command, CommandProps, CommandScreen, CommandToConfigTerminal, CommandToOutput, ExcludeCommandsOptions, FakeCommand, FakeFile, FakeFileCommand, Input, Machine, Output, Terminal, TerminalColors, TerminalLoadingScreenOptions, colorsHelper, commandsHelper, fileSystemHelper, useCommandsHistory, useInput, useOutputHandler, useStateMachine, useTerminal };

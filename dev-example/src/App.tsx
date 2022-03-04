@@ -10,6 +10,7 @@ import {
     Output,
     useOutputHandler,
     CommandScreen,
+    colorsHelper,
 } from './component-lib/esm'
 import { Hangman, hangman } from './components/Hangman/hangman'
 
@@ -54,10 +55,14 @@ const LoadingScreenExample2 = () => {
 }
 
 export const App = () => {
+
     const customCommands: FakeCommand[] = [
         {
             name: 'cls',
             // you can change help for a command
+            beforeFinishMiddleware: (props, command) => {
+                return {...command, configTerminal: { config: 'setColors', value: {color: colorsHelper.getColorByName('red'), background: colorsHelper.getColorByName('white')} }} as Command
+            },
             help: undefined,
         },
         {
@@ -93,15 +98,30 @@ export const App = () => {
                             ],
                         }
                     },
-            async: { waitingMessage: ['Getting something that takes some time...']}
+            async: { waitingMessage: ['Getting something that takes some time...']},
+            beforeFinishMiddleware: (props, command) => {
+                return {...command, configTerminal: { config: 'setColors', value: {color: colorsHelper.getColorByName('red'), background: colorsHelper.getColorByName('white')} }} as Command
+            },
         }
     ]
 
     const customFiles: FakeFile[] = [
         {
-            name: 'readme.txt',
+            name: 'Readme.txt',
             type: 'text/plain',
-            content: 'This is a README file.',
+            content: {
+                text: 'This is a README file.'
+            },
+            attributes: 'p',
+        },
+        {
+            name: 'test.bat',
+            type: 'application/bat',
+            content: {
+                    text: 'This is a test',
+                    action: ():Command => {return {output: [{action: 'add', value: 'Executed'}]}},
+                    help: ['Just a hangman game']
+                },
             attributes: 'p',
         },
         {   
@@ -120,7 +140,6 @@ export const App = () => {
                     name: 'hangman.exe',
                     type: 'application/executable',
                     content: {
-                        name: 'hangman',
                         action: hangman,
                         help: ['Just a hangman game']
                     },
@@ -140,7 +159,10 @@ export const App = () => {
             //showOldScreenEffect: false,
             //autoFocus: false,
             //initialOutput: [],//['This is my <span style="color: white">custom</span> terminal', ''],
-            defaultPrompt: '$d $t$_$p$g',
+            defaultPrompt: '$p$g',
+            // promptCallback: (prompt: string) => {
+            //     return prompt.replace(/%count/gi, count.toString())
+            // }
             //shouldTypewrite: false
         },
         
@@ -163,7 +185,7 @@ export const App = () => {
             //initialDir: 'system',
             customFiles,
             //useFakeFileSystem: false,
-            excludeInternalFiles: true,
+            //excludeInternalFiles: true,
             systemPaths: ['', 'games', 'system']
         },
     }

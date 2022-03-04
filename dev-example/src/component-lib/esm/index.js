@@ -1,8 +1,9 @@
-/* Version: 0.1.6 - February 21, 2022 14:29:01 */
+/* Version: 0.1.6 - March 4, 2022 17:44:48 */
 /* eslint-disable */import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useEffect, createContext, useCallback, useMemo, useContext, useReducer, forwardRef, useRef, createRef, createElement } from 'react';
 import _, { split } from 'lodash';
 import styled, { css, keyframes, createGlobalStyle } from 'styled-components';
+import { Buffer } from 'buffer';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -267,6 +268,7 @@ var TerminalContextProvider = function (_a) {
         userHasInteracted: config.autoFocus,
         currentPrompt: config.currentPrompt,
         defaultPrompt: config.defaultPrompt,
+        promptCallback: config.promptCallback,
     };
     var reducer = function (state, action) {
         switch (action.config) {
@@ -335,6 +337,7 @@ var defaults = {
         showOldScreenEffect: true,
         initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
         defaultPrompt: '$p$g',
+        promptCallback: undefined,
         shouldTypewrite: true,
     },
     commands: {
@@ -1851,17 +1854,18 @@ var getFile = function (files, name, pathsToSearch, matchFullName) {
         if (_.isEmpty(acc)) {
             var dirContent = getDir(files, path);
             if (dirContent) {
-                var fileName_1 = name;
+                var fileName_1 = name.toLowerCase();
                 var file = void 0;
                 if (!matchFullName) {
                     file = dirContent.find(function (f) {
                         var match = f.name.match(regexAttrib);
                         return (match &&
-                            (match[0] === fileName_1 || match[1] === fileName_1));
+                            (match[0].toLowerCase() === fileName_1 ||
+                                match[1].toLowerCase() === fileName_1));
                     });
                 }
                 else {
-                    file = dirContent.find(function (f) { return f.name === name; });
+                    file = dirContent.find(function (f) { return f.name.toLowerCase() === fileName_1; });
                 }
                 if (file) {
                     return file;
@@ -2816,11 +2820,59 @@ var useCommand = function () {
     return ctx;
 };
 
+var FileSystemContext = createContext(undefined);
+var FileSystemContextProvider = function (_a) {
+    var children = _a.children, config = _a.config;
+    var ls = useLocalStorage();
+    var fileSystemInitialState = {
+        currentDir: config.currentDir,
+        files: config.files,
+        totalSize: config.totalSize,
+        systemPaths: config.systemPaths,
+    };
+    var reducer = function (state, action) {
+        switch (action.type) {
+            case 'setCurrentDir':
+                ls.set('currentDir', action.value);
+                return __assign(__assign({}, state), { currentDir: action.value });
+            case 'setFiles':
+                return __assign(__assign({}, state), { allFiles: action.value });
+            default:
+                return state;
+        }
+    };
+    var _b = useReducer(reducer, fileSystemInitialState), state = _b[0], dispatch = _b[1];
+    var fs = useMemo(function () {
+        return __assign(__assign({}, state), { setFiles: function (files) {
+                dispatch({ type: 'setFiles', value: files });
+            }, setCurrentDir: function (value) {
+                dispatch({ type: 'setCurrentDir', value: value });
+            } });
+    }, [state]);
+    return (jsx(FileSystemContext.Provider, __assign({ value: fs }, { children: children }), void 0));
+};
+var useFileSystem = function () {
+    var ctx = useContext(FileSystemContext);
+    if (ctx === undefined) {
+        throw new Error("useFileSystem must be used within a FileSystemContextProvider.");
+    }
+    return ctx;
+};
+
 var useTerminal = function () {
     var terminal = useTerminalInternal();
     var command = useCommand();
+    var fileSystem = useFileSystem();
     return {
         output: terminal.output,
+        setColors: function (value) {
+            return terminal.setConfig({ config: 'setColors', value: value });
+        },
+        setPrompt: function (value) {
+            return terminal.setConfig({ config: 'setPrompt', value: value });
+        },
+        setFiles: function (files) { return fileSystem.setFiles(files); },
+        setCurrentDir: function (value) { return fileSystem.setCurrentDir(value); },
         isRunningCommand: command.isRunningCommand,
         endRunningCommand: command.endRunningCommand,
     };
@@ -2942,17 +2994,31 @@ var run$2 = function (_a) {
             ],
         };
     }
+    var getAsciiText = function () {
+        var t = 'action' in file.content && file.content.action
+            ? file.content.action.toString()
+            : '';
+        var ar8 = new TextEncoder().encode(JSON.stringify(file) + t);
+        var buf = Buffer.from(ar8);
+        var ar16 = new Uint16Array(buf.buffer, buf.byteOffset, buf.byteLength / Uint16Array.BYTES_PER_ELEMENT);
+        var arr = ar16.reduce(function (acc, value, index) {
+            var val = index % 2 === 0 ? value % 32.768 : value % 512;
+            acc.push(parseInt(val.toFixed(0), 10));
+            return acc;
+        }, []);
+        return String.fromCharCode.apply(String, arr);
+    };
     var fileType = split(file.type, '/');
-    if (fileType[0] !== 'text') {
+    if (fileType[0] !== 'text' && file.type !== 'application/bat') {
         return {
             output: [
                 {
                     action: 'add',
                     value: [
                         '',
-                        "MZ\u00C9\u2665\u2666  \u00A9@\u00D3\u266B\u25BC\u2551\u266B\u2524 \u2550!\u00A9\u263AL\u2550!.",
-                        "$\u2663\u00B7\u221FA\u00F8r\u00DDA\u00F8r\u00DDA\u00F8r\u00DDU\u00ADw\u00FD@\u00F8r\u00DDU\u00ADq\u00FDC\u00F8r\u00DDU\u00ADv\u00FDP\u00F8r\u00DDA\u00F8s\u00DDb\u00F8r\u00DDU\u00ADs\u00FDF\u00F8r\u00DDU\u00ADz\u00FDC\u00F8r\u00DDU\u00AD\u00EC\u00DD@\u00F8r\u00DDU\u00ADp\u00FD@\u00F8r\u00DDRichA\u00F8r\u00DDPEd\u00E5\u2660M\u00DD(\u00AD\"\u2642\u263B\u266B\u00B6$0\u00B6\u25BA@\u263A\u25BA\u263B",
-                        '',
+                        "MZ\u00C9\u2665\u2666  \u00A9@\u00D3\u266B\u25BC\u2551\u266B\u2524 \u2550!\u00A9\u263AL\u2550!. ".concat(getAsciiText()),
+                        "z\u00FDC\u00F8r\u00DDU\u00AD\u00EC\u00DD@\u00F8r\u00DDU\u00ADp\u00FD@\u00F8r\u00DDRichA\u00F8r\u00DD",
+                        "PEd\u00E5\u2660M\u00DD(\u00AD\"\u2642\u263B\u266B\u00B6$0\u00B6\u25BA@\u263A\u25BA\u263B",
                         '',
                         "@\u2560' \u2514\"T\u25BA \u2191\u263A(!\u25BA\u263A.text\u00D3   \u25BA",
                         "\u2666 '.rdata\u2560",
@@ -2964,8 +3030,15 @@ var run$2 = function (_a) {
             ],
         };
     }
-    if (typeof file.content === 'string') {
-        return { output: [{ action: 'add', value: ['', file.content, ''] }] };
+    if ('text' in file.content && file.content.text) {
+        if (typeof file.content.text === 'string') {
+            return {
+                output: [{ action: 'add', value: ['', file.content.text, ''] }],
+            };
+        }
+        return {
+            output: [{ action: 'add', value: __spreadArray(__spreadArray([''], file.content.text, true), [''], false) }],
+        };
     }
     var cont = file.content;
     return { output: [{ action: 'add', value: __spreadArray(__spreadArray([''], cont, true), [''], false) }] };
@@ -2988,7 +3061,7 @@ var run$1 = function (_a) {
             ],
         };
     }
-    var version = '0.1.6 - February 21, 2022 14:29:01';
+    var version = '0.1.6 - March 4, 2022 17:44:48';
     return {
         output: [
             {
@@ -3225,7 +3298,7 @@ var mergeEqualDirs = function (a, b) {
     return mergedDirs;
 };
 var calcSize = function (file) {
-    var _a;
+    var _a, _b, _c;
     var filesize = (_a = file.size) !== null && _a !== void 0 ? _a : 0;
     filesize += (file.name.length + 3) * 2;
     if (file.type === 'application/executable' ||
@@ -3233,8 +3306,10 @@ var calcSize = function (file) {
         var x = file.content;
         filesize += fileSystemHelper.getCommandsSize([x]);
     }
-    else if (file.type.includes('text/')) {
-        filesize += JSON.stringify(file.content).length * 2;
+    else if (file.type.includes('text/') || file.type === 'application/bat') {
+        if ('text' in file.content) {
+            filesize += JSON.stringify((_c = (_b = file.content) === null || _b === void 0 ? void 0 : _b.text) !== null && _c !== void 0 ? _c : '').length * 2;
+        }
     }
     else {
         var content = file.content;
@@ -3363,192 +3438,162 @@ var TerminalScreen = function (_a) {
     return (jsxs(Fragment, { children: [jsx("div", { ref: endRef }, void 0), jsx(ScreenContainer, __assign({ colors: colors !== null && colors !== void 0 ? colors : terminal.colors, oldEffect: oldEffect !== null && oldEffect !== void 0 ? oldEffect : terminal.showOldScreenEffect }, { children: jsx(ScreenContent, __assign({}, rest, { children: children }), void 0) }), void 0)] }, void 0));
 };
 
-var FileSystemContext = createContext(undefined);
-var FileSystemContextProvider = function (_a) {
-    var children = _a.children, config = _a.config;
-    var ls = useLocalStorage();
-    var fileSystemInitialState = {
-        currentDir: config.currentDir,
-        files: config.files,
-        totalSize: config.totalSize,
-        systemPaths: config.systemPaths,
-    };
-    var reducer = function (state, action) {
-        switch (action.type) {
-            case 'setCurrentDir':
-                ls.set('currentDir', action.value);
-                return __assign(__assign({}, state), { currentDir: action.value });
-            case 'setFiles':
-                return __assign(__assign({}, state), { allFiles: action.value });
-            default:
-                return state;
-        }
-    };
-    var _b = useReducer(reducer, fileSystemInitialState), state = _b[0], dispatch = _b[1];
-    var fs = useMemo(function () {
-        return __assign(__assign({}, state), { setFiles: function (files) {
-                dispatch({ type: 'setFiles', value: files });
-            }, setCurrentDir: function (value) {
-                dispatch({ type: 'setCurrentDir', value: value });
-            } });
-    }, [state]);
-    return (jsx(FileSystemContext.Provider, __assign({ value: fs }, { children: children }), void 0));
-};
-var useFileSystem = function () {
-    var ctx = useContext(FileSystemContext);
-    if (ctx === undefined) {
-        throw new Error("useFileSystem must be used within a FileSystemContextProvider.");
-    }
-    return ctx;
-};
-
 var useCommandsHandler = function (_a) {
     var action = _a.action;
     var terminal = useTerminalInternal();
     var filesystem = useFileSystem();
     var command = useCommand();
+    var colors = terminal.colors;
     var messages = command.messages, shouldAllowHelp = command.shouldAllowHelp, allCommands = command.allCommands;
     var currentDir = filesystem.currentDir, files = filesystem.files, totalSize = filesystem.totalSize, systemPaths = filesystem.systemPaths;
     var run = function (cmd) { return __awaiter(void 0, void 0, void 0, function () {
-        var getNameAndArgs, _a, name, args, isHelp, props, dispatch, runAction, executable, terminalCommand, _b, executableCommand;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    getNameAndArgs = function (c) {
-                        var index = c.indexOf(' ');
-                        var name = '';
-                        var args = '';
-                        var isHelp = false;
-                        if (index !== -1) {
-                            name = c.substring(0, index).trim();
-                            args = c.substring(index + 1).trim();
-                        }
-                        else {
-                            name = c.trim();
-                        }
-                        if (shouldAllowHelp) {
-                            var reg = /\/\?/;
-                            if (reg.test(name) && name !== '/?') {
-                                isHelp = true;
-                                name = name.substring(0, name.length - 2);
-                            }
-                            else if (args === '/?') {
-                                isHelp = true;
-                            }
-                            else if (!reg.test(name) && name === '/?') {
-                                isHelp = true;
-                            }
-                        }
-                        return { name: name, args: args, isHelp: isHelp };
-                    };
-                    _a = getNameAndArgs(cmd.replace(/</g, '&lt;')), name = _a.name, args = _a.args, isHelp = _a.isHelp;
-                    terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(terminal.currentPrompt, currentDir), " ").concat(cmd.replace(/</g, '&lt;')), true);
-                    if (name === '') {
-                        command.setActualCmd(null);
-                        return [2];
+        var getNameAndArgs, _a, name, args, isHelp, prompt, props, dispatch, runAction, executable, terminalCommand, executableCommand;
+        return __generator(this, function (_b) {
+            getNameAndArgs = function (c) {
+                var index = c.indexOf(' ');
+                var name = '';
+                var args = '';
+                var isHelp = false;
+                if (index !== -1) {
+                    name = c.substring(0, index).trim();
+                    args = c.substring(index + 1).trim();
+                }
+                else {
+                    name = c.trim();
+                }
+                if (shouldAllowHelp) {
+                    var reg = /\/\?/;
+                    if (reg.test(name) && name !== '/?') {
+                        isHelp = true;
+                        name = name.substring(0, name.length - 2);
                     }
-                    props = {
-                        name: name,
-                        args: args,
-                        allCommands: allCommands,
-                        messages: messages,
-                        currentDir: currentDir,
-                        files: files,
-                        totalSize: totalSize,
-                        systemPaths: systemPaths,
-                    };
-                    dispatch = function (response) {
-                        command.setActualCmd(__assign({ name: name, args: args }, response));
-                        if (response.configTerminal !== undefined) {
-                            if (response.configTerminal.config === 'setColors' ||
-                                response.configTerminal.config === 'setPrompt')
-                                terminal.setConfig(response.configTerminal);
-                            if (response.configTerminal.config === 'setCurrentDir') {
-                                filesystem.setCurrentDir(response.configTerminal.value);
-                            }
-                        }
-                        if (response.output) {
-                            terminal.output.addToQueue(response.output);
-                        }
-                        command.startRunningCommand();
-                        if (response.dynamic) {
-                            action('NEW_CMD', 'dynamic');
-                            return;
-                        }
-                        action('NEW_CMD', 'static');
-                    };
-                    runAction = function (cm) { return __awaiter(void 0, void 0, void 0, function () {
-                        var isAsync, waitingMessage, response, response;
-                        var _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0:
-                                    isAsync = cm === null || cm === void 0 ? void 0 : cm.async;
-                                    waitingMessage = (_a = cm === null || cm === void 0 ? void 0 : cm.async) === null || _a === void 0 ? void 0 : _a.waitingMessage;
-                                    if (isAsync) {
-                                        action('NEW_CMD', 'async');
-                                    }
-                                    if (waitingMessage) {
-                                        terminal.output.addLines(waitingMessage);
-                                    }
-                                    if (!cm.action) return [3, 2];
-                                    return [4, cm.action(props)];
-                                case 1:
-                                    response = _b.sent();
-                                    dispatch(response);
-                                    return [2];
-                                case 2:
-                                    if (!commandsHelper.commandNotFound.action) return [3, 4];
-                                    return [4, commandsHelper.commandNotFound.action(props)];
-                                case 3:
-                                    response = _b.sent();
-                                    dispatch(response);
-                                    _b.label = 4;
-                                case 4: return [2];
-                            }
-                        });
-                    }); };
-                    executable = function (p) {
-                        if (_.isEmpty(p.files)) {
-                            return null;
-                        }
-                        var pathsToSearch = __spreadArray([currentDir], systemPaths, true);
-                        var file = fileSystemHelper.getFile(files, p.name, pathsToSearch);
-                        if (file) {
-                            if (file.type === 'application/executable' ||
-                                file.type === 'application/system') {
-                                return file.content;
-                            }
-                            return commandsHelper.cantBeExecuted;
-                        }
-                        return null;
-                    };
-                    terminalCommand = allCommands.filter(function (c) {
-                        var _a;
-                        return c.name.toLowerCase() === name.toLowerCase() ||
-                            ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) { return a.toLowerCase() === name.toLowerCase(); }));
-                    });
-                    if (!isHelp) return [3, 2];
-                    _b = dispatch;
-                    return [4, help$4(__assign(__assign({}, props), { name: 'help', args: name }))];
-                case 1:
-                    _b.apply(void 0, [_c.sent()]);
-                    return [2];
-                case 2:
-                    if (terminalCommand[0]) {
-                        runAction(terminalCommand[0]);
+                    else if (args === '/?') {
+                        isHelp = true;
                     }
-                    else {
-                        executableCommand = executable(props);
-                        if (executableCommand) {
-                            runAction(executableCommand);
-                        }
-                        else {
-                            runAction(commandsHelper.commandNotFound);
-                        }
+                    else if (!reg.test(name) && name === '/?') {
+                        isHelp = true;
                     }
-                    return [2];
+                }
+                return { name: name, args: args, isHelp: isHelp };
+            };
+            _a = getNameAndArgs(cmd.replace(/</g, '&lt;')), name = _a.name, args = _a.args, isHelp = _a.isHelp;
+            prompt = terminal.promptCallback
+                ? terminal.promptCallback(terminal.currentPrompt)
+                : terminal.currentPrompt;
+            terminal.output.addLines("".concat(fileSystemHelper.formatPrompt(prompt, currentDir), " ").concat(cmd.replace(/</g, '&lt;')), true);
+            if (name === '') {
+                command.setActualCmd(null);
+                return [2];
             }
+            props = {
+                name: name,
+                args: args,
+                colors: colors,
+                allCommands: allCommands,
+                messages: messages,
+                currentDir: currentDir,
+                files: files,
+                totalSize: totalSize,
+                systemPaths: systemPaths,
+            };
+            dispatch = function (response) {
+                command.setActualCmd(__assign({ name: name, args: args }, response));
+                if (response.configTerminal !== undefined) {
+                    if (response.configTerminal.config === 'setColors' ||
+                        response.configTerminal.config === 'setPrompt')
+                        terminal.setConfig(response.configTerminal);
+                    if (response.configTerminal.config === 'setCurrentDir') {
+                        filesystem.setCurrentDir(response.configTerminal.value);
+                    }
+                }
+                if (response.output) {
+                    terminal.output.addToQueue(response.output);
+                }
+                command.startRunningCommand();
+                if (response.dynamic) {
+                    action('NEW_CMD', 'dynamic');
+                    return;
+                }
+                action('NEW_CMD', 'static');
+            };
+            runAction = function (cm) { return __awaiter(void 0, void 0, void 0, function () {
+                var isAsync, waitingMessage, response, responseAfterMiddleware, response;
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            isAsync = cm === null || cm === void 0 ? void 0 : cm.async;
+                            waitingMessage = (_a = cm === null || cm === void 0 ? void 0 : cm.async) === null || _a === void 0 ? void 0 : _a.waitingMessage;
+                            if (isAsync) {
+                                action('NEW_CMD', 'async');
+                            }
+                            if (waitingMessage) {
+                                terminal.output.addLines(waitingMessage);
+                            }
+                            if (!cm.action) return [3, 4];
+                            return [4, cm.action(props)];
+                        case 1:
+                            response = _b.sent();
+                            if (!cm.beforeFinishMiddleware) return [3, 3];
+                            return [4, cm.beforeFinishMiddleware(props, response)];
+                        case 2:
+                            responseAfterMiddleware = _b.sent();
+                            dispatch(responseAfterMiddleware);
+                            return [2];
+                        case 3:
+                            dispatch(response);
+                            return [2];
+                        case 4:
+                            if (!commandsHelper.commandNotFound.action) return [3, 6];
+                            return [4, commandsHelper.commandNotFound.action(props)];
+                        case 5:
+                            response = _b.sent();
+                            dispatch(response);
+                            _b.label = 6;
+                        case 6: return [2];
+                    }
+                });
+            }); };
+            executable = function (p) {
+                if (_.isEmpty(p.files)) {
+                    return null;
+                }
+                var pathsToSearch = __spreadArray([currentDir], systemPaths, true);
+                var file = fileSystemHelper.getFile(files, p.name, pathsToSearch);
+                if (file) {
+                    if (file.type === 'application/executable' ||
+                        file.type === 'application/system' ||
+                        file.type === 'application/bat') {
+                        return file.content;
+                    }
+                    return commandsHelper.cantBeExecuted;
+                }
+                return null;
+            };
+            terminalCommand = allCommands.filter(function (c) {
+                var _a;
+                return c.name.toLowerCase() === name.toLowerCase() ||
+                    ((_a = c.alias) === null || _a === void 0 ? void 0 : _a.find(function (a) { return a.toLowerCase() === name.toLowerCase(); }));
+            });
+            if (isHelp) {
+                props.name = 'help';
+                props.args = name;
+                runAction(allCommands.filter(function (c) { return c.name === 'help'; })[0]);
+                return [2];
+            }
+            if (terminalCommand[0]) {
+                runAction(terminalCommand[0]);
+            }
+            else {
+                executableCommand = executable(props);
+                if (executableCommand) {
+                    runAction(executableCommand);
+                }
+                else {
+                    runAction(commandsHelper.commandNotFound);
+                }
+            }
+            return [2];
         });
     }); };
     return {
@@ -3691,8 +3736,11 @@ var Main = function () {
             setHideOutput(false);
         }
     }, [state, dynamic]);
+    var prompt = terminal.promptCallback
+        ? terminal.promptCallback(terminal.currentPrompt)
+        : terminal.currentPrompt;
     return (jsxs(TerminalScreen, __assign({ onClick: function () { return input && input.setFocus(); } }, { children: [!hideOutput && (jsx(Output, { children: jsx(Output.Typewriter, { output: terminal.output }, void 0) }, void 0)), state === 'RUNNING_COMMAND' && dynamic && (jsx(UserDefinedElement, { element: dynamic === null || dynamic === void 0 ? void 0 : dynamic.element }, void 0)), state !== 'RUNNING_COMMAND' &&
-                !terminal.output.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(terminal.currentPrompt, currentDir) }, void 0))] }), void 0));
+                !terminal.output.typewriter.isTypewriting && (jsx(Input, { onKeyUp: handleKeyUp, id: "terminal_input", ref: input.ref, prompt: fileSystemHelper.formatPrompt(prompt, currentDir) }, void 0))] }), void 0));
 };
 
 var useLoadingScreen = function (config) {
@@ -3785,7 +3833,7 @@ var files = [
             {
                 name: 'readme.txt',
                 type: 'text/plain',
-                content: reactDosTerminal.help,
+                content: { text: reactDosTerminal.help },
                 attributes: 'p',
             },
             {
@@ -3803,7 +3851,6 @@ var files = [
                 type: 'application/executable',
                 attributes: 'p',
                 content: {
-                    name: 'help',
                     action: help$4,
                 },
                 size: fileSystemHelper.getFakeFileSize(help$4),
@@ -3813,36 +3860,39 @@ var files = [
 ];
 
 var useInitializer = function (config) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
     var ls = useLocalStorage();
     var isInstalled = ls.get('i');
-    var _v = useState(false), isInitialized = _v[0], setIsInitialized = _v[1];
+    var _x = useState(false), isInitialized = _x[0], setIsInitialized = _x[1];
     var persisteData = (config === null || config === void 0 ? void 0 : config.shouldPersisteUserData) !== undefined
         ? config.shouldPersisteUserData
         : defaults.shouldPersisteUserData;
-    var _w = useState(defaults.terminal.colors), finalColors = _w[0], setFinalColors = _w[1];
+    var _y = useState(defaults.terminal.colors), finalColors = _y[0], setFinalColors = _y[1];
     var finalOldScreenEffect = ((_a = config === null || config === void 0 ? void 0 : config.terminal) === null || _a === void 0 ? void 0 : _a.showOldScreenEffect) !== undefined
         ? (_b = config === null || config === void 0 ? void 0 : config.terminal) === null || _b === void 0 ? void 0 : _b.showOldScreenEffect
         : defaults.terminal.showOldScreenEffect;
     var finalDefaultPrompt = ((_c = config === null || config === void 0 ? void 0 : config.terminal) === null || _c === void 0 ? void 0 : _c.defaultPrompt) !== undefined
         ? (_d = config === null || config === void 0 ? void 0 : config.terminal) === null || _d === void 0 ? void 0 : _d.defaultPrompt
         : defaults.terminal.defaultPrompt;
-    var _x = useState(), finalCurrentPrompt = _x[0], setFinalCurrentPrompt = _x[1];
-    var _y = useState(), finalInitialDir = _y[0], setFinalInitialDir = _y[1];
-    var initialOutput = ((_e = config === null || config === void 0 ? void 0 : config.terminal) === null || _e === void 0 ? void 0 : _e.initialOutput) !== undefined
-        ? (_f = config === null || config === void 0 ? void 0 : config.terminal) === null || _f === void 0 ? void 0 : _f.initialOutput
-        : (_g = defaults === null || defaults === void 0 ? void 0 : defaults.terminal) === null || _g === void 0 ? void 0 : _g.initialOutput;
-    var finalAutofocus = ((_h = config === null || config === void 0 ? void 0 : config.terminal) === null || _h === void 0 ? void 0 : _h.autoFocus) !== undefined
+    var _z = useState(), finalCurrentPrompt = _z[0], setFinalCurrentPrompt = _z[1];
+    var finalPromptCallback = ((_e = config === null || config === void 0 ? void 0 : config.terminal) === null || _e === void 0 ? void 0 : _e.promptCallback) !== undefined
+        ? (_f = config === null || config === void 0 ? void 0 : config.terminal) === null || _f === void 0 ? void 0 : _f.promptCallback
+        : defaults.terminal.promptCallback;
+    var _0 = useState(), finalInitialDir = _0[0], setFinalInitialDir = _0[1];
+    var initialOutput = ((_g = config === null || config === void 0 ? void 0 : config.terminal) === null || _g === void 0 ? void 0 : _g.initialOutput) !== undefined
+        ? (_h = config === null || config === void 0 ? void 0 : config.terminal) === null || _h === void 0 ? void 0 : _h.initialOutput
+        : (_j = defaults === null || defaults === void 0 ? void 0 : defaults.terminal) === null || _j === void 0 ? void 0 : _j.initialOutput;
+    var finalAutofocus = ((_k = config === null || config === void 0 ? void 0 : config.terminal) === null || _k === void 0 ? void 0 : _k.autoFocus) !== undefined
         ? config.terminal.autoFocus
         : defaults.terminal.autoFocus;
-    var finalShouldTypewrite = ((_j = config === null || config === void 0 ? void 0 : config.terminal) === null || _j === void 0 ? void 0 : _j.shouldTypewrite) !== undefined
+    var finalShouldTypewrite = ((_l = config === null || config === void 0 ? void 0 : config.terminal) === null || _l === void 0 ? void 0 : _l.shouldTypewrite) !== undefined
         ? config.terminal.shouldTypewrite
         : defaults.terminal.shouldTypewrite;
-    var finalMessages = __assign(__assign({}, defaults.commands.messages), (_k = config === null || config === void 0 ? void 0 : config.commands) === null || _k === void 0 ? void 0 : _k.messages);
-    var finalAllowHelp = ((_l = config === null || config === void 0 ? void 0 : config.commands) === null || _l === void 0 ? void 0 : _l.shouldAllowHelp) !== undefined
+    var finalMessages = __assign(__assign({}, defaults.commands.messages), (_m = config === null || config === void 0 ? void 0 : config.commands) === null || _m === void 0 ? void 0 : _m.messages);
+    var finalAllowHelp = ((_o = config === null || config === void 0 ? void 0 : config.commands) === null || _o === void 0 ? void 0 : _o.shouldAllowHelp) !== undefined
         ? config.commands.shouldAllowHelp
         : defaults.commands.shouldAllowHelp;
-    var finalExcludeCommands = ((_m = config === null || config === void 0 ? void 0 : config.commands) === null || _m === void 0 ? void 0 : _m.excludeInternalCommands) !== undefined
+    var finalExcludeCommands = ((_p = config === null || config === void 0 ? void 0 : config.commands) === null || _p === void 0 ? void 0 : _p.excludeInternalCommands) !== undefined
         ? config.commands.excludeInternalCommands
         : defaults.commands.excludeInternalCommands;
     var finalCommands = useMemo(function () {
@@ -3874,9 +3924,9 @@ var useInitializer = function (config) {
         var c = initializer.createCommands(cmd, immutableCommands);
         return c;
     }, [
-        (_o = config === null || config === void 0 ? void 0 : config.commands) === null || _o === void 0 ? void 0 : _o.customCommands,
-        (_p = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _p === void 0 ? void 0 : _p.useFakeFileSystem,
-        (_q = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _q === void 0 ? void 0 : _q.excludeInternalFiles,
+        (_q = config === null || config === void 0 ? void 0 : config.commands) === null || _q === void 0 ? void 0 : _q.customCommands,
+        (_r = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _r === void 0 ? void 0 : _r.useFakeFileSystem,
+        (_s = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _s === void 0 ? void 0 : _s.excludeInternalFiles,
         finalAllowHelp,
         finalExcludeCommands,
     ]);
@@ -3893,7 +3943,7 @@ var useInitializer = function (config) {
         }
         return initializer.createFakeFileSystem();
     }, [config]);
-    var finalSystemPaths = ((_r = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _r === void 0 ? void 0 : _r.systemPaths) !== undefined
+    var finalSystemPaths = ((_t = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _t === void 0 ? void 0 : _t.systemPaths) !== undefined
         ? config.fileSystem.systemPaths
         : defaults.fileSystem.systemPaths;
     useEffect(function () {
@@ -3934,14 +3984,14 @@ var useInitializer = function (config) {
             setFinalCurrentPrompt(prompt_1);
         }
     }, [
-        (_s = config === null || config === void 0 ? void 0 : config.terminal) === null || _s === void 0 ? void 0 : _s.colors,
-        (_t = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _t === void 0 ? void 0 : _t.initialDir,
+        (_u = config === null || config === void 0 ? void 0 : config.terminal) === null || _u === void 0 ? void 0 : _u.colors,
+        (_v = config === null || config === void 0 ? void 0 : config.fileSystem) === null || _v === void 0 ? void 0 : _v.initialDir,
         isInstalled,
         isInitialized,
         persisteData,
         finalOldScreenEffect,
         finalInitialDir,
-        (_u = config === null || config === void 0 ? void 0 : config.terminal) === null || _u === void 0 ? void 0 : _u.defaultPrompt,
+        (_w = config === null || config === void 0 ? void 0 : config.terminal) === null || _w === void 0 ? void 0 : _w.defaultPrompt,
         ls,
     ]);
     return {
@@ -3951,6 +4001,7 @@ var useInitializer = function (config) {
             autoFocus: finalAutofocus,
             currentPrompt: finalCurrentPrompt,
             defaultPrompt: finalDefaultPrompt,
+            promptCallback: finalPromptCallback,
             initialOutput: initialOutput,
             shouldTypewrite: finalShouldTypewrite,
         },

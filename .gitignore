@@ -1,5 +1,6 @@
 /node_modules
 /dist
+/dev-example
 /dev-example/build
 /dev-example/node_modules
 
