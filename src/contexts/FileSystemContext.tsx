@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useReducer } from 'react'
-import { FakeCommand } from './CommandContext'
+import { Command, CommandProps } from './CommandContext'
 import { useLocalStorage } from './LocalStorageContext'
 
 export type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph'
@@ -8,11 +8,21 @@ export type FakeFileType =
     | 'directory'
     | 'application/executable'
     | 'application/system'
+    | 'application/bat'
+
+export interface FakeFileCommand {
+    text?: string | string[]
+    action?: (props: CommandProps) => Command | Promise<Command>
+    async?: {
+        waitingMessage?: string[]
+    }
+    help?: (() => string | string[]) | string | string[]
+}
 
 export interface FakeFile {
     name: string
     type: FakeFileType
-    content: string | string[] | FakeFile[] | FakeCommand
+    content: FakeFile[] | FakeFileCommand
     attributes: FakeAttribute
     size?: number
 }

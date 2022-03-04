@@ -133,8 +133,10 @@ const calcSize = (file: FakeFile) => {
     ) {
         const x = file.content as FakeCommand
         filesize += fileSystemHelper.getCommandsSize([x])
-    } else if (file.type.includes('text/')) {
-        filesize += JSON.stringify(file.content).length * 2
+    } else if (file.type.includes('text/') || file.type === 'application/bat') {
+        if ('text' in file.content) {
+            filesize += JSON.stringify(file.content?.text ?? '').length * 2
+        }
     } else {
         const content = file.content as FakeFile[]
         const final = content.map((f) => {

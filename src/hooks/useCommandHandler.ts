@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { help } from '../commands/help'
 import {
     Command,
     CommandProps,
@@ -157,7 +156,8 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             if (file) {
                 if (
                     file.type === 'application/executable' ||
-                    file.type === 'application/system'
+                    file.type === 'application/system' ||
+                    file.type === 'application/bat'
                 ) {
                     return file.content as FakeCommand
                 }

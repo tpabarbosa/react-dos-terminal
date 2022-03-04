@@ -82,7 +82,7 @@ export const files: FakeFile[] = [
             {
                 name: 'readme.txt',
                 type: 'text/plain',
-                content: reactDosTerminal.help,
+                content: { text: reactDosTerminal.help },
                 attributes: 'p',
             },
             {
@@ -100,7 +100,6 @@ export const files: FakeFile[] = [
                 type: 'application/executable',
                 attributes: 'p',
                 content: {
-                    name: 'help',
                     action: help,
                 },
                 size: fileSystemHelper.getFakeFileSize(help),
