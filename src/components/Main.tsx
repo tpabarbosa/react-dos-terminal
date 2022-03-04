@@ -66,6 +66,10 @@ export const Main = () => {
         }
     }, [state, dynamic])
 
+    const prompt = terminal.promptCallback
+        ? terminal.promptCallback(terminal.currentPrompt)
+        : terminal.currentPrompt
+
     return (
         <TerminalScreen onClick={() => input && input.setFocus()}>
             {!hideOutput && (
@@ -85,7 +89,7 @@ export const Main = () => {
                         id="terminal_input"
                         ref={input.ref}
                         prompt={fileSystemHelper.formatPrompt(
-                            terminal.currentPrompt,
+                            prompt,
                             currentDir
                         )}
                     />

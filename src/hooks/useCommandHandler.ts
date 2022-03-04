@@ -55,11 +55,15 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
         }
         const { name, args, isHelp } = getNameAndArgs(cmd.replace(/</g, '&lt;'))
 
+        const prompt = terminal.promptCallback
+            ? terminal.promptCallback(terminal.currentPrompt)
+            : terminal.currentPrompt
+
         terminal.output.addLines(
-            `${fileSystemHelper.formatPrompt(
-                terminal.currentPrompt,
-                currentDir
-            )} ${cmd.replace(/</g, '&lt;')}`,
+            `${fileSystemHelper.formatPrompt(prompt, currentDir)} ${cmd.replace(
+                /</g,
+                '&lt;'
+            )}`,
             true
         )
 

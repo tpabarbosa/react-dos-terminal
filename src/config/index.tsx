@@ -16,6 +16,7 @@ export interface TerminalConfig {
     autoFocus: boolean
     initialOutput: string | string[]
     defaultPrompt: string
+    promptCallback: ((prompt: string) => string) | undefined
     shouldTypewrite: boolean
 }
 
@@ -70,6 +71,7 @@ export const defaults: TerminalDefaults = {
         showOldScreenEffect: true,
         initialOutput: ['Welcome to IOS react-dos-terminal', '', ''],
         defaultPrompt: '$p$g',
+        promptCallback: undefined,
         shouldTypewrite: true,
     },
     commands: {

@@ -21,6 +21,7 @@ export interface TerminalState {
     userHasInteracted: boolean
     currentPrompt: string
     defaultPrompt: string
+    promptCallback: ((prompt: string) => string) | undefined
 }
 
 export interface TerminalProviderProps {
@@ -48,6 +49,7 @@ export const TerminalContextProvider = ({
         userHasInteracted: config.autoFocus,
         currentPrompt: config.currentPrompt,
         defaultPrompt: config.defaultPrompt,
+        promptCallback: config.promptCallback,
     }
 
     const reducer = (state: TerminalState, action: TerminalConfigAction) => {

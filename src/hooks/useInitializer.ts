@@ -48,6 +48,11 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
         string | undefined
     >()
 
+    const finalPromptCallback =
+        config?.terminal?.promptCallback !== undefined
+            ? config?.terminal?.promptCallback
+            : defaults.terminal.promptCallback
+
     const [finalInitialDir, setFinalInitialDir] = useState<string | undefined>()
 
     const initialOutput =
@@ -207,6 +212,7 @@ export const useInitializer = (config?: Partial<TerminalDefaults>) => {
             autoFocus: finalAutofocus,
             currentPrompt: finalCurrentPrompt,
             defaultPrompt: finalDefaultPrompt,
+            promptCallback: finalPromptCallback,
             initialOutput,
             shouldTypewrite: finalShouldTypewrite,
         } as TerminalConfig & { currentPrompt: string },
