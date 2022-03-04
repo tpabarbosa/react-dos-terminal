@@ -90,6 +90,7 @@ Terminal component accepts two props, a required **id** _string_ and an optional
         showOldScreenEffect: boolean,
         initialOutput: string | string[],
         defaultPrompt: string,
+        promptCallback: ((prompt: string) => string) | undefined,
         shouldTypewrite: boolean,
     },
     commands: {
@@ -129,6 +130,7 @@ Terminal component accepts two props, a required **id** _string_ and an optional
 | _terminal_               | **showOldScreenEffect**     |                                                                                                                                                                  Enable / disable background noise                                                                                                                                                                   | `true`                                                                                                                                                                                                                                                                                                                                       |
 | _terminal_               | **initialOutput**           |                                                                  Set text that shows before prompt when terminal is loaded. An empty array `[]`means that prompt will be displayed in the first line of the terminal. An empty string `''` means that prompt will be displayed after an empty line.                                                                  | `['Welcome to IOS react-dos-terminal', '', '']`                                                                                                                                                                                                                                                                                              |
 | _terminal_               | **defaultPrompt**           |                                                                                                                                                      Set prompt text ([see prompt command](#internal-commands))                                                                                                                                                      | `'\$p\$g'`                                                                                                                                                                                                                                                                                                                                   |
+| _terminal_               | **promptCallback**          |                                                                                                                                        Run a callback function before output prompt([see prompt command](#internal-commands))                                                                                                                                        | `undefined`                                                                                                                                                                                                                                                                                                                                  |
 | _terminal_               | **shouldTypewrite**         |                                                                                                                                                     Enable / disable typewriting effect when printing to output                                                                                                                                                      | `true`                                                                                                                                                                                                                                                                                                                                       |
 | _commands_               | **customCommands**          |                                                                                                                                                                   Set custom commands to terminal                                                                                                                                                                    | `[]`                                                                                                                                                                                                                                                                                                                                         |
 | _commands_               | **excludeInternalCommands** |                                                                                           Array of commands names to exclude or `'all'`, to exclude all commands (except non fileSystem related), or `'dev'` to exclude dev commands ([see commands](#internal-commands))                                                                                            | `process.env.NODE_ENV === 'development' ? [] : 'dev'`                                                                                                                                                                                                                                                                                        |
@@ -157,6 +159,10 @@ interface FakeCommand {
         waitingMessage?: string[]
     }
     help?: (() => string | string[]) | string | string[]
+    beforeFinishMiddleware?: (
+        props: CommandProps,
+        command: Command | Promise<Command>
+    ) => Command | Promise<Command>
 }
 ```
 
@@ -210,9 +216,18 @@ Each custom file is a FakeFile object with the following properties:
 interface FakeFile {
     name: string
     type: FakeFileType
-    content: string | string[] | FakeFile[] | FakeCommand
+    content: FakeFile[] | FakeFileCommand
     attributes: FakeAttribute
     size?: number
+}
+
+interface FakeFileCommand {
+    text?: string | string[]
+    action?: (props: CommandProps) => Command | Promise<Command>
+    async?: {
+        waitingMessage?: string[]
+    }
+    help?: (() => string | string[]) | string | string[]
 }
 
 type FakeAttribute = 'r' | 'rh' | 'w' | 'wh' | 'p' | 'ph'
@@ -221,6 +236,7 @@ type FakeFileType =
     | 'directory'
     | 'application/executable'
     | 'application/system'
+    | 'application/bat'
 ```
 
 Take this `FakeFile[]` as an example:
@@ -230,7 +246,7 @@ Take this `FakeFile[]` as an example:
     {
         name: 'readme.txt',
         type: 'text/plain', // type 'text' can be printed to output with command "type <filename>"
-        content: 'This is a README file.',
+        content: {text: 'This is a README file.'},
         attributes: 'p', // attribute 'p' means that the file is protected, it can't be modified by user
         // if you don't provide a size, terminal will calculate it based on content
     },
@@ -250,7 +266,6 @@ Take this `FakeFile[]` as an example:
                 name: 'hangman.exe',
                 type: 'application/executable', // type 'application/executable' simulates a program, it's content must be a FakeCommand
                 content: {
-                    name: 'hangman', // name doesn't have a meaning to fakeFileSystem, but is required by the FakeCommand interface
                     action: hangman, // here hangman is a method that returns a Command
                     help: ['Just a hangman game']
                 },
@@ -428,11 +443,15 @@ When running dynamic commands ([see Commands](#commands)) you might want to use 
 
 -   #### `useTerminal()`
 
-    | Attributes/Methods              | Description                     |
-    | :------------------------------ | :------------------------------ |
-    | output: `UseOutputHandler`      | [see useOutputHandler](#hooks)  |
-    | isRunningCommand: `boolean`     | return if a command is running  |
-    | endRunningCommand: `() => void` | set _isRunningCommand_ to false |
+    | Attributes/Methods                               | Description                     |
+    | :----------------------------------------------- | :------------------------------ |
+    | output: `UseOutputHandler`                       | [see useOutputHandler](#hooks)  |
+    | isRunningCommand: `boolean`                      | return if a command is running  |
+    | endRunningCommand: `() => void`                  | set _isRunningCommand_ to false |
+    | setColors: `(value: TerminalColors) => void`     | set terminal colors             |
+    | setPrompt: `(value: string) => void`             | set terminal prompt             |
+    | setFiles: `(files: FakeFileSystem) => void`      | set files                       |
+    | setCurrentDir: `(files: FakeFileSystem) => void` | set current Path                |
 
 -   #### `useOutputHandler()`
 
@@ -465,6 +484,7 @@ When running dynamic commands ([see Commands](#commands)) you might want to use 
 interface CommandProps {
     name: string // command name
     args: string // command arguments
+    colors: TerminalColors // terminal current colors
     currentDir: string // current Path
     files: FakeFile[] // all files registered in terminal
     totalSize: number // all files total fake size
