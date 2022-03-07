@@ -42,7 +42,6 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
             if (shouldAllowHelp) {
                 const reg = /\/\?/
-                console.log(reg.test(name))
                 if (reg.test(name) && name !== '/?') {
                     isHelp = true
                     name = name.substring(0, name.length - 2)
@@ -52,7 +51,6 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
                     isHelp = true
                 }
             }
-            console.log(name, args, isHelp)
             return { name, args, isHelp }
         }
         const { name, args, isHelp } = getNameAndArgs(cmd.replace(/</g, '&lt;'))
