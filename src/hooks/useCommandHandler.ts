@@ -42,15 +42,17 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
             if (shouldAllowHelp) {
                 const reg = /\/\?/
+                console.log(reg.test(name))
                 if (reg.test(name) && name !== '/?') {
                     isHelp = true
                     name = name.substring(0, name.length - 2)
                 } else if (args === '/?') {
                     isHelp = true
-                } else if (!reg.test(name) && name === '/?') {
+                } else if (reg.test(name) && name === '/?') {
                     isHelp = true
                 }
             }
+            console.log(name, args, isHelp)
             return { name, args, isHelp }
         }
         const { name, args, isHelp } = getNameAndArgs(cmd.replace(/</g, '&lt;'))
@@ -152,7 +154,6 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
 
             const pathsToSearch = [currentDir, ...systemPaths]
             const file = fileSystemHelper.getFile(files, p.name, pathsToSearch)
-
             if (file) {
                 if (
                     file.type === 'application/executable' ||
@@ -168,17 +169,19 @@ export const useCommandsHandler = ({ action }: UseCommandsHandlerProps) => {
             return null
         }
 
-        const terminalCommand: FakeCommand[] = allCommands.filter(
-            (c) =>
-                c.name.toLowerCase() === name.toLowerCase() ||
-                c.alias?.find((a) => a.toLowerCase() === name.toLowerCase())
-        )
         if (isHelp) {
             props.name = 'help'
-            props.args = name
-            runAction(allCommands.filter((c) => c.name === 'help')[0])
-            return
+            props.args = name !== '/?' ? name : ''
         }
+
+        const terminalCommand: FakeCommand[] = allCommands.filter(
+            (c) =>
+                c.name.toLowerCase() === props.name.toLowerCase() ||
+                c.alias?.find(
+                    (a) => a.toLowerCase() === props.name.toLowerCase()
+                )
+        )
+
         if (terminalCommand[0]) {
             // try internal commands
             runAction(terminalCommand[0])
